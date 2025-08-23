@@ -74,9 +74,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
+#DATABASES = {
+#    'default': dj_database_url.config(
+#        default=f"postgres://{env('DB_USERNAME', default='postgres')}:{env('DB_PASSWORD', default='postgres')}@marketplace_database:5432/{env('DB_DATABASE', default='postgres')}",
+#        conn_max_age=600,
+#        conn_health_checks=True,
+#    )
+#}
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgres://{env('DB_USERNAME', default='postgres')}:{env('DB_PASSWORD', default='postgres')}@marketplace_database:5432/{env('DB_DATABASE', default='postgres')}",
+        default=env('DATABASE_URL'),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -120,13 +128,26 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'None',
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': env('REDIS_URL', default='redis://marketplace_redis:6379/0'),
-        'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'},
+REDIS_URL = os.environ.get("REDIS_URL")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "IGNORE_EXCEPTIONS": True,
+            },
+            "TIMEOUT": 60 * 60,
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "fallback-locmem",
+        }
+    }
 
 LOGGING = {
     'version': 1,
