@@ -22,11 +22,50 @@ from rest_framework.response import Response
 import requests
 from django.conf import settings
 from django.conf.urls.static import static
+import redis
+from django.core.cache import cache
 
 @api_view(['GET'])
 def health_check(request):
-    """Return the health status of the API Gateway."""
-    return Response({"status": "ok"}, status=200)
+    """Return the health status of the API Gateway and dependent services."""
+    services = {
+        # Додай сервіси, коли вони будуть створені
+        # 'user_service': 'http://user_service:8000/health',
+        # 'product_service': 'http://product_service:8000/health',
+        # 'order_service': 'http://order_service:8000/health',
+        # 'auction_service': 'http://auction_service:8000/health',
+    }
+    results = {}
+    all_healthy = True
+
+    # Check each service
+    for service_name, url in services.items():
+        try:
+            response = requests.get(url, timeout=2)
+            results[service_name] = {
+                'status': 'ok' if response.status_code == 200 and response.json().get('status') == 'ok' else 'error',
+                'code': response.status_code
+            }
+            if results[service_name]['status'] != 'ok':
+                all_healthy = False
+        except (requests.RequestException, ValueError):
+            results[service_name] = {'status': 'error', 'code': None}
+            all_healthy = False
+
+    # Check Redis
+    try:
+        cache.get('health_check_test')  # Simple cache operation to test Redis
+        results['redis'] = {'status': 'ok'}
+    except redis.RedisError:
+        results['redis'] = {'status': 'error'}
+        all_healthy = False
+
+    # Overall status
+    overall_status = 'ok' if all_healthy else 'error'
+    return Response({
+        'status': overall_status,
+        'services': results
+    }, status=200 if all_healthy else 503)
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def proxy_view(request, path):

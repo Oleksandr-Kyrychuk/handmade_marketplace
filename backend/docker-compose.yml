@@ -1,9 +1,10 @@
 # /mnt/d/handmade_marketplace/backend/docker-compose.yml
-version: '3.8'
 
 services:
   api-gateway:
-    build: ./api_gateway
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
     container_name: api_gateway
     restart: unless-stopped
     ports:
@@ -12,8 +13,12 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
       - REDIS_URL=${REDIS_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./api_gateway:/app
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - handmade_network
     healthcheck:
