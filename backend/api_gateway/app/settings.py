@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -75,7 +76,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=env('DATABASE_URL'),
+        default=f"postgres://{env('DB_USERNAME', default='postgres')}:{env('DB_PASSWORD', default='postgres')}@marketplace_database:5432/{env('DB_DATABASE', default='postgres')}",
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -103,10 +104,10 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day',
-        'login': '10/hour',
-        'register': '5/hour',
+        'anon': '100000000/day',
+        'user': '10000000/day',
+        'login': '1000000/hour',
+        'register': '5000/hour',
     },
 }
 
