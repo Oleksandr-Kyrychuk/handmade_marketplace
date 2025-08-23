@@ -10,4 +10,4 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 ENV PYTHONUNBUFFERED=1
-CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "app.wsgi:application"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT app.wsgi:application"]
