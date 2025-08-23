@@ -1,0 +1,46 @@
+# /mnt/d/handmade_marketplace/backend/docker-compose.yml
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./api_gateway
+    container_name: api_gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - REDIS_URL=${REDIS_URL}
+    volumes:
+      - ./api_gateway:/app
+    networks:
+      - handmade_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: marketplace_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - handmade_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+
+networks:
+  handmade_network:
+    driver: bridge
