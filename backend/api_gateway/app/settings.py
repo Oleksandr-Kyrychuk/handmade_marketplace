@@ -74,9 +74,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
+#DATABASES = {
+#    'default': dj_database_url.config(
+#        default=f"postgres://{env('DB_USERNAME', default='postgres')}:{env('DB_PASSWORD', default='postgres')}@marketplace_database:5432/{env('DB_DATABASE', default='postgres')}",
+#        conn_max_age=600,
+#        conn_health_checks=True,
+#    )
+#}
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgres://{env('DB_USERNAME', default='postgres')}:{env('DB_PASSWORD', default='postgres')}@marketplace_database:5432/{env('DB_DATABASE', default='postgres')}",
+        default=env('DATABASE_URL'),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -120,6 +128,7 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'None',
 }
 
+REDIS_URL = os.environ.get("REDIS_URL")
 if REDIS_URL:
     CACHES = {
         "default": {
