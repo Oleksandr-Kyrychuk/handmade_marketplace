@@ -1,0 +1,83 @@
+# /mnt/d/handmade_marketplace/backend/docker-compose.local.yml
+services:
+  api-gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile.local
+      args:
+        - DATABASE_URL=postgresql://postgres:postgres@marketplace_database:5432/postgres
+    container_name: api_gateway_local
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=your-local-secret-key
+      - DEBUG=True
+      - REDIS_URL=redis://marketplace_redis:6379
+      - FRONTEND_URL=http://localhost:5173
+      - DATABASE_URL=postgresql://postgres:postgres@marketplace_database:5432/postgres
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    volumes:
+      - ./api_gateway:/app
+    depends_on:
+      marketplace_database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - handmade_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Решта сервісів (marketplace_database, redis) залишаються без змін
+  marketplace_database:
+    image: postgres:17-alpine
+    container_name: marketplace_database_local
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./infrastructure/postgres/init-extensions.sql:/docker-entrypoint-initdb.d/00-init-extensions.sql
+      - marketplace_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      SCHEMA: public
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - handmade_network
+
+  redis:
+    image: redis:7
+    container_name: marketplace_redis_local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - handmade_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  marketplace_db_data:
+  redis_data:
+
+networks:
+  handmade_network:
+    driver: bridge

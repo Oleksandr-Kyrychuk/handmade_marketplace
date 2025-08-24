@@ -1,0 +1,10 @@
+# /mnt/d/handmade_marketplace/backend/api_gateway/Dockerfile.local
+FROM python:3.12-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+
+ENV PYTHONUNBUFFERED=1
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:8000 app.wsgi:application --workers 2 --threads 2"]
