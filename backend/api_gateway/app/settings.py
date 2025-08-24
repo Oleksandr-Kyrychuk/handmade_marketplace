@@ -27,7 +27,7 @@ else:
     print("Loading .env")  # Для дебагу
     environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-print(f"Database URL: {env('DATABASE_URL')}")  # Для дебагу
+#print(f"Database URL: {env('DATABASE_URL')}")  # Для дебагу
 
 
 
