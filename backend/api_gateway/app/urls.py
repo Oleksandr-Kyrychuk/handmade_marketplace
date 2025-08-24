@@ -2,13 +2,23 @@ from django.urls import path, re_path
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.utils import extend_schema
 from django.conf import settings
 from django.conf.urls.static import static
 import redis
 from django.core.cache import cache
+from .serializers import HealthCheckSerializer, ProxyErrorSerializer
 
 @api_view(['GET'])
 @throttle_classes([])
+@extend_schema(
+    responses={
+        200: HealthCheckSerializer,
+        503: HealthCheckSerializer,
+    },
+    summary="Health check for API Gateway",
+    description="Checks the availability of Redis and returns the overall status."
+)
 def health_check(request):
     """Return the health status of the API Gateway.
 
@@ -57,6 +67,14 @@ def health_check(request):
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@extend_schema(
+    responses={
+        404: ProxyErrorSerializer,
+        503: ProxyErrorSerializer,
+    },
+    summary="Proxy view for microservices",
+    description="Temporary placeholder for proxying requests to microservices (not yet available)."
+)
 def proxy_view(request, path):
     """Temporary placeholder for proxy view since microservices are not deployed."""
     if path.startswith('static/') or path == 'favicon.ico':
@@ -90,8 +108,8 @@ def proxy_view(request, path):
 
 urlpatterns = [
     path('health', health_check, name='health'),
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),  # Автоматична генерація схеми
-    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  # Swagger UI
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     re_path(r'^(?P<path>.*)$', proxy_view),
 ]
 
