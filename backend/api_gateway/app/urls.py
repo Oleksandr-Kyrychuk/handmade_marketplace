@@ -6,12 +6,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 import redis
 from django.core.cache import cache
-# import requests  # Можна закоментувати, оскільки не використовується без мікросервісів
 
 @api_view(['GET'])
-@throttle_classes([])  # 🚀 вимикає throttling тільки тут
+@throttle_classes([])
 def health_check(request):
-    """Return the health status of the API Gateway."""
+    """Return the health status of the API Gateway.
+
+    Checks the availability of Redis and returns the overall status.
+
+    Responses:
+        200: All services healthy
+        503: Some services unhealthy
+    """
     results = {}
     all_healthy = True
 
@@ -82,71 +88,10 @@ def proxy_view(request, path):
     return Response({'error': 'No microservices available'}, status=503)
 
 
-@api_view(['GET'])
-@throttle_classes([])
-def combined_schema(request):
-    """Return a basic OpenAPI schema for the API Gateway."""
-    # Мікросервіси закоментовані, повертаємо базову схему
-    # microservices = {
-    #     'user_service': 'http://user_service:8000/openapi.json',
-    #     'product_service': 'http://product_service:8000/openapi.json',
-    #     'order_service': 'http://order_service:8000/openapi.json',
-    #     'auction_service': 'http://auction_service:8000/openapi.json',
-    # }
-    #
-    # combined = {
-    #     'openapi': '3.0.3',
-    #     'info': {
-    #         'title': 'Handmade Marketplace Combined API',
-    #         'version': '1.0.0',
-    #         'description': 'Combined API documentation from all microservices',
-    #     },
-    #     'paths': {},
-    #     'components': {'schemas': {}, 'responses': {}, 'parameters': {}, 'securitySchemes': {}},
-    #     'servers': [{'url': '/'}],
-    # }
-    #
-    # for service_name, schema_url in microservices.items():
-    #     try:
-    #         response = requests.get(schema_url, timeout=5)
-    #         if response.status_code == 200:
-    #             schema = response.json()
-    #             for path, methods in schema.get('paths', {}).items():
-    #                 combined['paths'][f'/{service_name}{path}'] = methods
-    #             for component_type, items in schema.get('components', {}).items():
-    #                 for name, definition in items.items():
-    #                     combined['components'][component_type][f'{service_name}_{name}'] = definition
-    #         except requests.RequestException:
-    #             pass
-
-    # Базова схема для API Gateway
-    combined = {
-        'openapi': '3.0.3',
-        'info': {
-            'title': 'Handmade Marketplace API Gateway',
-            'version': '1.0.0',
-            'description': 'API Gateway for Handmade Marketplace (microservices not yet available)',
-        },
-        'paths': {
-            '/health': {
-                'get': {
-                    'summary': 'Health check for API Gateway',
-                    'responses': {
-                        '200': {'description': 'All services healthy'},
-                        '503': {'description': 'Some services unhealthy'},
-                    },
-                },
-            },
-        },
-        'components': {'schemas': {}, 'responses': {}, 'parameters': {}, 'securitySchemes': {}},
-        'servers': [{'url': '/'}],
-    }
-    return Response(combined)
-
 urlpatterns = [
     path('health', health_check, name='health'),
-    path('schema/', combined_schema, name='combined-schema'),
-    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='combined-schema'), name='swagger-ui'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),  # Автоматична генерація схеми
+    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  # Swagger UI
     re_path(r'^(?P<path>.*)$', proxy_view),
 ]
 
