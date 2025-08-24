@@ -20,7 +20,14 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+if os.getenv('ENV') == 'local':
+    print("Loading .env.local")  # Для дебагу
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env.local'))
+else:
+    print("Loading .env")  # Для дебагу
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+print(f"Database URL: {env('DATABASE_URL')}")  # Для дебагу
 
 
 
@@ -129,6 +136,7 @@ SIMPLE_JWT = {
 }
 
 REDIS_URL = os.environ.get("REDIS_URL")
+print(f"Using REDIS_URL: {REDIS_URL}")
 if REDIS_URL:
     CACHES = {
         "default": {
@@ -166,3 +174,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Додано для Render
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Handmade Marketplace API Gateway',
+    'DESCRIPTION': 'API Gateway for Handmade Marketplace microservices',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,  # Виключаємо саму схему з UI, якщо потрібно
+}

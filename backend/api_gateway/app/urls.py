@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
-import requests
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
 import redis
@@ -77,9 +77,53 @@ def proxy_view(request, path):
     )
     return Response(response.json(), status=response.status_code)
 
+@api_view(['GET'])
+@throttle_classes([])
+def combined_schema(request):
+    """Combine OpenAPI schemas from all microservices into one."""
+    # Список мікросервісів і їх schema URLs (адаптуйте під ваші сервіси)
+    microservices = {
+        'user_service': 'http://user_service:8000/openapi.json',
+        'product_service': 'http://product_service:8000/openapi.json',
+        'order_service': 'http://order_service:8000/openapi.json',
+        'auction_service': 'http://auction_service:8000/openapi.json',
+        # Додайте інші сервіси за потребою
+    }
+
+    combined = {
+        'openapi': '3.0.3',
+        'info': {
+            'title': 'Handmade Marketplace Combined API',
+            'version': '1.0.0',
+            'description': 'Combined API documentation from all microservices',
+        },
+        'paths': {},
+        'components': {'schemas': {}, 'responses': {}, 'parameters': {}, 'securitySchemes': {}},
+        'servers': [{'url': '/'}],  # Базовий сервер
+    }
+
+    for service_name, schema_url in microservices.items():
+        try:
+            response = requests.get(schema_url, timeout=5)
+            if response.status_code == 200:
+                schema = response.json()
+                # Об'єднуємо paths з префіксом сервісу (наприклад, /users/)
+                for path, methods in schema.get('paths', {}).items():
+                    combined['paths'][f'/{service_name}{path}'] = methods
+                # Об'єднуємо components, додаючи префікс до імен (щоб уникнути конфліктів)
+                for component_type, items in schema.get('components', {}).items():
+                    for name, definition in items.items():
+                        combined['components'][component_type][f'{service_name}_{name}'] = definition
+        except requests.RequestException:
+            # Якщо сервіс недоступний, пропускаємо (логування для продакшену)
+            pass
+
+    return Response(combined)
 
 urlpatterns = [
     path('health', health_check, name='health'),
+    path('schema/', combined_schema, name='combined-schema'),  # Об'єднана схема
+    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='combined-schema'), name='swagger-ui'),  # Swagger UI з об'єднаною схемою
     re_path(r'^(?P<path>.*)$', proxy_view),
 ]
 
