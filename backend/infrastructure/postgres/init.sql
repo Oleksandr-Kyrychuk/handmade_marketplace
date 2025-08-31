@@ -13,3 +13,4 @@
 
 -- Приклад створення індексу (розкоментувати при потребі):
 -- CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE SCHEMA IF NOT EXISTS users_schema; CREATE SCHEMA IF NOT EXISTS gateway_schema;

@@ -41,6 +41,14 @@ class HealthCheckView(APIView):
         }, status=200 if all_healthy else 503)
 
 
+import requests
+from django.urls import path, re_path
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from .serializers import HealthCheckSerializer, ProxyErrorSerializer
+
 class ProxyView(APIView):
     serializer_class = ProxyErrorSerializer
 
@@ -60,7 +68,7 @@ class ProxyView(APIView):
             )
         ],
         summary="Proxy view for microservices",
-        description="Temporary placeholder for proxying requests to microservices (not yet available).",
+        description="Proxies requests to microservices like user_service.",
         methods=['GET', 'POST', 'PUT', 'DELETE']
     )
     def get(self, request, path):
@@ -78,7 +86,27 @@ class ProxyView(APIView):
     def handle_request(self, request, path):
         if path.startswith('static/') or path == 'favicon.ico':
             return Response({'error': 'Not handled by proxy'}, status=404)
-        return Response({'error': 'No microservices available'}, status=503)
+
+        # Перенаправлення до user_service
+        if path.startswith('users/') or path.startswith('auth/'):
+            target_url = f"http://user_service:8001/{path}"
+        else:
+            return Response({'error': 'No microservices available for this path'}, status=503)
+
+        headers = {key: value for key, value in request.headers.items() if key != 'Host'}
+        try:
+            response = requests.request(
+                method=request.method,
+                url=target_url,
+                headers=headers,
+                data=request.body,
+                params=request.GET,
+                allow_redirects=False
+            )
+            return Response(response.content, status=response.status_code, content_type=response.headers.get('Content-Type'))
+        except requests.RequestException as e:
+            return Response({'error': str(e)}, status=503)
+
 
 
 urlpatterns = [

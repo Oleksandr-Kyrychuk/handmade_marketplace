@@ -7,6 +7,9 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.db import transaction
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from cloudinary.models import CloudinaryField
 
 name_validator = RegexValidator(
     regex=r'^(?!-)([A-Za-zА-Яа-яї ЇіІєЄґҐ]+)(?<!-)$',
@@ -46,6 +49,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, validators=[name_validator])
     surname = models.CharField(max_length=50, validators=[name_validator])
+    avatar = CloudinaryField('image', blank=True, null=True)  # Додано поле для аватара
     roles = ArrayField(
         models.CharField(max_length=10, choices=ROLE_CHOICES),
         default=list,
@@ -66,12 +70,7 @@ class User(AbstractUser):
             if not self.is_superuser and not self.roles:
                 self.roles = ['user']
             super().save(*args, **kwargs)
-            User.objects.filter(pk=self.pk).update(
-                search_vector=(
-                    SearchVector('username', weight='A', config='ukrainian') +
-                    SearchVector('surname', weight='B', config='ukrainian')
-                )
-            )
+
     class Meta:
         indexes = [
             GinIndex(fields=['search_vector'], name='user_search_idx'),
@@ -79,3 +78,12 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} (ID: {self.id})"
+
+@receiver(post_save, sender=User)
+def update_search_vector(sender, instance, **kwargs):
+    User.objects.filter(pk=instance.pk).update(
+        search_vector=(
+            SearchVector('username', weight='A', config='simple') +
+            SearchVector('surname', weight='B', config='simple')
+        )
+    )

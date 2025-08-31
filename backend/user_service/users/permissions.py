@@ -2,8 +2,10 @@ import logging
 from typing import List
 from rest_framework import permissions
 from django.db import DatabaseError
+from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 class HasRolePermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -51,13 +53,23 @@ class HasRolePermission(permissions.BasePermission):
 
         try:
             user_roles = request.user.roles or []
-            if any(role in user_roles for role in allowed_roles):
+            if not any(role in user_roles for role in allowed_roles):
+                logger.warning(f"User {request.user.id} lacks required roles {allowed_roles}")
+                return False
+
+            if 'admin' in user_roles:
+                logger.debug(f"User {request.user.id} is admin, allowing access")
                 return True
 
-            # Перевірка власності для User
             if isinstance(obj, User):
-                return obj == request.user
+                result = obj == request.user
+                logger.debug(f"User check: {result} for user {request.user.id}")
+                return result
+            logger.warning(f"No ownership fields found for object {obj.__class__.__name__}")
+            return False
+        except DatabaseError as e:
+            logger.error(f"Database error in {view.__class__.__name__} for user {request.user.id}, object {obj.__class__.__name__}: {e}")
             return False
         except Exception as e:
-            logger.error(f"Error in object permission: {e}")
+            logger.critical(f"Unexpected error in {view.__class__.__name__} for user {request.user.id}, object {obj.__class__.__name__}: {e}")
             return False

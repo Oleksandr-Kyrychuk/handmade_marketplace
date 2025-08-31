@@ -4,15 +4,18 @@ import os
 from datetime import timedelta
 import dj_database_url
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env')) if os.getenv('ENV') != 'local' else environ.Env.read_env(os.path.join(BASE_DIR, '.env.local'))
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_TO_FILE = env.bool('LOG_TO_FILE', default=False)
+LOG_DIR = BASE_DIR / 'logs'
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,6 +27,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'django_filters',
     'users',
@@ -47,7 +51,7 @@ ROOT_URLCONF = 'user_service.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -65,8 +69,23 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
+DATABASES['default']['OPTIONS'] = {'options': '-c search_path=users_schema'}
 
-AUTH_PASSWORD_VALIDATORS = [...]  # Стандартні, як в моноліті
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 12},
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -78,103 +97,148 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'users.User'  # Кастомний User
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
+    'DEFAULT_THROTTLE_CLASSES': [  # Додано для rate limiting
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day'
+    }
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_COOKIE': 'refresh_token',
     'AUTH_COOKIE_HTTP_ONLY': True,
     'AUTH_COOKIE_SECURE': True,
     'AUTH_COOKIE_SAMESITE': 'None',
 }
 
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:3000', 'http://localhost:5173'])
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:3000'])
 CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = not DEBUG
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUD_NAME'),
     'API_KEY': env('API_KEY'),
     'API_SECRET': env('API_SECRET'),
 }
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-REDIS_URL = env('REDIS_URL')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
+        'LOCATION': env('REDIS_URL', default='redis://localhost:6379/1'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
 
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/1')
+CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'delete-unverified-users': {
+        'task': 'users.tasks.delete_unverified_users',
+        'schedule': timedelta(hours=24),
+    },
+}
 
 LOGGING = {
     'version': 1,
+    'disable_existing_loggers': False,
     'filters': {
         'sensitive_data': {
-            '()': 'core.log_filters.SensitiveDataFilter',
+            '()': 'users.log_filters.SensitiveDataFilter',
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s %(name)s: %(message)s',
+        },
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s %(name)s %(process)d %(threadName)s %(pathname)s:%(lineno)d: %(message)s',
         },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'filters': ['sensitive_data'],  # Залишаємо для логерів, які можуть містити чутливі дані
-        },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'celery.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 5,
             'filters': ['sensitive_data'],
+            'formatter': 'simple',
         },
         'console_no_sensitive': {
             'class': 'logging.StreamHandler',
-            # Без фільтра sensitive_data
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'user_service.log'),
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'encoding': 'utf-8',
+            'filters': ['sensitive_data'],
+            'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console_no_sensitive'],  # Використовуємо handler без фільтра
-            'level': 'INFO',
+            'handlers': ['console_no_sensitive'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
-        'django.utils.autoreload': {
-            'handlers': ['console_no_sensitive'],  # Явно вказуємо для autoreload
-            'level': 'INFO',
+        'django.request': {
+            'handlers': ['console_no_sensitive'],
+            'level': 'WARNING',
             'propagate': False,
         },
-        'core': {
-            'handlers': ['console', 'file'],  # Фільтр потрібен для core
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'backend_api.core.tasks': {
+        'users': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
+        },
+        'users.tasks': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
         },
         'celery': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
     },
 }
 
-
-FRONTEND_URL = env('FRONTEND_URL')
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+# Налаштування SMTP для відправки email (розкоментуйте, якщо налаштований SMTP-сервер)
+# EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+# EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+# EMAIL_USE_TLS = True
