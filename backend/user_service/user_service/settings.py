@@ -15,7 +15,8 @@ LOG_DIR = BASE_DIR / 'logs'
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+# ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='*').split(',')
+ALLOWED_HOSTS = ['*', 'user_service.local']
 
 INSTALLED_APPS = [
     'django.contrib.admin',

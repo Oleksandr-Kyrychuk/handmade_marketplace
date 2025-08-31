@@ -8,15 +8,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SECRET_KEY=your-local-secret-key
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-0gos56jbkua+tptfdw5j#(ipe%^%kwt2)ekc@$8!*9++o166wx}
       - DEBUG=True
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
       - ALLOWED_HOSTS=localhost,127.0.0.1
       - ENV=local
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
     volumes:
       - ./api_gateway:/app
+      - ./api_gateway/logs:/app/logs
     depends_on:
       marketplace_database:
         condition: service_healthy
@@ -43,11 +44,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: sysadmin
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -U dev -d marketplace"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -75,23 +76,27 @@ services:
       context: ./user_service
       dockerfile: Dockerfile.local
       args:
-        - DATABASE_URL=postgresql://postgres:postgres@marketplace_database:5432/postgres?options=-c%20search_path%3Dusers_schema
+        - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace?options=-c%20search_path%3Dusers_schema
     container_name: user_service_local
     restart: unless-stopped
     ports:
       - "8001:8001"
     environment:
-      - SECRET_KEY=your-local-secret-key
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-0gos56jbkua+tptfdw5j#(ipe%^%kwt2)ekc@$8!*9++o166wx}
       - DEBUG=True
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
-      - DATABASE_URL=postgresql://postgres:postgres@marketplace_database:5432/postgres?options=-c%20search_path%3Dusers_schema
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace?options=-c%20search_path%3Dusers_schema
       - ALLOWED_HOSTS=localhost,127.0.0.1
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
-      - DEFAULT_FROM_EMAIL=your-email@example.com
+      - DEFAULT_FROM_EMAIL=noreply@example.com
       - ENV=local
+      - CLOUD_NAME=${CLOUD_NAME:-your-cloudinary-cloud-name}
+      - API_KEY=${API_KEY:-your-cloudinary-api-key}
+      - API_SECRET=${API_SECRET:-your-cloudinary-api-secret}
     volumes:
       - ./user_service:/app
+      - ./user_service/logs:/app/logs
     depends_on:
       marketplace_database:
         condition: service_healthy
@@ -103,7 +108,7 @@ services:
       test: ["CMD-SHELL", "curl --fail http://localhost:8001/health || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
 volumes:
   marketplace_db_data:
