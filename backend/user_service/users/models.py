@@ -2,18 +2,14 @@ import random
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.timezone import now, timedelta
-from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
+from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
-from cloudinary.models import CloudinaryField
-from django.utils.text import slugify  # Переносимо імпорт на початок файлу
-from pytils.translit import slugify
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
-from django.contrib.postgres.search import SearchVector
 from django.db import transaction
 
 name_validator = RegexValidator(
-    regex=r'^(?!-)([A-Za-zА-Яа-яїЇіІєЄґҐ]+)(?<!-)$',
+    regex=r'^(?!-)([A-Za-zА-Яа-яї ЇіІєЄґҐ]+)(?<!-)$',
     message="Ім'я та прізвище можуть містити лише кирилицю, латиницю, дефіс (не на початку чи в кінці).",
     code='invalid_name'
 )
@@ -41,7 +37,6 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, username, surname, password, **extra_fields)
-
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -73,8 +68,8 @@ class User(AbstractUser):
             super().save(*args, **kwargs)
             User.objects.filter(pk=self.pk).update(
                 search_vector=(
-                        SearchVector('username', weight='A', config='ukrainian') +
-                        SearchVector('surname', weight='B', config='ukrainian')
+                    SearchVector('username', weight='A', config='ukrainian') +
+                    SearchVector('surname', weight='B', config='ukrainian')
                 )
             )
     class Meta:
