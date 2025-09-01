@@ -1,3 +1,4 @@
+import os
 from django.urls import path, re_path
 from django.views.generic import RedirectView
 from django.http import HttpResponse, HttpResponseRedirect
@@ -16,6 +17,9 @@ import requests
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Отримуємо USER_SERVICE_URL із змінної оточення
+USER_SERVICE_URL = os.getenv('USER_SERVICE_URL', 'http://user_service:8001')
 
 class HealthCheckView(APIView):
     throttle_classes = []
@@ -44,8 +48,7 @@ class HealthCheckView(APIView):
 
         try:
             response = requests.get(
-                'http://user_service:8001/health/',
-                headers={"Host": "user-service.localdomain"},
+                f'{USER_SERVICE_URL}/health/',
                 timeout=2
             )
             results['user_service'] = {'status': 'ok' if response.status_code == 200 else 'error'}
@@ -80,8 +83,7 @@ class UserServiceSchemaView(GenericAPIView):
         try:
             # Отримати схему user_service
             response = requests.get(
-                'http://user_service:8001/schema/',
-                headers={"Host": "user-service.localdomain"},
+                f'{USER_SERVICE_URL}/schema/',
                 timeout=2
             )
             if response.status_code == 200:
@@ -103,8 +105,6 @@ class UserServiceSchemaView(GenericAPIView):
         except requests.RequestException as e:
             return Response({'error': f'Error fetching user service schema: {str(e)}'}, status=503)
 
-
-
 class ProxyView(APIView):
     serializer_class = ProxyErrorSerializer
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
@@ -117,19 +117,17 @@ class ProxyView(APIView):
 
         if path.startswith('users/'):
             service_name = 'user_service'
-            target_url = f'http://user_service:8001/{path[len("users/"):]}'
+            target_url = f'{USER_SERVICE_URL}/{path[len("users/"):]}'
         else:
             logger.warning(f"No microservice available for path: {path}")
             return Response({'error': f'No microservices available for path: {path}'}, status=503)
 
-        headers = {"Host": "user-service.localdomain"}
-        logger.info(f"Proxying {request.method} request to {target_url} with headers: {headers}")
+        logger.info(f"Proxying {request.method} request to {target_url}")
 
         try:
             response = requests.request(
                 method=request.method,
                 url=target_url,
-                headers=headers,
                 data=request.body,
                 params=request.GET,
                 allow_redirects=False,

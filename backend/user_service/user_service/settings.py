@@ -18,7 +18,7 @@ DEBUG = env.bool('DEBUG', default=False)
 # ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='*').split(',')
 # ALLOWED_HOSTS = ['localhost,127.0.0.1,user_service,api_gateway']
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'user_service', 'user_service.local', 'api_gateway']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")  # Додано для Render
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
