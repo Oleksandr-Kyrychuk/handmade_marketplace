@@ -11,3 +11,7 @@ class HealthCheckSerializer(serializers.Serializer):
 
 class ProxyErrorSerializer(serializers.Serializer):
     error = serializers.CharField(max_length=100)
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
