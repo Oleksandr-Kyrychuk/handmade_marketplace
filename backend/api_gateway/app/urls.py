@@ -49,7 +49,7 @@ class HealthCheckView(APIView):
         try:
             response = requests.get(
                 f'{USER_SERVICE_URL}/health/',
-                timeout=2
+                timeout=20
             )
             results['user_service'] = {'status': 'ok' if response.status_code == 200 else 'error'}
         except requests.RequestException as e:
@@ -84,7 +84,7 @@ class UserServiceSchemaView(GenericAPIView):
             # Отримати схему user_service
             response = requests.get(
                 f'{USER_SERVICE_URL}/schema/',
-                timeout=2
+                timeout=20
             )
             if response.status_code == 200:
                 user_schema = response.json()
@@ -131,7 +131,7 @@ class ProxyView(APIView):
                 data=request.body,
                 params=request.GET,
                 allow_redirects=False,
-                timeout=2
+                timeout=20
             )
             logger.info(f"Received {response.status_code} from {target_url}")
 

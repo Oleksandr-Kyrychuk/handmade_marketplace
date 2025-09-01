@@ -66,7 +66,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
-DATABASES['default']['OPTIONS'] = {'options': '-c search_path=gateway_schema'}
+# DATABASES['default']['OPTIONS'] = {'options': '-c search_path=gateway_schema'}
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
