@@ -32,7 +32,6 @@ class HealthCheckView(APIView):
         results = {}
         all_healthy = True
 
-        # Перевірка Redis
         try:
             cache.get('health_check_test')
             results['redis'] = {'status': 'ok'}
@@ -41,11 +40,10 @@ class HealthCheckView(APIView):
             all_healthy = False
             logger.error(f"Redis health check failed: {str(e)}")
 
-        # Перевірка user_service
         try:
             response = requests.get(
                 'http://user_service:8001/health/',
-                headers={"Host": "user_service"},  # обрізаємо порт
+                headers={"Host": "user-service.localdomain"},
                 timeout=2
             )
             results['user_service'] = {'status': 'ok' if response.status_code == 200 else 'error'}
@@ -64,52 +62,15 @@ class ProxyView(APIView):
     serializer_class = ProxyErrorSerializer
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
-    @extend_schema(
-        request=None,
-        responses={
-            200: None,
-            404: ProxyErrorSerializer,
-            503: ProxyErrorSerializer,
-        },
-        parameters=[
-            OpenApiParameter(
-                name='path',
-                type=str,
-                location=OpenApiParameter.PATH,
-                description='Path to the microservice endpoint (e.g., users/register/)',
-                required=True
-            )
-        ],
-        summary="Proxy view for microservices",
-        description="Proxies requests to microservices like user_service.",
-        methods=['GET', 'POST', 'PUT', 'DELETE']
-    )
-    def get(self, request, path):
-        return self.handle_request(request, path)
-
-    def post(self, request, path):
-        return self.handle_request(request, path)
-
-    def put(self, request, path):
-        return self.handle_request(request, path)
-
-    def delete(self, request, path):
-        return self.handle_request(request, path)
-
     def handle_request(self, request, path):
-        if path.startswith('static/') or path == 'favicon.ico':
-            logger.warning(f"Blocked static or favicon request: {path}")
-            return Response({'error': 'Not handled by proxy'}, status=404)
-
-        # Перенаправлення до user_service
         if path.startswith('users/'):
-            target_url = f"http://user_service:8001/{path}"
             service_name = 'user_service'
+            target_url = f'http://user_service:8001/{path[len("users/"):]}'
         else:
             logger.warning(f"No microservice available for path: {path}")
             return Response({'error': f'No microservices available for path: {path}'}, status=503)
 
-        headers={"Host": "user_service.local"}
+        headers = {"Host": "user-service.localdomain"}  # Залишаємо .localdomain для консистентності
         logger.info(f"Proxying {request.method} request to {target_url} with headers: {headers}")
 
         try:
@@ -130,22 +91,25 @@ class ProxyView(APIView):
             )
         except requests.Timeout:
             logger.error(f"Timeout when proxying to {service_name} at {target_url}")
-            return Response(
-                {'error': f'{service_name} timed out'},
-                status=503
-            )
+            return Response({'error': f'{service_name} timed out'}, status=503)
         except requests.ConnectionError:
             logger.error(f"Connection error when proxying to {service_name} at {target_url}")
-            return Response(
-                {'error': f'Failed to connect to {service_name}'},
-                status=503
-            )
+            return Response({'error': f'Failed to connect to {service_name}'}, status=503)
         except requests.RequestException as e:
             logger.error(f"Error proxying to {service_name} at {target_url}: {str(e)}")
-            return Response(
-                {'error': f'Error proxying to {service_name}: {str(e)}'},
-                status=503
-            )
+            return Response({'error': f'Error proxying to {service_name}: {str(e)}'}, status=503)
+
+    def get(self, request, path):
+        return self.handle_request(request, path)
+
+    def post(self, request, path):
+        return self.handle_request(request, path)
+
+    def put(self, request, path):
+        return self.handle_request(request, path)
+
+    def delete(self, request, path):
+        return self.handle_request(request, path)
 
 urlpatterns = [
     path('health', RedirectView.as_view(url='/health/')),

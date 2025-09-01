@@ -165,6 +165,7 @@ class LogoutView(APIView):
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 class HealthCheckView(APIView):
+    permission_classes = [permissions.AllowAny]
     serializer_class = HealthCheckSerializer
 
     def get(self, request):

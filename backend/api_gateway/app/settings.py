@@ -16,8 +16,8 @@ else:
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost,127.0.0.1,user_service,user_service.local,api_gateway').split(',')
-
+# ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost,127.0.0.1,user_service,user_service.local,api_gateway').split(',')
+ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

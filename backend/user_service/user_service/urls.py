@@ -26,6 +26,13 @@ from users.views import (
 )
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.http import JsonResponse
+def debug_host(request):
+    return JsonResponse({
+        "host": request.get_host(),
+        "headers": dict(request.headers)
+    })
+
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='users')
@@ -48,3 +55,5 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+    urlpatterns += [path('debug-host/', debug_host, name='debug-host')]

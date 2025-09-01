@@ -16,8 +16,9 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
 # ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='*').split(',')
-ALLOWED_HOSTS = ['*', 'user_service.local']
-
+# ALLOWED_HOSTS = ['localhost,127.0.0.1,user_service,api_gateway']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'user_service', 'user_service.local', 'api_gateway']
+ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,6 +41,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'user_service.middleware.DebugHostMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
