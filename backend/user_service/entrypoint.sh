@@ -1,9 +1,11 @@
-# user_service/entrypoint.sh
 #!/bin/bash
 set -e
 
+# Очищаємо DATABASE_URL від непідтримуваних параметрів для psql
+CLEAN_DB_URL="${DATABASE_URL/&channel_binding=require/}"
+
 echo "Creating schema if not exists..."
-psql "$DATABASE_URL" -c "CREATE SCHEMA IF NOT EXISTS users_schema; GRANT ALL ON SCHEMA users_schema TO dev;"
+psql "$CLEAN_DB_URL" -c "CREATE SCHEMA IF NOT EXISTS users_schema; GRANT ALL ON SCHEMA users_schema TO dev;"
 
 echo "Applying migrations..."
 python manage.py migrate
