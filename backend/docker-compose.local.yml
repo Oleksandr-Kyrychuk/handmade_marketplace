@@ -12,7 +12,7 @@ services:
       - DEBUG=False
       - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
-      - ALLOWED_HOSTS=['*']
+      - ALLOWED_HOSTS=*
       - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace
       - ENV=local
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
@@ -88,11 +88,12 @@ services:
       - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
       - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace?options=-c%20search_path%3Dusers_schema
-      - ALLOWED_HOSTS=['*']
+      - ALLOWED_HOSTS=*
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
       - DEFAULT_FROM_EMAIL=noreply@example.com
       - ENV=local
       - CLOUD_NAME=${CLOUD_NAME:-your-cloudinary-cloud-name}
+      - USER_SERVICE_URL=http://user_service:8001
       - API_KEY=${API_KEY:-your-cloudinary-api-key}
       - API_SECRET=${API_SECRET:-your-cloudinary-api-secret}
     volumes:
