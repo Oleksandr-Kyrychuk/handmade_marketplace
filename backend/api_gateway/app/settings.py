@@ -109,13 +109,13 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'api_gateway.log'),
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 5,
-            'formatter': 'verbose',
-        },
+        # 'file': {
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': os.path.join(BASE_DIR, 'logs', 'api_gateway.log'),
+        #     'maxBytes': 10 * 1024 * 1024,
+        #     'backupCount': 5,
+        #     'formatter': 'verbose',
+        # },
     },
     'loggers': {
     'django': {
