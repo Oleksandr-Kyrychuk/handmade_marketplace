@@ -24,6 +24,7 @@ from users.views import (
     LoginView, CustomTokenRefreshView, PasswordResetRequestView,
     PasswordResetConfirmView, UserViewSet, UserProfileView, LogoutView
 )
+from drf_spectacular.renderers import OpenApiJsonRenderer
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.http import JsonResponse
@@ -49,7 +50,7 @@ urlpatterns = [
     path('users/password-reset-confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     path('users/profile/', UserProfileView.as_view(), name='profile'),
     path('users/logout/', LogoutView.as_view(), name='logout'),
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),  # Додано для документації
+    path('schema/', SpectacularAPIView.as_view(renderer_classes=[OpenApiJsonRenderer]), name='schema'),  # Додано для документації
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  # Додано для Swagger UI
 ] + router.urls + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

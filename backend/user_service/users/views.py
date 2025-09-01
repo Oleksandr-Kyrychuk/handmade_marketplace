@@ -62,6 +62,7 @@ class RegisterView(GenericAPIView):
 
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = VerifyEmailSerializer
 
     @extend_schema(summary="Підтвердження email")
     def get(self, request, uidb64, token):
@@ -89,6 +90,7 @@ class ResendVerificationCodeView(GenericAPIView):
 
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
+    # serializer_class = TokenObtainPairSerializer
 
     @extend_schema(summary="Логін користувача")
     def post(self, request, *args, **kwargs):
@@ -153,6 +155,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = None
 
     @extend_schema(summary="Логаут користувача")
     def post(self, request):
@@ -168,6 +171,11 @@ class HealthCheckView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = HealthCheckSerializer
 
+    @extend_schema(
+        summary="Перевірка здоров'я сервісів",
+        request=None,
+        responses={200: HealthCheckSerializer, 503: HealthCheckSerializer}
+    )
     def get(self, request):
         results = {}
         all_healthy = True
