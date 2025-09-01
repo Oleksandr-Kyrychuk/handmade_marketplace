@@ -72,7 +72,7 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
-DATABASES['default']['OPTIONS'] = {'options': '-c search_path=users_schema'}
+# DATABASES['default']['OPTIONS'] = {'options': '-c search_path=users_schema'}
 
 AUTH_PASSWORD_VALIDATORS = [
     {

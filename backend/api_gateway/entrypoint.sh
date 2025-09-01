@@ -2,7 +2,7 @@
 echo "Applying migrations..."
 python manage.py migrate
 
-echo "Initializing user_service schema..."
+echo "Initializing api_gateway schema..."
 python manage.py fetch_schema
 
 echo "Starting Gunicorn..."
