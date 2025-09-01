@@ -198,15 +198,15 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': str(LOG_DIR / 'user_service.log'),
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 5,
-            'encoding': 'utf-8',
-            'filters': ['sensitive_data'],
-            'formatter': 'verbose',
-        },
+        # 'file': {
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': str(LOG_DIR / 'user_service.log'),
+        #     'maxBytes': 10 * 1024 * 1024,
+        #     'backupCount': 5,
+        #     'encoding': 'utf-8',
+        #     'filters': ['sensitive_data'],
+        #     'formatter': 'verbose',
+        # },
     },
     'loggers': {
         'django': {
