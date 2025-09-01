@@ -118,17 +118,17 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'app': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
+    'django': {
+        'handlers': ['console'],  # прибрали 'file'
+        'level': 'INFO',
+        'propagate': False,
     },
+    'app': {
+        'handlers': ['console'],  # прибрали 'file'
+        'level': 'DEBUG',
+        'propagate': False,
+    },
+}
 }
 
 STATIC_URL = 'static/'
