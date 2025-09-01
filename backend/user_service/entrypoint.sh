@@ -1,11 +1,5 @@
 # entrypoint.sh
-set -e
-
-# Очищаємо DATABASE_URL від channel_binding
-CLEAN_DB_URL=$(echo "$DATABASE_URL" | sed 's/&channel_binding=require//')
-
-echo "Creating schema if not exists..."
-psql "$CLEAN_DB_URL" -c "CREATE SCHEMA IF NOT EXISTS users_schema; GRANT ALL ON SCHEMA users_schema TO dev;"
+python create_schema.py
 
 echo "Applying migrations..."
 python manage.py migrate
