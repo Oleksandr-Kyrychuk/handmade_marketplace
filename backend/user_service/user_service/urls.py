@@ -41,15 +41,15 @@ router.register(r'users', UserViewSet, basename='users')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', HealthCheckView.as_view(), name='health'),
-    path('users/register/', RegisterView.as_view(), name='register'),
-    path('users/verify-email/<str:uidb64>/<str:token>/', VerifyEmailView.as_view(), name='verify-email'),
-    path('users/resend-verification/', ResendVerificationCodeView.as_view(), name='resend-verification'),
-    path('users/login/', LoginView.as_view(), name='login'),
-    path('users/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
-    path('users/password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
-    path('users/password-reset-confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
-    path('users/profile/', UserProfileView.as_view(), name='profile'),
-    path('users/logout/', LogoutView.as_view(), name='logout'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('verify-email/<str:uidb64>/<str:token>/', VerifyEmailView.as_view(), name='verify-email'),
+    path('resend-verification/', ResendVerificationCodeView.as_view(), name='resend-verification'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
+    path('password-reset-confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('profile/', UserProfileView.as_view(), name='profile'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('schema/', SpectacularAPIView.as_view(renderer_classes=[OpenApiJsonRenderer]), name='schema'),  # Додано для документації
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  # Додано для Swagger UI
 ] + router.urls + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
