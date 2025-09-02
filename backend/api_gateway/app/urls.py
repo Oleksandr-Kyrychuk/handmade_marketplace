@@ -117,7 +117,9 @@ class ProxyView(APIView):
 
         if path.startswith('users/'):
             service_name = 'user_service'
-            target_url = f'{USER_SERVICE_URL}/{path[len("users/"):]}'
+            sub_path = path[len("users/"):].lstrip('/')
+            target_url = f'{USER_SERVICE_URL}/{sub_path}'
+            #target_url = f'{USER_SERVICE_URL}/{path[len("users/"):]}'
         else:
             logger.warning(f"No microservice available for path: {path}")
             return Response({'error': f'No microservices available for path: {path}'}, status=503)

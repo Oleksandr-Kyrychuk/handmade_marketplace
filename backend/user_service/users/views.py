@@ -144,6 +144,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_class = UserFilter
     allowed_roles = ['admin']
     pagination_class = StandardResultsSetPagination  # Додано пагінацію
+    http_method_names = ['get', 'put', 'patch', 'delete']
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
