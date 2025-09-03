@@ -43,6 +43,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
 ROOT_URLCONF = 'app.urls'  # Змінено на app.urls, бо це API Gateway
 
 TEMPLATES = [
