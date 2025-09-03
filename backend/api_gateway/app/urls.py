@@ -108,8 +108,8 @@ class ProxyView(APIView):
 
         if path.startswith('users/'):
             service_name = 'user_service'
-            sub_path = path[len("users/"):].rstrip('/')  # Видаляємо trailing slash
-            target_url = f'{USER_SERVICE_URL}/{sub_path}'
+            sub_path = path[len("users/"):].rstrip('/')
+            target_url = f'{settings.USER_SERVICE_URL}/{sub_path}'
         else:
             logger.warning(f"No microservice available for path: {path}")
             return Response({'error': f'No microservices available for path: {path}'}, status=503)
@@ -135,19 +135,19 @@ class ProxyView(APIView):
             logger.info(f"Received {response.status_code} from {target_url}")
 
             content_type = response.headers.get('Content-Type', '')
-            try:
-                content = response.text  # Спробуємо декодувати як текст
-            except UnicodeDecodeError:
-                logger.error(f"Unicode decode error for response from {target_url}")
-                content = "Invalid response encoding from service"
-
             if 'application/json' in content_type:
                 try:
                     return Response(response.json(), status=response.status_code)
-                except ValueError:
-                    return Response({'error': content}, status=response.status_code)
+                except ValueError as e:
+                    logger.error(f"Invalid JSON from {target_url}: {str(e)}")
+                    return Response({'error': 'Invalid JSON response from service'}, status=response.status_code)
             else:
-                return Response({'error': content or "Unknown error from service"}, status=response.status_code)
+                try:
+                    content = response.text
+                    return Response({'error': content or 'Unknown error from service'}, status=response.status_code)
+                except UnicodeDecodeError:
+                    logger.error(f"Unicode decode error for response from {target_url}")
+                    return Response({'error': 'Invalid response encoding from service'}, status=response.status_code)
 
         except requests.Timeout:
             logger.error(f"Timeout when proxying to {service_name} at {target_url}")
