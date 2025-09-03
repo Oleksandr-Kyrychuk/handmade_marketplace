@@ -133,7 +133,7 @@ class ProxyView(APIView):
                 timeout=20
             )
             logger.info(f"Received {response.status_code} from {target_url}")
-
+            content = response.content.decode('utf-8', errors='replace')
             content_type = response.headers.get('Content-Type', '')
             if 'application/json' in content_type:
                 try:
