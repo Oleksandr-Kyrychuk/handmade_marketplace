@@ -1,7 +1,13 @@
-# entrypoint.sh
-python create_schema.py
+#!/bin/sh
+echo "Creating users_schema if not exists..."
+python manage.py dbshell <<EOF
+CREATE SCHEMA IF NOT EXISTS users_schema;
+EOF
 
-echo "Applying migrations..."
+echo "Applying migrations for users app..."
+python manage.py migrate users
+
+echo "Applying migrations for other apps..."
 python manage.py migrate
 
 echo "Starting Gunicorn..."
