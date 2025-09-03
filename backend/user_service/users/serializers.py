@@ -68,8 +68,42 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(style={'input_type': 'password'})
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+                if not user.check_password(password):
+                    raise serializers.ValidationError(
+                        {'email': [_('Невірний email або пароль')], 'password': [_('Невірний email або пароль')]})
+                if not user.is_active:
+                    raise serializers.ValidationError({'email': [_('Обліковий запис не активний')]})
+                if not user.is_verified:
+                    raise serializers.ValidationError({'email': [_('Email не підтверджений')]})
+            except User.DoesNotExist:
+                raise serializers.ValidationError(
+                    {'email': [_('Невірний email або пароль')], 'password': [_('Невірний email або пароль')]})
+        else:
+            raise serializers.ValidationError({'email': [_('Це поле обов’язкове')], 'password': [_('Це поле обов’язкове')]})
+
+        # Генерація JWT-токенів
+        refresh = RefreshToken.for_user(user)
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        data['user'] = {
+            'id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'surname': user.surname,
+            'roles': user.roles
+        }
+
+        return data
 
 class VerifyEmailSerializer(serializers.Serializer):
     uidb64 = serializers.CharField()
