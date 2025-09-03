@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django_filters.rest_framework import DjangoFilterBackend
@@ -50,7 +50,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 class RegisterView(GenericAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
-    parser_classes = [MultiPartParser, FormParser]  # Додано для обробки файлів
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # Додано для обробки файлів
 
     @extend_schema(summary="Реєстрація нового користувача")
     def post(self, request):
