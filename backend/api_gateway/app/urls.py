@@ -121,19 +121,26 @@ class ProxyView(APIView):
             service_name = 'user_service'
             sub_path = path[len("users/"):].lstrip('/')
             target_url = f'{USER_SERVICE_URL}/{sub_path}'
-            #target_url = f'{USER_SERVICE_URL}/{path[len("users/"):]}'
         else:
             logger.warning(f"No microservice available for path: {path}")
             return Response({'error': f'No microservices available for path: {path}'}, status=503)
 
         logger.info(f"Proxying {request.method} request to {target_url}")
 
+        # Копіюємо заголовки, виключаючи непотрібні
+        headers = {
+            key: value
+            for key, value in request.headers.items()
+            if key.lower() not in ('host', 'content-length', 'connection', 'transfer-encoding')
+        }
+
         try:
             response = requests.request(
                 method=request.method,
                 url=target_url,
-                data=request.body,
-                params=request.GET,
+                headers=headers,  # Передаємо заголовки
+                data=request.body,  # Тіло запиту (для POST/PUT)
+                params=request.GET,  # Параметри запиту
                 allow_redirects=False,
                 timeout=20
             )
