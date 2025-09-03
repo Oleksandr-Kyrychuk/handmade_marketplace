@@ -15,6 +15,7 @@ from django.core.cache import cache
 from .serializers import HealthCheckSerializer, ProxyErrorSerializer, EmptySerializer
 import requests
 import logging
+from rest_framework import permissions
 
 logger = logging.getLogger(__name__)
 
