@@ -10,7 +10,7 @@ from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from cloudinary.models import CloudinaryField
-
+from django.contrib.postgres.search import SearchVector
 name_validator = RegexValidator(
     regex=r'^(?!-)([A-Za-zА-Яа-яї ЇіІєЄґҐ]+)(?<!-)$',
     message="Ім'я та прізвище можуть містити лише кирилицю, латиницю, дефіс (не на початку чи в кінці).",
