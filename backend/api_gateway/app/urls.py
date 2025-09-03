@@ -106,6 +106,7 @@ class UserServiceSchemaView(GenericAPIView):
             return Response({'error': f'Error fetching user service schema: {str(e)}'}, status=503)
 
 class ProxyView(APIView):
+    permission_classes = [permissions.AllowAny]
     serializer_class = ProxyErrorSerializer
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
