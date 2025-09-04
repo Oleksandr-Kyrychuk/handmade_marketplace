@@ -1,5 +1,43 @@
 {
-  "UserProfile": {
-    "title": "1 profile"
+  "header": {
+    "topLinks": {
+      "about": "AboutAbout the platform",
+      "contacts": "Contacts",
+      "help": "Help",
+      "registration": "Registration"
+    },
+    "navigation": {
+      "home": "Home",
+      "masters": "Masters",
+      "liveAuction": "Live Auction",
+      "salehits": "Sale hits",
+      "specialPropositions": "Special propositions",
+      "masterClass": "Master class",
+      "blog": "Blog"
+    },
+    "actions": {
+      "notification": "Notification",
+      "favorite": "Favorite",
+      "basket": "Baster"
+    },
+    "logIn": "Log In",
+    "category": "Category"
+  },
+  "search": {
+    "placeholder": "Search for product, craftsman, brand"
+  },
+  "user-menu": {
+    "navigation": {
+      "getMaster": "Become a Master",
+      "profile": "My Profile",
+      "orders": "My Orders",
+      "goods": "My Goods",
+      "favorite": "Favorites",
+      "notification": "Notifications",
+      "reviews": "Reviews",
+      "settings": "Settings",
+      "help": "Help",
+      "logout": "Log Out"
+    }
   }
 }

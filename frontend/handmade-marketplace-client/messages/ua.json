@@ -1,5 +1,43 @@
 {
-  "UserProfile": {
-    "title": "2 profile"
+  "header": {
+    "topLinks": {
+      "about": "Про платформу",
+      "contacts": "Контакти",
+      "help": "Допомога",
+      "registration": "Реєстрація"
+    },
+    "navigation": {
+      "home": "Головна",
+      "masters": "Майстри",
+      "liveAuction": "Live Аукціон",
+      "salehits": "Хіти продаж",
+      "specialPropositions": "Спеціальні пропозиції",
+      "masterClass": "Майстер-класи",
+      "blog": "Блог"
+    },
+    "actions": {
+      "notification": "Повідомлення",
+      "favorite": "Обране",
+      "basket": "Корзина"
+    },
+    "logIn": "Log In",
+    "category": "Категорія"
+  },
+  "search": {
+    "placeholder": "Шукати товар, майстра, бренд"
+  },
+  "user-menu": {
+    "navigation": {
+      "getMaster": "Стати майстром",
+      "profile": "Мій профіль",
+      "orders": "Мої замовлення",
+      "goods": "Мої товари",
+      "favorite": "Обране",
+      "notification": "Повідомлення",
+      "reviews": "Відгуки",
+      "settings": "Налаштування",
+      "help": "Допомога",
+      "logout": "Вийти"
+    }
   }
 }

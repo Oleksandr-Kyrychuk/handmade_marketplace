@@ -13,6 +13,7 @@ function Provider({messages, locale, children}: IProviderProps) {
     <NextIntlClientProvider 
         locale={locale}
         messages={messages}
+        timeZone='Ukraine/Kyiv'
       >
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />

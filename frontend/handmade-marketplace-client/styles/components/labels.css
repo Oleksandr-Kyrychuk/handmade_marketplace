@@ -1,0 +1,6 @@
+.label-1 {
+  @apply font-secondary font-bold text-xl leading-[100%] tracking-[0px];
+}
+.label-2 {
+  @apply font-secondary font-bold text-base leading-[100%] tracking-[0px];
+}

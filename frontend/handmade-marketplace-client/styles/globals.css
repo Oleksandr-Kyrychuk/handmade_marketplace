@@ -1,4 +1,10 @@
 @import "tailwindcss";
+@import './tailwind-settings.css';
+@import './components/cards.css';
+@import './components/labels.css';
+@import './components/buttons.css';
+@import './components/links.css';
+@import './hamburger-style.css';
 
 :root {
   --background: #ffffff;
@@ -19,8 +25,46 @@
   }
 }
 
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main {
+  flex-grow: 1;
+}
+button,
+a {
+  cursor: pointer;
+}
+* {
+  outline: none !important;
+  outline-offset: 0 !important
+}
+img {
+  width: 100%;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-comfortaa);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 100%;
+  color: var(--color-primary-900);
+  background: var(--color-snow);
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1422px;
+  }
 }

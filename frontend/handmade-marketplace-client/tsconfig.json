@@ -29,6 +29,7 @@
         "name": "next"
       }
     ],
+    "typeRoots": ["./types", "./node_modules/@types"],
     "exactOptionalPropertyTypes": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -42,6 +43,7 @@
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
+    "./types/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [

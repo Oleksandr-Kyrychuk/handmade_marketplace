@@ -1,3 +1,5 @@
+import '@/styles/globals.css'
+
 import { routing } from "@/i18n/routing";
 import Provider from "@/components/Provider/Provider";
 import { IRootLayoutProps } from "@/types/general-interfaces";
@@ -5,6 +7,7 @@ import { hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { Comfortaa, Nunito } from "next/font/google";
 import { notFound } from "next/navigation";
+import Header from "@/layout/Header/Header";
 
 const comfortaa = Comfortaa({
   variable: "--font-comfortaa",
@@ -19,7 +22,7 @@ const nunito = Nunito({
   subsets: ["latin"],
   display: 'swap',
   weight: 'variable',
-  style: 'italic'
+  style: 'normal'
 });
 
 
@@ -39,7 +42,12 @@ async function RootLayout({children, params}: IRootLayoutProps) {
         <Provider   
           messages={messages}
           locale={locale}>
-            {children}
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="main flex-1">
+                {children}
+              </main>
+            </div>
         </Provider>
       </body>
     </html>
