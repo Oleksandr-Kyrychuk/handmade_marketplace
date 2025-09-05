@@ -3,7 +3,7 @@ services:
     build:
       context: ./api_gateway
       dockerfile: Dockerfile.local
-    container_name: api_gateway_local
+    container_name: api-gateway-local  # можна залишити для Docker, дефіс замість _
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -12,31 +12,32 @@ services:
       - DEBUG=False
       - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
-      - ALLOWED_HOSTS=*
-      - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace
+      - USER_SERVICE_URL=http://user-service:8001
+      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,api-gateway
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace
       - ENV=local
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
     volumes:
       - ./api_gateway:/app
       - ./api_gateway/logs:/app/logs
     depends_on:
-      marketplace_database:
+      marketplace-database:
         condition: service_healthy
       redis:
         condition: service_healthy
-      user_service:
+      user-service:
         condition: service_healthy
     networks:
       - handmade_network
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:8000/health || exit 1"]
+      test: ["CMD-SHELL", "curl --fail http://api-gateway:8000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  marketplace_database:
+  marketplace-database:
     image: postgres:17-alpine
-    container_name: marketplace_database_local
+    container_name: marketplace-database-local
     restart: unless-stopped
     volumes:
       - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql
@@ -58,7 +59,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: marketplace_redis_local
+    container_name: marketplace-redis-local
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -72,13 +73,13 @@ services:
       timeout: 5s
       retries: 5
 
-  user_service:
+  user-service:
     build:
       context: ./user_service
       dockerfile: Dockerfile.local
       args:
-        - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace?options=-c%20search_path%3Dusers_schema
-    container_name: user-service_local
+        - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dusers_schema
+    container_name: user-service-local
     restart: unless-stopped
     ports:
       - "8001:8001"
@@ -87,27 +88,27 @@ services:
       - DEBUG=True
       - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
-      - DATABASE_URL=postgresql://dev:sysadmin@marketplace_database:5432/marketplace?options=-c%20search_path%3Dusers_schema
-      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dusers_schema
+      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,api-gateway
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
       - DEFAULT_FROM_EMAIL=noreply@example.com
       - ENV=local
       - CLOUD_NAME=${CLOUD_NAME:-your-cloudinary-cloud-name}
-      - USER_SERVICE_URL=http://user_service:8001
+      - USER_SERVICE_URL=http://user-service:8001
       - API_KEY=${API_KEY:-your-cloudinary-api-key}
       - API_SECRET=${API_SECRET:-your-cloudinary-api-secret}
     volumes:
       - ./user_service:/app
       - ./user_service/logs:/app/logs
     depends_on:
-      marketplace_database:
+      marketplace-database:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - handmade_network
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:8001/health || exit 1"]
+      test: ["CMD-SHELL", "curl --fail http://user-service:8001/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10

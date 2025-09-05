@@ -13,7 +13,7 @@ up:
 # Запуск лише api_gateway
 gate:
 	@echo "🚀 Запуск api_gateway..."
-	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml up -d api_gateway
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml up -d api-gateway
 	@echo "⏳ Очікування запуску api_gateway..."
 	@sleep 5
 	@echo "✅ api_gateway запущено!"
