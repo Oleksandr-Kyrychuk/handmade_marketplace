@@ -3,7 +3,7 @@ services:
     build:
       context: ./api_gateway
       dockerfile: Dockerfile.local
-    container_name: api-gateway-local  # можна залишити для Docker, дефіс замість _
+    container_name: api-gateway-local
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -110,8 +110,32 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://user-service:8001/health || exit 1"]
       interval: 10s
-      timeout: 5s
+      timeout: 20s
       retries: 10
+      start_period: 120s
+
+  user-service-celery:
+    build:
+      context: ./user_service
+      dockerfile: Dockerfile.local
+    container_name: user-service-celery-local
+    restart: unless-stopped
+    command: sh entrypoint-celery.sh
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-0gos56jbkua+tptfdw5j#(ipe%^%kwt2)ekc@$8!*9++o166wx}
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dusers_schema
+      - ENV=local
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
+    depends_on:
+      redis:
+        condition: service_healthy
+      marketplace-database:
+        condition: service_healthy
+    networks:
+      - handmade_network
 
 volumes:
   marketplace_db_data:

@@ -8,7 +8,7 @@ echo "Applying migrations..."
 python manage.py migrate
 
 echo "Initializing api_gateway schema..."
-python manage.py fetch_schema
+python manage.py fetch_schema || echo "Failed to fetch schema, continuing..."
 
 echo "Starting Gunicorn..."
 PORT=${PORT:-8000}
