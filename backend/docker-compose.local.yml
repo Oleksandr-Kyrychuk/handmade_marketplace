@@ -25,8 +25,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      user-service:
-        condition: service_healthy
     networks:
       - handmade_network
     healthcheck:
@@ -90,6 +88,8 @@ services:
       - FRONTEND_URL=http://localhost:5173
       - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dusers_schema
       - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,api-gateway
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
       - DEFAULT_FROM_EMAIL=noreply@example.com
       - ENV=local
