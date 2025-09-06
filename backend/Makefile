@@ -5,7 +5,7 @@ DOCKER_COMPOSE_BIN := $(shell command -v docker-compose 2>/dev/null || echo "doc
 # Запуск усіх сервісів
 up:
 	@echo "🚀 Запуск усіх контейнерів (api_gateway, user_service, marketplace_database, redis)..."
-	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml up -d --build
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml up -d --build --no-cache
 	@echo "⏳ Очікування запуску сервісів..."
 	@sleep 10
 	@echo "✅ Всі сервіси запущені!"
