@@ -164,11 +164,16 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/1')
-CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/1')
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/1')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_TIMEOUT = 10
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
 CELERY_BEAT_SCHEDULE = {
     'delete-unverified-users': {
         'task': 'users.tasks.delete_unverified_users',
@@ -179,11 +184,11 @@ CELERY_BEAT_SCHEDULE = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'sensitive_data': {
-            '()': 'users.log_filters.SensitiveDataFilter',
-        },
-    },
+    # 'filters': {
+    #     'sensitive_data': {
+    #         '()': 'users.log_filters.SensitiveDataFilter',
+    #     },
+    # },
     'formatters': {
         'simple': {
             'format': '[%(asctime)s] %(levelname)s %(name)s: %(message)s',
@@ -195,7 +200,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'filters': ['sensitive_data'],
+            # 'filters': ['sensitive_data'],
             'formatter': 'simple',
         },
         'console_no_sensitive': {
