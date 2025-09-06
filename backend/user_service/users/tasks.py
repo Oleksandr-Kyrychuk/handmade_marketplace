@@ -67,7 +67,9 @@ def send_verification_email(user_id):
             user.save()
             verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}"
             # print для дебагу:
-            print(f"Verification URL for user {user.email}: {verification_url}")
+            logger = logging.getLogger('users.tasks')
+            logger.info(f"Verification URL for user {user.email}: {verification_url}")
+
             send_mail(
                 'Підтвердження email',
                 f'Вітаємо, {user.username}!\n\n'
