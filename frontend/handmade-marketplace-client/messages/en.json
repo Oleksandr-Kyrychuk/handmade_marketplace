@@ -6,15 +6,6 @@
       "help": "Help",
       "registration": "Registration"
     },
-    "navigation": {
-      "home": "Home",
-      "masters": "Masters",
-      "liveAuction": "Live Auction",
-      "salehits": "Sale hits",
-      "specialPropositions": "Special propositions",
-      "masterClass": "Master class",
-      "blog": "Blog"
-    },
     "actions": {
       "notification": "Notification",
       "favorite": "Favorite",
@@ -22,6 +13,39 @@
     },
     "logIn": "Log In",
     "category": "Category"
+  },
+  "navigation": {
+    "home": "Home",
+    "masters": "Masters",
+    "liveAuction": "Live Auction",
+    "salehits": "Sale hits",
+    "specialPropositions": "Special propositions",
+    "masterClass": "Master class",
+    "blog": "Blog"
+  },
+  "footer": {
+    "textUnderLogo": "Best for those who value uniqueness: handmade, exclusive stories, warm emotions.",
+    "socialTitle": "Follow us:",
+    "contactTitle": "Contacts",
+    "payMethodsTitle": "Payment Support",
+    "AllRightsReserved": "All rights reserved",
+    "footerAboutLinks": {
+      "about-platform": "About the platform",
+      "about-auction": "About the auction",
+      "help": "Help",
+      "program-loyalty": "Loyalty program"
+    },
+    "footerInfoLinks": {
+      "payment-delivery": "Payment and delivery",
+      "return-conditions": "Return conditions",
+      "basket": "Basket",
+      "favorite": "Favorite"
+    },
+    "footerBottomLink": {
+      "privacyPolicy": "Privacy Policy",
+      "agreement": "Consent to the processing of personal data",
+      "termsOfService": "Terms of Service"
+    }
   },
   "search": {
     "placeholder": "Search for product, craftsman, brand"
@@ -39,5 +63,8 @@
       "help": "Help",
       "logout": "Log Out"
     }
+  },
+  "authorization": {
+    "login": "Log In"
   }
 }

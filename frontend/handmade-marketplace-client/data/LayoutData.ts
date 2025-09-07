@@ -144,3 +144,29 @@ export const getUserMenuLinks = ():IUserMenuLinks[] => {
     },
   ]
 }
+
+export const getFooterLinksAbout = ():INavigationLinks[] => {
+  return [
+    { labelKey: 'about-platform', path: Path.About },
+    { labelKey: 'about-auction', path: Path.Contacts },
+    { labelKey: 'help', path: Path.Help },
+    { labelKey: 'program-loyalty', path: Path.Registration },
+  ]
+}
+
+export const getFooterLinksInfo = ():INavigationLinks[] => {
+  return [
+    { labelKey: 'payment-delivery', path: Path.PaymentDelivery },
+    { labelKey: 'return-conditions', path: Path.ReturnConditions },
+    { labelKey: 'basket', path: Path.Basket },
+    { labelKey: 'favorite', path: Path.Favorite },
+  ]
+}
+
+export const getFooterBottomLinks = ():INavigationLinks[] => {
+  return [
+    { labelKey: 'privacyPolicy', path: Path.PrivacyPolicy },
+    { labelKey: 'agreement', path: Path.Agreement },
+    { labelKey: 'termsOfService', path: Path.TermsOfService },
+  ]
+}

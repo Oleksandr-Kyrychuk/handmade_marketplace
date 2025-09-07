@@ -27,4 +27,10 @@ export const enum Path {
   Reviews = '/reviews',
   Settings = '/settings',
 
+  PaymentDelivery = '/payment-delivery',
+  ReturnConditions = '/return-conditions',
+  PrivacyPolicy = '/privacy-policy',
+  Agreement = '/agreement',
+  TermsOfService = '/terms-service'
+
 }
