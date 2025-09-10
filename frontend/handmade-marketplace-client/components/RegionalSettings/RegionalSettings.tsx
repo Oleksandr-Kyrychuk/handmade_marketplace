@@ -1,8 +1,8 @@
 'use client';
 
-import { Link } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
-import DropDown from "@/UI/DropDown/DropDown";
+import { Link } from "@/shared/i18n/config/navigation";
+import { routing } from "@/shared/i18n/config/routing";
+import DropDown from "@/shared/UI/DropDown/DropDown";
 import { useLanguage } from "./hook/useLanguage";
 
 

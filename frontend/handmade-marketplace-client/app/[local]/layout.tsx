@@ -1,13 +1,13 @@
 import '@/styles/globals.css'
 
-import { routing } from "@/i18n/routing";
+import { routing } from "@/shared/i18n/config/routing";
 import Provider from "@/components/Provider/Provider";
-import { IRootLayoutProps } from "@/types/general-interfaces";
+import { IRootLayoutProps } from "@/shared/types/general-interfaces";
 import { hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { Comfortaa, Nunito } from "next/font/google";
 import { notFound } from "next/navigation";
-import Header from "@/layout/Header/Header";
+import Header from "@/widgets/Header/Header";
 
 const comfortaa = Comfortaa({
   variable: "--font-comfortaa",

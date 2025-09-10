@@ -1,8 +1,8 @@
 "use client"
 
-import { getMenuLinks } from "@/data/LayoutData";
+import { getMenuLinks } from "@/shared/data/LayoutData";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link } from "@/shared/i18n/config/navigation";
 
 
 function MenuLinks() {

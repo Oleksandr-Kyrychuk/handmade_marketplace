@@ -1,4 +1,4 @@
-import { Link } from '@/i18n/navigation';
+import { Link } from '@/shared/i18n/config/navigation';
 import Image from 'next/image';
 import React from 'react';
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { getHeaderTopLinks } from "@/data/LayoutData";
-import { LocalKeys } from "@/enums/LocalKey";
-import { Link } from "@/i18n/navigation";
+import { getHeaderTopLinks } from "@/shared/data/LayoutData";
+import { LocalKeys } from "@/shared/enums/LocalKey";
+import { Link } from "@/shared/i18n/config/navigation";
 import { useTranslations } from "next-intl";
 
 function HeaderTopPC() {

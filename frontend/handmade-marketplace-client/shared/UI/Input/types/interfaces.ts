@@ -1,4 +1,4 @@
-import { IChildren } from "@/types/general-interfaces";
+import { IChildren } from "@/shared/types/general-interfaces";
 import { ReactElement } from "react";
 import { UseFormRegisterReturn } from "react-hook-form";
 

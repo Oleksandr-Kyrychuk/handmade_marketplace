@@ -1,14 +1,14 @@
-import SocialLinks from "@/layout/SocialLinks/SocialLinks";
+import SocialLinks from "@/widgets/SocialLinks/SocialLinks";
 import Logo from "../Logo/Logo";
 import { Email, Phone } from "@/assets/Icons";
 import SearchBlock from "../SearchBlock/SearchBlock";
 import { useTranslations } from "next-intl";
 import PayMethods from "./PayMethods/PayMethods";
 import RegionalSettings from "../RegionalSettings/RegionalSettings";
-import Button from "@/UI/Button/Button";
-import { Link } from "@/i18n/navigation";
-import { Path } from "@/enums/Path";
-import { getFooterLinksAbout, getFooterLinksInfo, getMenuLinks } from "@/data/LayoutData";
+import Button from "@/shared/UI/Button/Button";
+import { Link } from "@/shared/i18n/config/navigation";
+import { Path } from "@/shared/enums/Path";
+import { getFooterLinksAbout, getFooterLinksInfo, getMenuLinks } from "@/shared/data/LayoutData";
 
 function FooterTop() {
   const t = useTranslations();

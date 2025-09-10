@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useRef } from 'react';
 import MenuLinks from './MenuLinks';
-import { useHandleClickOutside } from '@/hooks/useHandleClickOutside';
-import Button from '@/UI/Button/Button';
+import { useHandleClickOutside } from '@/shared/hooks/useHandleClickOutside';
+import Button from '@/shared/UI/Button/Button';
 import { ArrowDown, CatalogIcon } from '@/assets/Icons';
 import { useTranslations } from 'next-intl';
 import { IMenuProps } from './types/interfaces';

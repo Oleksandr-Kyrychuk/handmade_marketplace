@@ -1,4 +1,4 @@
-import { payTypes } from "@/data/PayMethods";
+import { payTypes } from "@/shared/data/PayMethods";
 import Image from "next/image";
 
 function PayMethods() {

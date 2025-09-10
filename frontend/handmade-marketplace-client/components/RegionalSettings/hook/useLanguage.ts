@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { Local } from "@/i18n/routing";
-import { useDropdown } from "@/UI/DropDown/hook/useDropdown";
+import { usePathname, useRouter } from "@/shared/i18n/config/navigation";
+import { Local } from "@/shared/i18n/config/routing";
+import { useDropdown } from "@/shared/UI/DropDown/hook/useDropdown";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 

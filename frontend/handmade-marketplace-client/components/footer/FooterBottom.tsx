@@ -1,5 +1,5 @@
-import { getFooterBottomLinks } from "@/data/LayoutData";
-import { Link } from "@/i18n/navigation";
+import { getFooterBottomLinks } from "@/shared/data/LayoutData";
+import { Link } from "@/shared/i18n/config/navigation";
 import { useTranslations } from "next-intl";
 
 function FooterBottom() {

@@ -1,7 +1,7 @@
 "use client";
 
 import HeaderTopPC from "./HeaderTopPC";
-import SocialLinks from "@/layout/SocialLinks/SocialLinks";
+import SocialLinks from "@/widgets/SocialLinks/SocialLinks";
 
 function HeaderTop() {
   return (

@@ -1,7 +1,7 @@
-import { Request } from "@/utils/http/http-request";
+import { Request } from "@/shared/api/http/http-request";
 import { ICategoryApi } from "./types/category-api-interfaces";
 import { CategoryRequestDTO, CategoryResponseDTO } from "./types/interfaces";
-import { ApiEndpoints, HttpMethods } from "@/utils/http/enums";
+import { ApiEndpoints, HttpMethods } from "@/shared/api/http/enums";
 
 class CategoryApi implements ICategoryApi {
   async getCategory(): Promise<CategoryResponseDTO> {

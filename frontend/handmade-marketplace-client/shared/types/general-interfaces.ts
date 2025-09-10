@@ -1,5 +1,5 @@
-import { IconActive, IconName } from "@/maps/SocialIcons";
-import { IconUserMenu } from "@/maps/UserMenuIcons";
+import { IconActive, IconName } from "@/shared/maps/SocialIcons";
+import { IconUserMenu } from "@/shared/maps/UserMenuIcons";
 import React from "react";
 
 export interface IChildren {

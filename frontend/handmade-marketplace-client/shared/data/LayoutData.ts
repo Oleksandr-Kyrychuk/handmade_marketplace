@@ -1,5 +1,5 @@
-import { Path } from "@/enums/Path"
-import { IGetHeaderActionLinks, INavigationLinks, ISocialLinks, IUserMenuLinks } from "@/types/general-interfaces"
+import { Path } from "@/shared/enums/Path"
+import { IGetHeaderActionLinks, INavigationLinks, ISocialLinks, IUserMenuLinks } from "@/shared/types/general-interfaces"
 
 export const getMenuLinks = ():INavigationLinks[] => {
   return [

@@ -1,10 +1,10 @@
 import React from 'react';
 import UserInfo from './UserInfo';
-import { userMenuIcons } from '@/maps/UserMenuIcons'
-import { getUserMenuLinks } from '@/data/LayoutData';
-import { Link } from '@/i18n/navigation';
+import { userMenuIcons } from '@/shared/maps/UserMenuIcons'
+import { getUserMenuLinks } from '@/shared/data/LayoutData';
+import { Link } from '@/shared/i18n/config/navigation';
 import { useTranslations } from 'next-intl';
-import Button from '@/UI/Button/Button';
+import Button from '@/shared/UI/Button/Button';
 
 function UserMenu() {
   // const {getUserProfile} = useGetUserQuery();

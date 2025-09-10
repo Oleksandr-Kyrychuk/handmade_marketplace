@@ -1,6 +1,6 @@
 'use client';
 
-import { useHandleClickOutside } from "@/hooks/useHandleClickOutside";
+import { useHandleClickOutside } from "@/shared/hooks/useHandleClickOutside";
 import { useRef, useState } from "react";
 
 export function useDropdown(initValue: string) {

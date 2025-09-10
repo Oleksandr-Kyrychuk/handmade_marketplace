@@ -1,10 +1,10 @@
-import { getHeaderActionLinks } from '@/data/LayoutData';
-import { Link } from '@/i18n/navigation';
-import { iconActive } from '@/maps/SocialIcons';
+import { getHeaderActionLinks } from '@/shared/data/LayoutData';
+import { Link } from '@/shared/i18n/config/navigation';
+import { iconActive } from '@/shared/maps/SocialIcons';
 import { useTranslations } from 'next-intl';
 import UserIcon from '@/assets/HeaderActions/UserIcon.svg'
-import { Path } from '@/enums/Path';
-import Button from '@/UI/Button/Button';
+import { Path } from '@/shared/enums/Path';
+import Button from '@/shared/UI/Button/Button';
 import UserMenu from '../UserMenu/UserMenu';
 
 function HeaderActions({handleOpenUserMenu}) {

@@ -1,9 +1,9 @@
 'use client';
 
-import { getSocialLinks } from "@/data/LayoutData";
-import { Link } from "@/i18n/navigation";
+import { getSocialLinks } from "@/shared/data/LayoutData";
+import { Link } from "@/shared/i18n/config/navigation";
 import { ISocialLinksProps } from "./types/interface";
-import { iconMap } from "@/maps/SocialIcons";
+import { iconMap } from "@/shared/maps/SocialIcons";
 
 function SocialLinks({className = '', colorIcon="text-snow"}: ISocialLinksProps) {
   const socialLinks = getSocialLinks();

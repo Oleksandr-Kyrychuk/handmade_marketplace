@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchIcon } from "@/assets/Icons";
-import InputField from "@/UI/Input/InputField";
+import InputField from "@/shared/UI/Input/InputField";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
