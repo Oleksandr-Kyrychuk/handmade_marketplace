@@ -1,16 +1,12 @@
-import { payTypes } from "@/shared/data/PayMethods";
 import Image from "next/image";
+import { payTypes } from "@/shared/data/PayMethods";
 
 function PayMethods() {
   return (
     <div className="payMethods">
       <div className="payMethods__items flex items-center gap-3">
         {payTypes.map(pay => (
-          <div className="payMethods__item" key={pay.id}>
-            <span>
-              <Image src={pay.icon} alt={pay.label} title={pay.label} />
-            </span>
-          </div>
+          <Image key={pay.id} src={pay.icon} alt={pay.label} title={pay.label} width={32} height={55} />
         ))}
       </div>
     </div>

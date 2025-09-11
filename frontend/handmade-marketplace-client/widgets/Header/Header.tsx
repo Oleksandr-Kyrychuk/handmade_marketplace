@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { HeaderTop, HeaderBottom, Menu } from '.';
 
-import HeaderBottom from "@/components/Header/HeaderBottom/HeaderBottom";
-import HeaderTop from "@/components/Header/HeaderTop/HeaderTop";
-import Menu from "@/components/Header/Menu/Menu";
 
 function Header() {
   const [activeHamburger, setActiveHamburger] = useState(false);

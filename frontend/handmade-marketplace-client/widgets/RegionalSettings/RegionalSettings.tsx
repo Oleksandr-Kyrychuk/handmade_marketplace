@@ -26,7 +26,7 @@ function RegionalSettings() {
           options={options}
           dropdownRef={dropdownRef}
           renderOption={(option, handleClick) => (
-            <Link key={option.id} href={option.id} onClick={handleClick} className="px-3 py-2 w-full">{option.label}</Link>
+            <Link key={option.id} href={option.id} onClick={handleClick} className="px-3 py-2 w-full text-primary-900">{option.label}</Link>
           )}
         />
       </div>

@@ -1,12 +1,12 @@
 "use client"
 
-import { getMenuLinks } from "@/shared/data/LayoutData";
 import { useTranslations } from "next-intl";
-import { Link } from "@/shared/i18n/config/navigation";
+import { getMenuLinks } from "@/shared/data/LayoutData";
+import { Link } from "@/shared/i18n";
 
 
 function MenuLinks() {
-  const t = useTranslations('header');
+  const t = useTranslations();
 
   const menuLinks = getMenuLinks();
   return (

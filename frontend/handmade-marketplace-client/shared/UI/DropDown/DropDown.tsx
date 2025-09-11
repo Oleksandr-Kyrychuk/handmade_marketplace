@@ -25,7 +25,7 @@ function DropDown({selectedValue, placeholder, onToggle, isOpen, listClass='', o
                 <li key={option.id} className="flex relative items-center justify-between cursor-pointer rounded-md hover:bg-gray-100"
                 >
                   {renderOption(option, handleClick)}
-                  {isActive && (<CheckIcon className="absolute right-0 top-1/2 -translate-y-1/2 -mt-0.5" width={20} height={20} />)}
+                  {isActive && (<CheckIcon className="absolute right-0 top-1/2 -translate-y-1/2 -mt-0.5 text-primary-900" width={20} height={20} />)}
                 </li>
               )
             })}

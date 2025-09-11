@@ -1,9 +1,8 @@
-import FooterBottom from "@/components/footer/FooterBottom";
-import FooterTop from "@/components/footer/FooterTop";
+import {FooterTop, FooterBottom} from '.';
 
 function Footer() {
   return (
-    <footer>
+    <footer className="bg-primary-900  pt-[80px] pb-4 text-snow">
       <div className="container m-auto px-4">
         <FooterTop />
         <FooterBottom />

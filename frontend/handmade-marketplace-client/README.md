@@ -46,6 +46,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/b
 3. Axios
 4. react-hook-form
 5. vite-plugin-svgr
+6. Swiper slider
 
 
 

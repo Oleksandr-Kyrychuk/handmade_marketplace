@@ -4,8 +4,7 @@ import { iconActive } from '@/shared/maps/SocialIcons';
 import { useTranslations } from 'next-intl';
 import UserIcon from '@/assets/HeaderActions/UserIcon.svg'
 import { Path } from '@/shared/enums/Path';
-import Button from '@/shared/UI/Button/Button';
-import UserMenu from '../UserMenu/UserMenu';
+
 
 function HeaderActions({handleOpenUserMenu}) {
   const t = useTranslations('header.actions');

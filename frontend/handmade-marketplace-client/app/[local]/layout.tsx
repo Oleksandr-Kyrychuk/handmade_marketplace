@@ -1,13 +1,15 @@
-import '@/styles/globals.css'
+import '@/shared/styles/globals.css'
 
-import { routing } from "@/shared/i18n/config/routing";
-import Provider from "@/components/Provider/Provider";
-import { IRootLayoutProps } from "@/shared/types/general-interfaces";
 import { hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { Comfortaa, Nunito } from "next/font/google";
 import { notFound } from "next/navigation";
-import Header from "@/widgets/Header/Header";
+
+import { IRootLayoutProps } from '@/shared/types/general-interfaces';
+import { routing } from '@/shared/i18n';
+import Provider from '@/widgets/Provider/Provider';
+import Header from '@/widgets/Header/Header';
+import Footer from '@/widgets/Footer/Footer';
 
 const comfortaa = Comfortaa({
   variable: "--font-comfortaa",
@@ -47,6 +49,7 @@ async function RootLayout({children, params}: IRootLayoutProps) {
               <main className="main flex-1">
                 {children}
               </main>
+              <Footer />
             </div>
         </Provider>
       </body>

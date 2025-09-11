@@ -1,8 +1,8 @@
 "use client";
 
-import Logo from "@/components/Logo/Logo";
-import RegionalSettings from "@/components/RegionalSettings/RegionalSettings";
-import SearchBlock from "@/components/SearchBlock/SearchBlock";
+import Logo from "@/widgets/Logo/Logo";
+import RegionalSettings from "@/widgets/RegionalSettings/RegionalSettings";
+import SearchBlock from "@/widgets/SearchBlock/SearchBlock";
 import HeaderActions from "../HeaderActions/HeaderActions";
 import { IHeaderBottomProps } from "./types/interfaces";
 
@@ -12,7 +12,7 @@ function HeaderBottom({setActiveHamburger, handleOpenUserMenu}: IHeaderBottomPro
   }
 
   return (
-    <div className='menu-bottom bg-primary-900 py-6'>
+    <div className='menu-bottom bg-primary-900 md:py-6 py-3'>
       <div className='container mx-auto px-4'>
         <div className="menu-bottom__inner flex items-center justify-between xl:gap-6 lg:gap-4">
           <Logo />
