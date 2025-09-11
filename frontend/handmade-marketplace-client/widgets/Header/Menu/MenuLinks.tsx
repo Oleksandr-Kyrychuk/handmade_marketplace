@@ -1,0 +1,23 @@
+"use client"
+
+import { useTranslations } from "next-intl";
+import { getMenuLinks } from "@/shared/data/LayoutData";
+import { Link } from "@/shared/i18n";
+
+
+function MenuLinks() {
+  const t = useTranslations();
+
+  const menuLinks = getMenuLinks();
+  return (
+    <ul className="flex-1 flex lg:flex-row flex-col xl:gap-x-9 lg:gap-x-7 gap-2.5 lg:p-0 p-3.5">
+      {menuLinks?.map(({labelKey, path}) => (
+        <li key={labelKey} className="menu__item">
+          <Link href={path} className="text-size-link-1 py-1.5 duration-500 font-secondary">{t(`navigation.${labelKey}`)}</Link>
+        </li>
+      ))}
+    </ul> 
+  );
+}
+
+export default MenuLinks;

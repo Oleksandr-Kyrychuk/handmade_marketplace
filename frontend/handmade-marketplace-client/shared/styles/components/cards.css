@@ -1,0 +1,16 @@
+
+.card-title-1 {
+  @apply font-generale font-bold text-2xl leading-[100%] tracking-[0px];
+}
+
+.card-title-2 {
+  @apply font-generale font-bold text-base leading-[100%] tracking-[0px];
+}
+
+.card-title-3 {
+  @apply font-secondary font-normal text-base leading-[100%] tracking-[0px];
+}
+
+.card-title-4 {
+  @apply font-secondary font-normal text-xs leading-[100%] tracking-[0px];
+}

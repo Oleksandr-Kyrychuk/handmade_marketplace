@@ -1,0 +1,18 @@
+@layer utilities {
+  .link-title-3 {
+    @apply font-secondary text-base leading-[100%] tracking-[0px];
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: 8%;
+    text-underline-offset: 20%;
+  }
+}
+
+.link-title-1 {
+  @apply font-secondary text-base leading-[100%] tracking-[0px] underline;
+}
+.link-title-2 {
+  @apply font-secondary text-base leading-[100%] tracking-[0px];
+}
+

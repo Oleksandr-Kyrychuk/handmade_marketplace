@@ -1,0 +1,70 @@
+{
+  "header": {
+    "topLinks": {
+      "about": "Про платформу",
+      "contacts": "Контакти",
+      "help": "Допомога",
+      "registration": "Реєстрація"
+    },
+    "actions": {
+      "notification": "Повідомлення",
+      "favorite": "Обране",
+      "basket": "Корзина"
+    },
+    "logIn": "Log In",
+    "category": "Категорія"
+  },
+  "navigation": {
+    "home": "Головна",
+    "masters": "Майстри",
+    "liveAuction": "Live Аукціон",
+    "salehits": "Хіти продаж",
+    "specialPropositions": "Спеціальні пропозиції",
+    "masterClass": "Майстер-класи",
+    "blog": "Блог"
+  },
+  "footer": {
+    "textUnderLogo": "Найкраще для тих, хто цінує унікальність: ручна робота, ексклюзивн історії, теплі емоції.",
+    "socialTitle": "Слідкуйте за нами:",
+    "contactTitle": "Контакти",
+    "payMethodsTitle": "Підтримка платежів",
+    "allRightsReserved": "Всі права захищено",
+    "footerAboutLinks": {
+      "about-platform": "Про платформу",
+      "about-auction": "Про аукціон",
+      "help": "Допомога",
+      "program-loyalty": "Програма лояльності"
+    },
+    "footerInfoLinks": {
+      "payment-delivery": "Оплата і доставка",
+      "return-conditions": "Умови повернення",
+      "basket": "Кошик",
+      "favorite": "Обране"
+    },
+    "footerBottomLink": {
+      "privacyPolicy": "Політика конфіденційності",
+      "agreement": "Згода на обробку персональних даних",
+      "termsOfService": "Умови надання послуг"
+    }
+  },
+  "search": {
+    "placeholder": "Шукати товар, майстра, бренд"
+  },
+  "user-menu": {
+    "navigation": {
+      "getMaster": "Стати майстром",
+      "profile": "Мій профіль",
+      "orders": "Мої замовлення",
+      "goods": "Мої товари",
+      "favorite": "Обране",
+      "notification": "Повідомлення",
+      "reviews": "Відгуки",
+      "settings": "Налаштування",
+      "help": "Допомога",
+      "logout": "Вийти"
+    }
+  },
+  "authorization": {
+    "login": "Вхід"
+  }
+}

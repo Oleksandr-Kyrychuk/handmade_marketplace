@@ -1,0 +1,6 @@
+.button-title-1 {
+  @apply font-secondary text-xl font-bold leading-[100%] tracking-[0px];
+}
+.button-title-2 {
+  @apply font-secondary text-base font-bold leading-[100%] tracking-[0px];
+}

@@ -46,6 +46,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/b
 3. Axios
 4. react-hook-form
 5. vite-plugin-svgr
+6. Swiper slider
 
 
 
@@ -57,3 +58,12 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/b
 5. In all project we use double quotes
 6. 3 props pre line
 7. use tab = 2
+
+
+Feature-Sliced Design
+src/
+ ├─ app/          # Next.js страницы
+ ├─ entities/     # базовые бизнес-сущности (User, Product, Category)
+ ├─ features/     # фичи (Auth, Cart, Auction, Payment)
+ ├─ widgets/      # большие блоки интерфейса (Header, Footer, UserMenu)
+ ├─ shared/       # переиспользуемое (UI, hooks, lib, api, constants, config)
