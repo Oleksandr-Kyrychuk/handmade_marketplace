@@ -19,6 +19,7 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "react-responsive": "^10.0.1",
+    "sass": "^1.92.1",
     "swiper": "^11.2.10",
     "vite-plugin-svgr": "^4.5.0",
     "zustand": "^5.0.8"

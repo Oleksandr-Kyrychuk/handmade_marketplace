@@ -89,9 +89,6 @@
     line-height: var(--leading-130);
     color: var(--color-snow);
   }
-  .pattern-bg {
-    background: url('@/assets/Pattern-bg.svg');
-  }
   .label-onlineAuction {
     background: var(--color-accent-800);
     color: var(--color-snow);
@@ -112,44 +109,15 @@
     font-size: var(--text-size-body-3);
   }
 
-  /* .btn {
-    line-height: var(--leading-100);
-    color: var(--color-snow);
-  }
-  .btn-primary:focus {
-    background: var(--color-primary-700);
-    transition: 0.5s;
-  }
-  .btn-primary:disabled {
-    background: var(--color-primary-300);
-  }
-
-  .btn-secondary {
-    background: var(--color-accent-700);
-    color: var(--color-snow);
-    transition: 0.5s;
-  }
-  .btn-secondary:hover {
-    background: var(--color-accent-600);
-    color: var(--color-snow);
-    box-shadow: var(--shadow-custom1);
-    transition: 0.5s;
-  }
-  .btn-secondary:focus {
-    background: var(--color-accent-500);
-    color: var(--color-snow);
-    transition: 0.5s;
-  }
-  .btn-secondary:disabled {
-    background: var(--color-accent-300);
-  } */
-
-  /* button,
-  a {
-    font-family: var(--font-secondary);
-  } */
   .rounded-5xl {
     border-radius: var(--radius-5xl);
   }
 
+}
+
+
+@layer utilities {
+  .pattern-bg {
+    background: url('/images/Pattern-bg.svg');
+  }
 }

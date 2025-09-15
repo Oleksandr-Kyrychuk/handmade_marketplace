@@ -1,7 +1,7 @@
 {
   "header": {
     "topLinks": {
-      "about": "AboutAbout the platform",
+      "about": "About the platform",
       "contacts": "Contacts",
       "help": "Help",
       "registration": "Registration"
@@ -47,8 +47,35 @@
       "termsOfService": "Terms of Service"
     }
   },
+  "promo-slider": {
+    "block1": {
+      "title": "Discover the world of unique products",
+      "description": {
+        "p1": "Choose what really matters! Buy or sell handmade products.",
+        "p2": "Support craftsmen, create unique gifts, and find something valuable for you and your loved ones."
+      },
+      "stats": {
+        "products": "Products",
+        "auctions": "Auctions",
+        "craftsmen": "Craftsmen"
+      }
+    },
+    "block2": {
+      "title": "Your guide in the handmade world",
+      "description": {
+        "p1": "Not sure where to start? We’ll help you figure everything out step by step.",
+        "p2": "Visit the 'About the Platform' section to learn our story, or go to the 'Help' page if you need support right away."
+      }
+    }
+  },
   "search": {
     "placeholder": "Search for product, craftsman, brand"
+  },
+  "buttons": {
+    "registration": "Registration",
+    "auction": "Auction",
+    "about": "About the platform",
+    "help": "Help"
   },
   "user-menu": {
     "navigation": {
