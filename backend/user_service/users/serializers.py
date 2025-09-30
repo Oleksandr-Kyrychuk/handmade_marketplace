@@ -15,6 +15,7 @@ from django.utils.timezone import now
 from datetime import timedelta
 import logging
 from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.tokens import RefreshToken
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar']
+
+    def validate_avatar(self, value):
+        max_size = 5 * 1024 * 1024  # 5MB
+        if value.size > max_size:
+            raise ValidationError("Розмір зображення не повинен перевищувати 5MB.")
+        valid_types = ['image/png', 'image/jpeg']
+        if value.content_type not in valid_types:
+            raise ValidationError("Дозволені формати: PNG, JPEG.")
+        return value
 
     def update(self, instance, validated_data):
         if 'avatar' in validated_data:

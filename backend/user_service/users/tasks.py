@@ -18,10 +18,18 @@ def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(email_regex, email))
 
+def mask_email(email: str) -> str:
+    """Маскує email для логів: te***@gmail.com"""
+    try:
+        local, domain = email.split("@")
+        return local[:2] + "***@" + domain
+    except Exception:
+        return "***"
+
 def is_throttled(email, action):
     key = f"email_{action}_{email}"
     if cache.get(key):
-        logger.warning(f"Email throttled for {action} to {email}")
+        logger.warning(f"Throttling triggered for action='{action}' user='{mask_email(email)}'")
         return True
     cache.set(key, True, timeout=60)  # Блокування на 1 хвилину
     return False
@@ -42,7 +50,7 @@ def delete_unverified_users():
             else:
                 logger.info("No unverified users found for deletion.")
     except Exception as e:
-        logger.error(f"Error deleting unverified users: {str(e)}")
+        logger.exception("Error deleting unverified users")  # exception = автоматично traceback
         send_mail(
             'Critical Error in Celery Task',
             f"Error in delete_unverified_users: {str(e)}",
@@ -57,7 +65,7 @@ def send_verification_email(user_id):
         with transaction.atomic():
             user = User.objects.get(pk=user_id)
             if not is_valid_email(user.email):
-                logger.warning(f"Invalid email format for user {user.id}: {user.email}")
+                logger.warning(f"Invalid email format for user_id={user.id}")
                 return
             if is_throttled(user.email, 'verify'):
                 return
@@ -65,10 +73,8 @@ def send_verification_email(user_id):
             token = default_token_generator.make_token(user)
             user.verification_token_created_at = now()
             user.save()
+
             verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}"
-            # print для дебагу:
-            logger = logging.getLogger('users.tasks')
-            logger.info(f"Verification URL for user {user.email}: {verification_url}")
 
             send_mail(
                 'Підтвердження email',
@@ -79,9 +85,9 @@ def send_verification_email(user_id):
                 [user.email],
                 fail_silently=False,
             )
-            logger.info(f"Verification email sent to {user.email}")
+            logger.info(f"Verification email sent to user_id={user.id}, email={mask_email(user.email)}")
     except Exception as e:
-        logger.error(f"Error sending verification email to user {user_id}: {str(e)}")
+        logger.exception(f"Error sending verification email to user_id={user_id}")
         send_mail(
             'Error Sending Verification Email',
             f"Error sending verification email to user {user_id}: {str(e)}",
@@ -96,13 +102,14 @@ def send_password_reset_email(user_id):
         with transaction.atomic():
             user = User.objects.get(pk=user_id)
             if not is_valid_email(user.email):
-                logger.warning(f"Invalid email format for user {user.id}: {user.email}")
+                logger.warning(f"Invalid email format for user_id={user.id}")
                 return
             if is_throttled(user.email, 'reset'):
                 return
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             reset_url = f"{settings.FRONTEND_URL}/password-reset-confirm/{uid}/{token}"
+
             send_mail(
                 'Скидання пароля',
                 f'Вітаємо, {user.username}!\n\n'
@@ -112,9 +119,9 @@ def send_password_reset_email(user_id):
                 [user.email],
                 fail_silently=False,
             )
-            logger.info(f"Password reset email sent to {user.email}")
+            logger.info(f"Password reset email sent to user_id={user.id}, email={mask_email(user.email)}")
     except Exception as e:
-        logger.error(f"Error sending password reset email to user {user_id}: {str(e)}")
+        logger.exception(f"Error sending password reset email to user_id={user_id}")
         send_mail(
             'Error Sending Password Reset Email',
             f"Error sending password reset email to user {user_id}: {str(e)}",
