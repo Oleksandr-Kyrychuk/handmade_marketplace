@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
+import environ
+
+from backend.api_gateway.app.settings import REST_FRAMEWORK
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g*hasu)ak(rfn!^-tte@l4)*)y6^+qyj_3tzcvd_up!#xdrg)x'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
+    'rest_framework',
+    'django-filters',
+    'drf-spectacular',
+    'cloudinary',
+    'products',
 ]
 
 MIDDLEWARE = [
@@ -47,7 +57,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'product_service.middleware.AuthMiddleware'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHINTIFICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
+    'DEFAULT_SCHEMA_CLSS': ['drf_spectacular.openapi.AutoSchema'],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': ['rest_framework.pagination.PageNumberPagination'],
+    'PAGE_SIZE': 50,
+
+}
 
 ROOT_URLCONF = 'product_service.urls'
 
@@ -75,9 +96,64 @@ WSGI_APPLICATION = 'product_service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('PRODUCT_DB_NAME', default = 'marketplace'),
+        'USER': env('PRODUCT_DB_USER', default = 'dev'),
+        'PASSWORD': env('PRODUCT_DB_PASSWORD', default = 'sysadmin'),
+        'HOST': env('PRODUCT_DB_HOST', default = 'marketplace-database'),
+        'PORT': env('PRODUCT_DB_PORT', default = '5432'),
+        'OPTIONS': {
+            'options': '-c search_path:product_schema'
+        },
+
+
     }
+}
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUD_NAME', default='your-cloudinary-cloud-name'),
+    'API_KEY': env('API_KEY', default='your-cloudinary-api-key'),
+    'API_SECRET': env('API_SECRET', default='your-cloudinary-api-secret'),
+}
+
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://redis:6379/1')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://redis:6379/1')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+USER_SERVICE_URL = env('USER_SERVICE_URL', default='http://user-service:8001')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'sensitive_data': {
+            '()': 'products.log_filters.SensitiveDataFilter',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/product_service.log'),
+            'filters': ['sensitive_data'],
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'filters': ['sensitive_data'],
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
 
 

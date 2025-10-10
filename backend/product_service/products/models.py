@@ -1,3 +1,130 @@
 from django.db import models
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import ArrayField
+from cloudinary.models import CloudinaryField
+from django.util.text import slugify
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField, SearchVector
+from django.db import transactions
 
-# Create your models here.
+name_validator = RegexValidator(
+    regex=r'^[A-Za-zА-Яа-я0-9\s\-\']+$',
+    message="Назва продукту може містити літери, цифри, пробіли, дефіси та одинарні лапки",
+    code='invalid_product_name'
+)
+
+class Category(models.Model):
+    name = models.CharField(max_lenght=255, unique=True)
+    parent = models.ForeignKey('self', null=True, on_delete=models.SET_NULL, db_index=True)
+    category_image = CloudinaryField('image', blank=True, null=True)
+    category_href = models.SlugField(max_length=255, unique=True, blank=True)
+    search_vector = SearchVectorField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.category_href:
+            self.category_href = slugify(self.name)
+            if not self.category_href:
+                self.category_href = f"category={self.id or Category.objects.count() + 1}"
+            base_href = self.category_href
+            counter = 1
+            while Category.objects.filter(category_href=self.category_href).exclude(id=self.id).exist():
+                self.category_href = f"{base_href}-{counter}"
+                counter += 1
+
+        super().save(*args, **kwargs)
+        Category.objects.filter(pk=self.pk).update(
+            search_vector=SearchVector('name', weight='A', config='ukrainian')
+        )
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+        indexes = [
+            GinIndex(fields=['search_vector'], name='category_search_idx'),
+        ]
+
+class Product(models.Model):
+    SALE_TYPE_CHOICES = [
+        ('fixed', 'Fixed Price'),
+        ('auction', 'Auction')
+    ]
+
+    vendor_id = models.IntegerField(db_index=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255, db_index=True, validators=[name_validator])
+    description = models.TextField(blank=True)
+    sale_type = models.CharField(max_length=10, choises=SALE_TYPE_CHOICES, default='fixed', db_index=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,db_index=True)
+    discount_price = models.DecimalField(max_degets=10, decimal_places=2, null=True, blank=True, db_index=True)
+    start_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    auction_end_time = models.DateTimeField(null=True, blank=True, db_index=True)
+    stock = models.PositiveIntegerField(default=0, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    product_href = models.SlugField(max_length=255, unique=True, blank=True)
+    rating_count = models.PositiveIntegerField(default=0, index_db=True)
+    search_vector = SearchVectorField(null=True, blank=True)
+    is_approved = models.BooleanField(default=False, db_index=True)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if not self.name.strip():
+                raise ValueError("Назва продукту не може бути порожньою")
+            if not self.product_href:
+                self.product_href = slugify(self.name)
+                if not self.product_href:
+                    self.product_href = f"product-{self.id or Product.objects.count() + 1}"
+                base_href = self.product_href
+                counter = 1
+                while Product.objects.filter(product_href=self.product_href).exclude(id=self.id).exists():
+                    self.product_href = f"{base_href}-{counter}"
+                    counter += 1
+            if self.sale_type == 'fixed' and self.discount_price is not None:
+                if self.price is None:
+                    raise ValueError("Для типу продаж fixed ціна обовязкова якщо вказана знижка")
+                if self.discount_price > self.price:
+                    raise ValueError("Знижена ціна не може бути більшою за звичайну")
+            if self.sale_type == 'auction' and self.discount_price is not None:
+                self.discount_price = None
+            super().save(*args, **kwargs)
+            Product.objects.filter(pk=self.pk).update(
+                search_vector=(
+                    SearchVector('name', weight='A', config='ukrainian') +
+                    SearchVector('description', weight='B', config='ukrainian')
+                )
+            )
+
+        def is_available(self):
+            return self.stock > 0 and self.is_approved
+
+        class Meta:
+            indexes = [
+                GinIndex(fields=['search_vector'], name='product_search_idx'),
+            ]
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user_id = models.IntegerField(db_index=True)
+    image_url = models.URLField(null=True, blank=True)
+    image = CloudinaryField('image', null=True, blank=True)
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user_id = models.IntegerField(db_index=True)
+    rating = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        db_index=True
+    )
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    is_approved = models.BooleanField(default=False, db_index=True)
+
+    def save(self, *args, ** kwargs):
+        super().save(*args, **kwargs)
+        self.product.rating_count = self.product.reviews.filter(is_approved=True).count()
+        self.product.save(update_fields=['rating_count'])
+
+    def delete(self, *args, **kwargs):
+        product = self.product
+        super().delete(*args, **kwargs)
+        product.rating_count = product.reviews.filter(is_approved=True).count()
+        product.save(update_fields=['rating_count'])
