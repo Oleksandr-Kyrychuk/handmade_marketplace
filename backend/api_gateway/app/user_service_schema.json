@@ -1,0 +1,1122 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "User Service API",
+    "version": "1.0.0",
+    "description": "API for User Service in Handmade Marketplace"
+  },
+  "paths": {
+    "/health/": {
+      "get": {
+        "operationId": "health_retrieve",
+        "summary": "\u041f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0430 \u0437\u0434\u043e\u0440\u043e\u0432'\u044f \u0441\u0435\u0440\u0432\u0456\u0441\u0456\u0432",
+        "tags": [
+          "health"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            },
+            "description": ""
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/login/": {
+      "post": {
+        "operationId": "login_create",
+        "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
+        "summary": "\u041b\u043e\u0433\u0456\u043d \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430",
+        "tags": [
+          "login"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/logout/": {
+      "post": {
+        "operationId": "logout_create",
+        "summary": "\u041b\u043e\u0433\u0430\u0443\u0442 \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430",
+        "tags": [
+          "logout"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/password-reset/": {
+      "post": {
+        "operationId": "password_reset_create",
+        "summary": "\u0417\u0430\u043f\u0438\u0442 \u043d\u0430 \u0441\u043a\u0438\u0434\u0430\u043d\u043d\u044f \u043f\u0430\u0440\u043e\u043b\u044e",
+        "tags": [
+          "password-reset"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetRequest"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/password-reset-confirm/{uidb64}/{token}/": {
+      "post": {
+        "operationId": "password_reset_confirm_create",
+        "summary": "\u041f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043d\u043d\u044f \u0441\u043a\u0438\u0434\u0430\u043d\u043d\u044f \u043f\u0430\u0440\u043e\u043b\u044e",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "uidb64",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "password-reset-confirm"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirm"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirm"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetConfirm"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/profile/": {
+      "get": {
+        "operationId": "profile_retrieve",
+        "tags": [
+          "profile"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "profile_update",
+        "tags": [
+          "profile"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfile"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfile"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "profile_partial_update",
+        "tags": [
+          "profile"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserProfile"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserProfile"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/register/": {
+      "post": {
+        "operationId": "register_create",
+        "summary": "\u0420\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430",
+        "tags": [
+          "register"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Register"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/resend-verification/": {
+      "post": {
+        "operationId": "resend_verification_create",
+        "summary": "\u041f\u043e\u0432\u0442\u043e\u0440\u043d\u0430 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0430 \u043a\u043e\u0434\u0443 \u0432\u0435\u0440\u0438\u0444\u0456\u043a\u0430\u0446\u0456\u0457",
+        "tags": [
+          "resend-verification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationCode"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationCode"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationCode"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendVerificationCode"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/token/refresh/": {
+      "post": {
+        "operationId": "token_refresh_create",
+        "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+        "summary": "\u041e\u043d\u043e\u0432\u043b\u0435\u043d\u043d\u044f \u0442\u043e\u043a\u0435\u043d\u0443",
+        "tags": [
+          "token"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRefresh"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRefresh"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRefresh"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenRefresh"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users-list": {
+      "get": {
+        "operationId": "users_list_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "created_after",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "created_before",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_verified",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roles",
+            "schema": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "admin",
+                  "user"
+                ],
+                "type": "string",
+                "description": "* `user` - User\n* `admin` - Admin"
+              }
+            },
+            "description": "* `user` - User\n* `admin` - Admin"
+          },
+          {
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "users-list"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedUserList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users-list/{id}": {
+      "get": {
+        "operationId": "users_list_retrieve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "users-list"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "users_list_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "users-list"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "users_list_partial_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "users-list"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUser"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUser"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUser"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "users_list_destroy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "users-list"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/verify-email/{uidb64}/{token}/": {
+      "get": {
+        "operationId": "verify_email_retrieve",
+        "summary": "\u041f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043d\u043d\u044f email",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "uidb64",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "verify-email"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyEmail"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "services": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "required": [
+          "services",
+          "status"
+        ]
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "PaginatedUserList": {
+        "type": "object",
+        "required": [
+          "count",
+          "results"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "PasswordResetConfirm": {
+        "type": "object",
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "confirm_password": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "confirm_password",
+          "new_password"
+        ]
+      },
+      "PasswordResetRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "PatchedUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri",
+            "writeOnly": true
+          }
+        }
+      },
+      "PatchedUserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Register": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "username": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "password_confirm": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "password_confirm",
+          "surname",
+          "username"
+        ]
+      },
+      "ResendVerificationCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "RolesEnum": {
+        "enum": [
+          "user",
+          "admin"
+        ],
+        "type": "string",
+        "description": "* `user` - User\n* `admin` - Admin"
+      },
+      "TokenRefresh": {
+        "type": "object",
+        "properties": {
+          "access": {
+            "type": "string",
+            "readOnly": true
+          },
+          "refresh": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "access",
+          "refresh"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "surname",
+          "username"
+        ]
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "pattern": "^(?!-)([A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457 \\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "surname",
+          "username"
+        ]
+      },
+      "VerifyEmail": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "uid"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "jwtAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

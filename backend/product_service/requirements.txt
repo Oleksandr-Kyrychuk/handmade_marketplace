@@ -8,3 +8,9 @@ redis==5.0.8
 cloudinary==1.41.0
 requests==2.32.3
 django-environ==0.11.2
+gunicorn==22.0.0
+dj_database_url
+django-cors-headers
+djangorestframework-simplejwt
+django-celery-beat
+
