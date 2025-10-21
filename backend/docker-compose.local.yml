@@ -13,8 +13,9 @@ services:
       - REDIS_URL=redis://redis:6379/1
       - FRONTEND_URL=http://localhost:5173
       - USER_SERVICE_URL=http://user-service:8001
-      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,api-gateway
-      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace
+      - PRODUCT_SERVICE_URL=http://product-service:8002
+      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,product-service,api-gateway
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dgateway_schema
       - ENV=local
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
     volumes:
@@ -32,6 +33,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 60s  # Збільшено для стабільності
 
   marketplace-database:
     image: postgres:17-alpine
@@ -55,48 +57,23 @@ services:
     networks:
       - handmade_network
 
-  redis:
-    image: redis:7
-    container_name: marketplace-redis-local
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - handmade_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   user-service:
     build:
       context: ./user_service
       dockerfile: Dockerfile.local
-      args:
-        - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dusers_schema
     container_name: user-service-local
     restart: unless-stopped
     ports:
       - "8001:8001"
     environment:
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-0gos56jbkua+tptfdw5j#(ipe%^%kwt2)ekc@$8!*9++o166wx}
-      - DEBUG=True
-      - REDIS_URL=redis://redis:6379/1
-      - FRONTEND_URL=http://localhost:5173
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
       - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dusers_schema
-      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,api-gateway
+      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,product-service,api-gateway
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
-      - DEFAULT_FROM_EMAIL=noreply@example.com
       - ENV=local
-      - CLOUD_NAME=${CLOUD_NAME:-your-cloudinary-cloud-name}
-      - USER_SERVICE_URL=http://user-service:8001
-      - API_KEY=${API_KEY:-your-cloudinary-api-key}
-      - API_SECRET=${API_SECRET:-your-cloudinary-api-secret}
     volumes:
       - ./user_service:/app
       - ./user_service/logs:/app/logs
@@ -120,9 +97,9 @@ services:
       dockerfile: Dockerfile.local
     container_name: user-service-celery-local
     restart: unless-stopped
-    command: sh entrypoint-celery.sh
+    command: sh ./entrypoint-celery.sh  # Явно вказуємо entrypoint-celery.sh
     environment:
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-0gos56jbkua+tptfdw5j#(ipe%^%kwt2)ekc@$8!*9++o166wx}
+      - SECRET_KEY=${SECRET_KEY}
       - REDIS_URL=redis://redis:6379/1
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
@@ -134,6 +111,83 @@ services:
         condition: service_healthy
       marketplace-database:
         condition: service_healthy
+    networks:
+      - handmade_network
+
+  product-service:
+    build:
+      context: ./product_service
+      dockerfile: Dockerfile.local
+    container_name: product-service-local
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dproducts_schema
+      - ALLOWED_HOSTS=localhost,127.0.0.1,user-service,product-service,api-gateway
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+      - ENV=local
+      - CLOUD_NAME=${CLOUD_NAME:-your-cloudinary-cloud-name}
+      - API_KEY=${API_KEY:-your-cloudinary-api-key}
+      - API_SECRET=${API_SECRET:-your-cloudinary-api-secret}
+      - USER_SERVICE_URL=http://user-service:8001
+    volumes:
+      - ./product_service:/app
+      - ./product_service/logs:/app/logs
+    depends_on:
+      marketplace-database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - handmade_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://product-service:8002/health || exit 1"]
+      interval: 10s
+      timeout: 20s
+      retries: 10
+      start_period: 120s
+
+  product-service-celery:
+    build:
+      context: ./product_service
+      dockerfile: Dockerfile.local
+    container_name: product-service-celery-local
+    restart: unless-stopped
+    command: sh ./entrypoint-celery.sh  # Явно вказуємо entrypoint-celery.sh
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DATABASE_URL=postgresql://dev:sysadmin@marketplace-database:5432/marketplace?options=-c%20search_path%3Dproducts_schema
+      - ENV=local
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
+    depends_on:
+      redis:
+        condition: service_healthy
+      marketplace-database:
+        condition: service_healthy
+    networks:
+      - handmade_network
+
+  redis:
+    image: redis:7.4.0-alpine
+    container_name: marketplace-redis-local
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - handmade_network
 

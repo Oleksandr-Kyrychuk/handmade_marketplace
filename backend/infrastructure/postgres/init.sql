@@ -1,21 +1,22 @@
--- init.sql
--- Базовий файл для ініціалізації бази даних
--- Тут можна додавати схеми, таблиці та індекси
--- Поки що залишаємо порожнім для міграцій
+-- Ініціалізація бази даних, користувачів і схем
+CREATE USER dev WITH PASSWORD 'sysadmin';
+ALTER USER dev CREATEDB;
+CREATE DATABASE marketplace;
+GRANT ALL PRIVILEGES ON DATABASE marketplace TO dev;
 
--- Приклад створення таблиці (розкоментувати при потребі):
--- CREATE TABLE IF NOT EXISTS users (
---     id SERIAL PRIMARY KEY,
---     username VARCHAR(255) NOT NULL UNIQUE,
---     email VARCHAR(255) NOT NULL UNIQUE,
---     created_at TIMESTAMP DEFAULT now()
--- );
+-- Підключаємося до БД marketplace
+\c marketplace
 
--- Приклад створення індексу (розкоментувати при потребі):
--- CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+-- Створюємо схеми
 CREATE SCHEMA IF NOT EXISTS users_schema;
-   GRANT ALL ON SCHEMA users_schema TO dev;
-   ALTER SCHEMA users_schema OWNER TO dev;
-   GRANT ALL ON ALL TABLES IN SCHEMA users_schema TO dev;
-   GRANT ALL ON ALL SEQUENCES IN SCHEMA users_schema TO dev;
+CREATE SCHEMA IF NOT EXISTS products_schema;
 CREATE SCHEMA IF NOT EXISTS gateway_schema;
+
+-- Надаємо права
+GRANT ALL ON SCHEMA users_schema TO dev;
+GRANT ALL ON SCHEMA products_schema TO dev;
+GRANT ALL ON SCHEMA gateway_schema TO dev;
+
+ALTER SCHEMA users_schema OWNER TO dev;
+ALTER SCHEMA products_schema OWNER TO dev;
+ALTER SCHEMA gateway_schema OWNER TO dev;

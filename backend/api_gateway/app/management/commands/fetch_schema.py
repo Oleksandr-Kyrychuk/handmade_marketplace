@@ -1,25 +1,37 @@
 from django.core.management.base import BaseCommand
-from django.core.cache import cache
+from app.settings import USER_SERVICE_URL, PRODUCT_SERVICE_URL
 import requests
+import json
 import logging
-
-from backend.api_gateway.app.urls import USER_SERVICE_URL
+import time
 
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Fetches and caches OpenAPI schema for user_service'
+    help = 'Fetch OpenAPI schemas from services and save them'
 
-    def handle(self, *args, **options):
-        try:
-            response = requests.get(
-                f'{USER_SERVICE_URL}/schema/',
-                timeout=10
-            )
-            response.raise_for_status()
-            schema = response.json()
-            cache.set('user_service_schema', schema, timeout=3600)
-            self.stdout.write(self.style.SUCCESS('Successfully fetched and cached gateway_service schema'))
-        except requests.RequestException as e:
-            logger.error(f"Failed to fetch user_service schema: {str(e)}")
-            self.stdout.write(self.style.ERROR(f'Failed to fetch gateway_service schema: {str(e)}'))
+    def handle(self, *args, **kwargs):
+        services = {
+            'user_service': USER_SERVICE_URL + '/schema/',
+            'product_service': PRODUCT_SERVICE_URL + '/schema/'
+        }
+        max_retries = 5  # Збільшено кількість спроб
+        retry_delay = 10  # Збільшено затримку
+        timeout = 20  # Збільшено таймаут
+
+        for service_name, schema_url in services.items():
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(schema_url, timeout=timeout)
+                    response.raise_for_status()
+                    schema = response.json()
+                    with open(f'app/{service_name}_schema.json', 'w') as f:
+                        json.dump(schema, f, indent=2)
+                    self.stdout.write(self.style.SUCCESS(f'Successfully fetched schema for {service_name}'))
+                    break
+                except requests.RequestException as e:
+                    logger.error(f'Attempt {attempt + 1} failed for {service_name}: {e}')
+                    if attempt == max_retries - 1:
+                        logger.error(f'Failed to fetch schema for {service_name}: {e}')
+                        self.stdout.write(self.style.WARNING(f'Failed to fetch schema for {service_name}, continuing...'))
+                    time.sleep(retry_delay)
