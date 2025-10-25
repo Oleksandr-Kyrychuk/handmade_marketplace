@@ -82,3 +82,23 @@ super-user:
 super-product:
 	@echo "👤 Створення суперкористувача для product_service..."
 	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service python manage.py createsuperuser
+
+# Очищення користувачів
+flush-user:
+	@echo "Очищення користувачів в user_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user-service python manage.py flush_users
+
+# Заповнення користувачів
+seed-user:
+	@echo "Заповнення користувачів в user_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user-service python manage.py seed_users
+
+# Очищення продуктів
+flush-product:
+	@echo "Очищення продуктів в product_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service python manage.py flush_products
+
+# Заповнення продуктів
+seed-product:
+	@echo "Заповнення продуктів в product_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service python manage.py seed_products
