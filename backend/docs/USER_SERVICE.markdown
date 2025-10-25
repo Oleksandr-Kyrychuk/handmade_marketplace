@@ -74,6 +74,14 @@ User Service відповідає за управління користувач
   ```bash
   make super-user
   ```
+- **Заповнення списку користувачів**:
+  ```bash
+  make seed-user
+  ```
+- **Очищення списку користувачі**:
+  ```bash
+  make flush-user
+  ```
 - **Healthcheck**:
   - `curl --fail http://user-service:8001/health` (10с, таймаут 20с, 10 спроб).
 

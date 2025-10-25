@@ -1,7 +1,7 @@
 # Розгортання
 
 ## 1. Огляд
-Проект розгортається через Docker Compose для локального та продакшн середовищ.
+Проект розгортається через Docker Compose для локального середовища.
 - **API Gateway**: Gunicorn (2 воркери, 2 потоки, `entrypoint.sh`)
 - **Асинхронні задачі**: Celery через Redis
 - **Логи**: файли (`api_gateway/logs`, `user_service/logs`, `product_service/logs`) та консоль
