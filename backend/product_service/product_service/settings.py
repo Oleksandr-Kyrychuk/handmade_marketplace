@@ -5,16 +5,30 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
-if os.getenv('ENV') == 'local':
-    print("Loading .env.local")
-    environ.Env.read_env(os.path.join(BASE_DIR, '.env.local'))
-else:
-    print("Loading .env")
-    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env = environ.Env(
+    DEBUG=(bool, False),
+    SECRET_KEY=(str, 'django-insecure-change-me-in-production!'),
+    DATABASE_URL=(str, 'postgresql://dev:dev@localhost:5432/marketplace'),
+    USER_SERVICE_URL=(str, 'http://user-service:8001'),
+    CLOUD_NAME=(str, 'cloudinary-cloud-name'),
+    API_KEY=(str, 'cloudinary-api-key'),
+    API_SECRET=(str, 'cloudinary-api-secret'),
+    REDIS_URL=(str, 'redis://redis:6379/1'),
+    CORS_ALLOWED_ORIGINS=(str, 'http://localhost:5173,http://localhost:3000'),
+)
 
+# Читаємо .env файл,, якщо він є
+env_path = BASE_DIR / ('.env.local' if os.getenv('ENV') == 'local' else '.env')
+if env_path.exists():
+    print(f"Loading {env_path.name}")
+    environ.Env.read_env(str(env_path))
+else:
+    print(f"{env_path.name} not found — using Docker environment variables")
+
+# Тепер читаємо змінні
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG', default=False)
+DEBUG = env('DEBUG')
+USER_SERVICE_URL = env('USER_SERVICE_URL')  # тепер працює і з Docker!
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 

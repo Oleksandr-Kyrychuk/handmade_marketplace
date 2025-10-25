@@ -70,6 +70,16 @@ Product Service управляє продуктами, категоріями, �
   ```bash
   make super-product
   ```
+- **Заповнення продуктів і категорій**:
+  ```bash
+  make seed-product
+  ```
+- **Очищення продуктів і категорій**:
+  ```bash
+  make flush-product
+  ```
+  
+
 - **Healthcheck**:
   - Команда: `curl --fail http://product-service:8002/health`.
   - Інтервал: 10с, таймаут: 20с, 10 спроб, період запуску: 120с.

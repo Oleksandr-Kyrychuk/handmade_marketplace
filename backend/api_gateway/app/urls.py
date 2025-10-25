@@ -125,8 +125,9 @@ class ProxyView(APIView):
     def handle_request(self, request, path):
         path = path.strip('/')
 
-        if path.startswith('users'):
-            target_url = f'{settings.USER_SERVICE_URL}/{path}'
+        if path.startswith('users/'):
+            target_path = path[6:]  # 6 символів = len('users/')
+            target_url = f'{settings.USER_SERVICE_URL}/{target_path}'
             service_name = 'user_service'
         elif path.startswith('products') or path.startswith('moderation'):
             target_url = f'{settings.PRODUCT_SERVICE_URL}/{path}'
@@ -135,7 +136,14 @@ class ProxyView(APIView):
             logger.warning(f"No microservice for path: {path}")
             return Response({'error': f'No microservice available for path: {path}'}, status=503)
 
-        headers = {k: v for k, v in request.headers.items() if k.lower() not in ('host', 'content-length', 'connection', 'transfer-encoding')}
+        headers = {
+            k: v for k, v in request.headers.items()
+            if k.lower() not in ('host', 'content-length', 'connection', 'transfer-encoding')
+        }
+
+        # Додаємо Content-Length, якщо є body
+        if request.body:
+            headers['Content-Length'] = str(len(request.body))
 
         try:
             resp = requests.request(

@@ -31,7 +31,7 @@ class Category(models.Model):
 
         super().save(*args, **kwargs)
         Category.objects.filter(pk=self.pk).update(
-            search_vector=SearchVector('name', weight='A', config='ukrainian')
+            search_vector=SearchVector('name', weight='A', config='simple')
         )
 
     class Meta:
@@ -90,8 +90,8 @@ class Product(models.Model):
             super().save(*args, **kwargs)
             Product.objects.filter(pk=self.pk).update(
                 search_vector=(
-                    SearchVector('name', weight='A', config='ukrainian') +
-                    SearchVector('description', weight='B', config='ukrainian')
+                        SearchVector('name', weight='A', config='simple') +
+                        SearchVector('description', weight='B', config='simple')
                 )
             )
 

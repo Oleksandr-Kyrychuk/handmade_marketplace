@@ -70,6 +70,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise ValidationError({"password": _("Пароль має містити принаймні один спеціальний символ.")})
         return data
 
+    def create(self, validated_data):
+        validated_data.pop('password_confirm', None)  # видаляємо зайве поле
+        password = validated_data.pop('password')
+        user = User.objects.create_user(password=password, **validated_data)
+        return user
+
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

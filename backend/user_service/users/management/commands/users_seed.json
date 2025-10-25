@@ -1,0 +1,242 @@
+[
+  {
+    "email": "anna.handmade@example.com",
+    "username": "Анна",
+    "surname": "Коваль",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "petro.crafts@example.com",
+    "username": "Петро",
+    "surname": "Сидоренко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "olga.artisan@example.com",
+    "username": "Ольга",
+    "surname": "Мельник",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "ivan.maker@example.com",
+    "username": "Іван",
+    "surname": "Бондар",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "maria.designer@example.com",
+    "username": "Марія",
+    "surname": "Левченко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "kateryna.shevchenko@example.com",
+    "username": "Катерина",
+    "surname": "Шевченко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "dmytro.kozak@example.com",
+    "username": "Дмитро",
+    "surname": "Козак",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "yulia.novak@example.com",
+    "username": "Юлія",
+    "surname": "Новак",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "mykola.hrytsenko@example.com",
+    "username": "Микола",
+    "surname": "Гриценко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "olena.moroz@example.com",
+    "username": "Олена",
+    "surname": "Мороз",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "viktor.kucher@example.com",
+    "username": "Віктор",
+    "surname": "Кучер",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "natalia.glushko@example.com",
+    "username": "Наталія",
+    "surname": "Глушко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "serhii.tarasenko@example.com",
+    "username": "Сергій",
+    "surname": "Тарасенко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "inna.poliakova@example.com",
+    "username": "Інна",
+    "surname": "Полякова",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "andriy.pavlenko@example.com",
+    "username": "Андрій",
+    "surname": "Павленко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "sofiya.horbach@example.com",
+    "username": "Софія",
+    "surname": "Горбач",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "bohdan.lysenko@example.com",
+    "username": "Богдан",
+    "surname": "Лисенко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "iryna.marchenko@example.com",
+    "username": "Ірина",
+    "surname": "Марченко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "maksym.borys@example.com",
+    "username": "Максим",
+    "surname": "Борис",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "oksana.dudko@example.com",
+    "username": "Оксана",
+    "surname": "Дудко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "roman.fedorenko@example.com",
+    "username": "Роман",
+    "surname": "Федоренко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "kristina.bondarenko@example.com",
+    "username": "Кристина",
+    "surname": "Бондаренко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "yevhen.sokolov@example.com",
+    "username": "Євген",
+    "surname": "Соколов",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "larysa.kovalchuk@example.com",
+    "username": "Лариса",
+    "surname": "Ковальчук",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "pavlo.shevchuk@example.com",
+    "username": "Павло",
+    "surname": "Шевчук",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "viktoriia.zaitseva@example.com",
+    "username": "Вікторія",
+    "surname": "Зайцева",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "oleksii.danylchenko@example.com",
+    "username": "Олексій",
+    "surname": "Данильченко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "tamara.khomenko@example.com",
+    "username": "Тамара",
+    "surname": "Хоменко",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "artem.melnyk@example.com",
+    "username": "Артем",
+    "surname": "Мельник",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  },
+  {
+    "email": "daryna.kravets@example.com",
+    "username": "Дарина",
+    "surname": "Кравець",
+    "password": "StrongPass123!",
+    "roles": ["user"],
+    "is_verified": true
+  }
+]
