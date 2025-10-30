@@ -160,6 +160,7 @@ services:
     restart: unless-stopped
     command: sh ./entrypoint-celery.sh  # Явно вказуємо entrypoint-celery.sh
     environment:
+      - SERVICE_TYPE=celery
       - SECRET_KEY=${SECRET_KEY}
       - REDIS_URL=redis://redis:6379/1
       - CELERY_BROKER_URL=redis://redis:6379/1

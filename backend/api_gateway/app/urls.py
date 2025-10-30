@@ -2,6 +2,7 @@ import logging
 from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
@@ -18,6 +19,31 @@ import time
 import redis
 
 logger = logging.getLogger(__name__)
+
+
+class RootView(APIView):
+    def get(self, request):
+        user_schema = cache.get('user_service_schema', {})
+        product_schema = cache.get('product_service_schema', {})
+
+        def extract_paths(schema):
+            return list(schema.get('paths', {}).keys()) if schema else []
+
+        available_services = {
+            "user_service": extract_paths(user_schema),
+            "product_service": extract_paths(product_schema)
+        }
+
+        return Response({
+            "gateway": "Handmade Marketplace Gateway",
+            "available_services": available_services,
+            "docs": {
+                "user_service": "/swagger-ui?urls.primaryName=User",
+                "product_service": "/swagger-ui?urls.primaryName=Product"
+            }
+        })
+
+
 
 # ============================
 # Health check for gateway
@@ -191,6 +217,8 @@ class ProxyView(APIView):
 
 
 urlpatterns = [
+    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+    path('', RootView.as_view(), name='root'),
     path('health', HealthCheckView.as_view(), name='health'),
     path('schema', MergedSchemaView.as_view(), name='schema'),
     path('swagger-ui', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

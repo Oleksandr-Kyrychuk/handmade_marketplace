@@ -13,4 +13,5 @@ COPY . .
 RUN chmod +x entrypoint.sh entrypoint-celery.sh
 
 # Використовуємо entrypoint
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT []
+CMD ["./entrypoint.sh"]
