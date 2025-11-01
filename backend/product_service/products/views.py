@@ -32,6 +32,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Авторизація обов'язкова")
         serializer.save(vendor_id=self.request.user.id, is_approved=False)
 
     def perform_update(self, serializer):
