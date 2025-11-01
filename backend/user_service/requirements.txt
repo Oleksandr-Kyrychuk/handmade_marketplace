@@ -17,4 +17,5 @@ django-celery-beat==2.7.0
 whitenoise
 django-redis==5.4.0
 dj_rest_auth
+djangorestframework-recursive
 

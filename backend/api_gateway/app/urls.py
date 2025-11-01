@@ -149,18 +149,22 @@ class ProxyView(APIView):
 
     @extend_schema(exclude=True)
     def handle_request(self, request, path):
-        path = path.strip('/')
-
-        if path.startswith('users/'):
-            target_path = path[6:]  # 6 символів = len('users/')
-            target_url = f'{settings.USER_SERVICE_URL}/{target_path}'
-            service_name = 'user_service'
-        elif path.startswith('products') or path.startswith('moderation'):
-            target_url = f'{settings.PRODUCT_SERVICE_URL}/{path}'
+        # === МАРШРУТИЗАЦІЯ ===
+        if path.startswith('products/') or path == 'products':
             service_name = 'product_service'
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/{path}"
+        elif path.startswith('users/') or path == 'users':
+            service_name = 'user_service'
+            clean_path = path.replace('users/', '', 1)
+            target_url = f"{settings.USER_SERVICE_URL}/{clean_path}"
+        elif path.startswith('moderation/'):
+            service_name = 'product_service'
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/{path}"
         else:
-            logger.warning(f"No microservice for path: {path}")
-            return Response({'error': f'No microservice available for path: {path}'}, status=503)
+            return Response(
+                {'error': f'No microservice available for path: {path}'},
+                status=404
+            )
 
         headers = {
             k: v for k, v in request.headers.items()

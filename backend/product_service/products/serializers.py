@@ -88,16 +88,30 @@ class ProductSerializer(serializers.ModelSerializer):
         }
 
     def get_vendor(self, obj) -> dict:
+        request = self.context.get('request')
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '') if request else ''
+
+        # Якщо немає токена — повертаємо тільки ID
+        if not auth_header:
+            return {"id": obj.vendor_id}
+
         try:
             response = requests.get(
                 f"{settings.USER_SERVICE_URL}/api/users/{obj.vendor_id}/",
-                headers={'Authorization': self.context['request'].META.get('HTTP_AUTHORIZATION', '')},
-                timeout=5
+                headers={'Authorization': auth_header},
+                timeout=3
             )
-            response.raise_for_status()
-            return response.json()
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "id": obj.vendor_id,
+                    "username": data.get("username", "unknown"),
+                    "email": data.get("email", "")
+                }
+            else:
+                return {"id": obj.vendor_id}
         except requests.RequestException as e:
-            logger.error(f"Error fetching vendor data for product {obj.id}: {str(e)}")
+            logger.warning(f"Failed to fetch vendor {obj.vendor_id}: {e}")
             return {"id": obj.vendor_id}
 
     def get_isAvailable(self, obj) -> bool:
@@ -130,16 +144,25 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_at', 'is_approved']
 
     def get_user(self, obj) -> dict:
+        request = self.context.get('request')
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '') if request else ''
+
+        if not auth_header:
+            return {"id": obj.user_id}
+
         try:
             response = requests.get(
                 f"{settings.USER_SERVICE_URL}/api/users/{obj.user_id}/",
-                headers={'Authorization': self.context['request'].META.get('HTTP_AUTHORIZATION', '')},
-                timeout=5
+                headers={'Authorization': auth_header},
+                timeout=3
             )
-            response.raise_for_status()
-            return response.json()
+            if response.status_code == 200:
+                data = response.json()
+                return {"id": obj.user_id, "username": data.get("username", "unknown")}
+            else:
+                return {"id": obj.user_id}
         except requests.RequestException as e:
-            logger.error(f"Error fetching user data for review {obj.id}: {str(e)}")
+            logger.warning(f"Failed to fetch user {obj.user_id}: {e}")
             return {"id": obj.user_id}
 
     def validate(self, data):
