@@ -15,8 +15,8 @@ from django.dispatch import receiver
 from cloudinary.models import CloudinaryField
 from django.contrib.postgres.search import SearchVector
 name_validator = RegexValidator(
-    regex=r'^(?!-)[A-Za-zА-Яа-яїЇіІєЄґҐ-]{1,50}(?<!-)$',
-    message="Ім'я та прізвище можуть містити лише кирилицю, латиницю, дефіс (не на початку чи в кінці).",
+    regex=r'^(?!-)[A-Za-zА-Яа-яїЇіІєЄґҐ]+(-[A-Za-zА-Яа-яїЇіІєЄґҐ]+)*(?<!-)$',
+    message="Ім'я та прізвище: лише літери (кирилиця/латиниця), дефіс не на початку чи в кінці.",
     code='invalid_name'
 )
 
