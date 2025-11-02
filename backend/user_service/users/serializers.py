@@ -60,14 +60,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise ValidationError({"password": _("Паролі не співпадають.")})
 
         password = data['password']
-        if len(password) < 12:
-            raise ValidationError({"password": _("Пароль має бути довжиною щонайменше 12 символів.")})
+        if not (8 <= len(password) <= 16):
+            raise ValidationError({"password": _("Пароль повинен містити від 8 до 16 символів.")})
         if not re.search(r'[A-Z]', password):
             raise ValidationError({"password": _("Пароль має містити принаймні одну велику літеру.")})
         if not re.search(r'[0-9]', password):
             raise ValidationError({"password": _("Пароль має містити принаймні одну цифру.")})
         if not re.search(r'[!@#$%^&*]', password):
-            raise ValidationError({"password": _("Пароль має містити принаймні один спеціальний символ.")})
+            raise ValidationError({"password": _("Пароль має містити принаймні один спеціальний символ: !@#$%^&*")})
         return data
 
     def create(self, validated_data):
@@ -90,14 +90,14 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             raise ValidationError({"new_password": _("Паролі не співпадають.")})
 
         password = data['new_password']
-        if len(password) < 12:
-            raise ValidationError({"new_password": _("Пароль має бути довжиною щонайменше 12 символів.")})
+        if not (8 <= len(password) <= 16):
+            raise ValidationError({"new_password": _("Пароль повинен містити від 8 до 16 символів.")})
         if not re.search(r'[A-Z]', password):
             raise ValidationError({"new_password": _("Пароль має містити принаймні одну велику літеру.")})
         if not re.search(r'[0-9]', password):
             raise ValidationError({"new_password": _("Пароль має містити принаймні одну цифру.")})
         if not re.search(r'[!@#$%^&*]', password):
-            raise ValidationError({"new_password": _("Пароль має містити принаймні один спеціальний символ.")})
+            raise ValidationError({"new_password": _("Пароль має містити принаймні один спеціальний символ: !@#$%^&*")})
         return data
 
 
