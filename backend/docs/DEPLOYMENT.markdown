@@ -141,3 +141,13 @@ make logs
 ```bash
 make ps
 ```
+
+## 8. Redis
+- **Контейнер**: `marketplace-redis-local`
+- **Порт**: 6379
+- **Використання**:
+  - Celery брокер
+  - Кеш схем (Gateway)
+  - Кеш даних (User/Product)
+  - Кеш відповідей (Gateway)
+- **Healthcheck**: `redis-cli ping`

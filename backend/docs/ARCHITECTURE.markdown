@@ -26,6 +26,11 @@ Handmade Marketplace реалізує мікросервісну архітек�
   - Фоновий потік (`apps.py`) оновлює схеми кожні 60с (з експоненційною затримкою, max 60с).
   - Троттлінг: `AnonRateThrottle` (1M/день), `UserRateThrottle` (10M/день).
   - CORS: `http://localhost:5173`, `http://localhost:3000` (`.env.local`).
+  - **Кешування HTTP-відповідей** (GET):  
+        - **Ключ: `gateway:response:{md5(path+query)}`**  
+        - **TTL: 60 секунд**  
+        - **Тільки 200 OK, JSON**  
+        - **Реалізовано в `ProxyView.dispatch()`**
 
 ### 2.2. User Service
 - **Функціонал**:
@@ -119,6 +124,16 @@ Handmade Marketplace реалізує мікросервісну архітек�
     - Product Service: `upload_image_to_cloudinary`, `send_moderation_notification`, `moderate_content`.
 - **Логи**: Django logging, файли/консоль, маскування чутливих даних.
 - **Кешування**: Redis для OpenAPI-схем (TTL 1 година), троттлінгу email.
+- ### Кеш (Redis)
+- **Спільний Redis**: `redis://redis:6379/1`
+- **Префікси ключів**:
+  - `user:` — User Service
+  - `product:` — Product Service
+  - `gateway:` — API Gateway
+- **Типи кешу**:
+  1. **Swagger Cache** (вже є)
+  2. **Data Cache** (профілі, продукти)
+  3. **Response Cache** (Gateway)
 
 ## 6. Здоров’я сервісів
 - **Ендпоінт /health**:

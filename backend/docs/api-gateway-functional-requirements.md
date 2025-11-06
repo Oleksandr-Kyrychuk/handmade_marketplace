@@ -139,6 +139,24 @@
 
 ---
 
+## 2.14 Кешування відповідей (Response Caching)
+
+| ID | Вимога | Статус | Джерело |
+|----|-------|-------|--------|
+| CACHE-01 | Кешування GET-запитів у API Gateway | [] | `ProxyView.dispatch()` |
+| CACHE-02 | Ключ: MD5(path + query) | [] | `get_cache_key()` |
+| CACHE-03 | TTL: 60 секунд | [] | `cache.set(..., timeout=60)` |
+| CACHE-04 | Тільки 200 OK, JSON | [] | Умова в `dispatch()` |
+| CACHE-05 | Авто-інвалідатори в мікросервісах | [] | `invalidate_product_cache` |
+
+## 2.15 Data Caching (мікросервіси)
+
+| ID | Вимога | Статус | Джерело |
+|----|-------|--------|--------|
+| DATA-01 | Кеш профілів у User Service | [] | `user:profile:{id}` |
+| DATA-02 | Кеш списків продуктів | [] | `product:list:*` |
+| DATA-03 | Інвалідатори при змінах | [] | `cache.delete_pattern()` |
+
 ## План розширення (Roadmap)
 
 | Етап | Термін | Вимоги |

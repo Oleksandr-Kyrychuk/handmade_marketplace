@@ -216,3 +216,24 @@ API маркетплейсу базується на REST з JSON-схемами
   - `AnonRateThrottle`: 1,000,000/день.
   - `UserRateThrottle`: 10,000,000/день.
 - **Email-запити**: 1/хвилина (Redis, User Service).
+
+### 7.2 Кешування (Redis)
+
+| Тип кешу | Де | Ключ | TTL | Опис |
+|----------|-------|------|------|------|
+| **OpenAPI схеми** | API Gateway | `user_service_schema`, `product_service_schema`, `merged_schema` | 1 година | Авто-оновлення кожні 60с, фоновий потік |
+| **Профілі користувачів** | User Service | `user:profile:{id}` | 30 хв | Кешується при GET `/users/profile/` |
+| **Списки продуктів** | Product Service | `product:list:cat:{id}`, `product:list:search:{query}` | 5 хв | Фільтри, пошук |
+| **Деталі продукту** | Product Service | `product:detail:{id}` | 10 хв | З відгуками |
+| **HTTP-відповіді** | API Gateway | `gateway:response:{md5(path+query)}` | 1 хвилина | Тільки GET, 200 OK |
+
+#### Інвалідатори
+- При оновленні продукту: `cache.delete_pattern("product:list:*")`, `cache.delete("product:detail:{id}")`
+- При зміні профілю: `cache.delete("user:profile:{id}")`
+
+#### Налаштування
+```env
+REDIS_URL=redis://redis:6379/1
+CACHE_TTL_PROFILE=1800
+CACHE_TTL_PRODUCT_LIST=300
+CACHE_TTL_GATEWAY_RESPONSE=60
