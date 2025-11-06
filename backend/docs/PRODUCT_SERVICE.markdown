@@ -43,6 +43,7 @@ Product Service управляє продуктами, категоріями, �
   - `upload_image_to_cloudinary`: Асинхронне завантаження зображень. Повторні спроби для надійності.
   - `send_moderation_notification`: Нотифікації через User Service. Інформує про зміни статусу.
   - `moderate_content`: Перевірка тексту через `/moderate`. Оновлює статус автоматично.
+  - **`invalidate_product_cache`**: Видаляє кеш при створенні/оновленні продукту.
 - **URLs** (`urls.py`): Ендпоінти для всіх views, інтеграція зі Swagger.
 - **Settings** (`settings.py`):
   - Django, DRF, Celery (`CELERY_BROKER_URL`, `CELERY_RESULT_BACKEND`).
@@ -96,3 +97,8 @@ Product Service управляє продуктами, категоріями, �
   - Автоматична: Перевірка тексту на токсичність. Захищає від шкідливого контенту.
   - Ручна: Схвалення/відхилення адмінами. Додає контроль.
 - **Логи**: Маскування чутливих даних через `SensitiveDataFilter`.
+- **Кешування**
+  - **Список продуктів**: `product:list:*` → TTL 5 хв
+  - **Деталі продукту**: `product:detail:{id}` → TTL 10 хв
+  - **Пошук**: `product:search:{query}` → TTL 3 хв
+  - **Інвалідатор**: Викликається після `save()`, `delete()`, модерації.

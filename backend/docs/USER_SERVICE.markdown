@@ -40,6 +40,8 @@ User Service відповідає за управління користувач
   - `LogoutView` (POST `/logout/`): Чорний список `refresh_token`.
   - `UserViewSet` (CRUD `/users-list/`): Для адмінів, пагінація (50/сторінка).
   - `HealthCheckView` (GET `/health/`): Redis, PostgreSQL.
+  - `UserProfileView`: Кешує профіль у `user:profile:{id}` (TTL 30 хв).
+  - `UserListView` (адмін): Кешує список `user:list:page:{n}` (TTL 10 хв).
 - **Permissions** (`permissions.py`):
   - `HasRolePermission`: Перевірка ролей (`allowed_roles`), ownership (obj == request.user).
 - **Фільтри** (`filters.py`):
@@ -94,6 +96,10 @@ User Service відповідає за управління користувач
 - **Permissions**: `HasRolePermission` для ролей, ownership.
 - **Логи**: Маскування через `SensitiveDataFilter`.
 - **JWT**: Чорний список для `refresh_token`.
+- **Кешування*
+  - **Профіль**: `user:profile:{id}` → 30 хв
+  - **Список користувачів** (адмін): `user:list:page:{n}` → 10 хв
+  - **Інвалідатор**: При оновленні профілю, ролі, верифікації.
 
 ## 7. Тестування
 - **Запуск**: `./manage.py test`
