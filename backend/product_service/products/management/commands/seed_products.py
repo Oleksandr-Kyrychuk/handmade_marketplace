@@ -153,7 +153,52 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"  Помилка створення '{original_name}': {e}"))
                 skipped_count += 1
 
-        # === Підсумок ===
+        # === 4. Створюємо відгуки ===
+        from products.models import Review
+        from random import choice, randint, uniform
+
+        self.stdout.write("Створення відгуків...")
+
+        # Список продуктів, яким додамо відгуки
+        products_with_reviews = Product.objects.filter(is_approved=True).order_by('?')[:15]  # 15 випадкових
+
+        review_templates = [
+            {"rating": 5, "comment": "Чудовий товар! Рекомендую!"},
+            {"rating": 5, "comment": "Дуже якісна робота, дякую!"},
+            {"rating": 4, "comment": "Добре, але можна було б трохи дешевше."},
+            {"rating": 4, "comment": "Подобається, доставка швидка."},
+            {"rating": 3, "comment": "Нормально, але очікував більше."},
+            {"rating": 2, "comment": "Не дуже, є недоліки."},
+            {"rating": 1, "comment": "Не сподобалось, повернення."},
+        ]
+
+        review_count = 0
+        for product in products_with_reviews:
+            # 1–4 відгуки на продукт
+            num_reviews = randint(1, 4)
+            reviewers = list(valid_vendor_ids)  # випадкові користувачі
+            if len(reviewers) == 0:
+                continue
+
+            for _ in range(num_reviews):
+                reviewer_id = choice(reviewers)
+                template = choice(review_templates)
+                try:
+                    Review.objects.create(
+                        product=product,
+                        user_id=reviewer_id,
+                        rating=template["rating"],
+                        comment=template["comment"],
+                        is_approved=True  # одразу схвалюємо
+                    )
+                    review_count += 1
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f"Помилка створення відгуку: {e}"))
+
+        self.stdout.write(self.style.SUCCESS(f"Створено {review_count} відгуків."))
+
+
+                # === Підсумок ===
         self.stdout.write(self.style.SUCCESS(
             f"\nСідинг завершено: створено {created_count} продуктів, пропущено {skipped_count}."
         ))

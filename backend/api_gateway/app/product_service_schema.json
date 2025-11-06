@@ -168,6 +168,22 @@
           },
           {
             "in": "query",
+            "name": "created_after",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "created_before",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
             "name": "is_approved",
             "schema": {
               "type": "boolean"
@@ -182,7 +198,21 @@
           },
           {
             "in": "query",
+            "name": "max_rating",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
             "name": "min_price",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_rating",
             "schema": {
               "type": "number"
             }
@@ -438,6 +468,42 @@
         }
       }
     },
+    "/products/{id}/reviews/": {
+      "get": {
+        "operationId": "products_reviews_retrieve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
     "/products/{id}/upload_image/": {
       "post": {
         "operationId": "products_upload_image_create",
@@ -490,6 +556,278 @@
               }
             },
             "description": ""
+          }
+        }
+      }
+    },
+    "/reviews/": {
+      "get": {
+        "operationId": "reviews_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "created_at",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_approved",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "product",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  }
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "reviews_create",
+        "tags": [
+          "reviews"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/reviews/{id}/": {
+      "get": {
+        "operationId": "reviews_retrieve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "reviews_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "reviews_partial_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedReview"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedReview"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedReview"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "reviews_destroy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
           }
         }
       }
@@ -611,6 +949,40 @@
           },
           "discount_tag": {
             "type": "string",
+            "readOnly": true
+          },
+          "is_approved": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        }
+      },
+      "PatchedReview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "productId": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "object",
+            "additionalProperties": {},
+            "readOnly": true
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0
+          },
+          "comment": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
             "readOnly": true
           },
           "is_approved": {
@@ -758,6 +1130,48 @@
         "required": [
           "id",
           "user_id"
+        ]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "productId": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "object",
+            "additionalProperties": {},
+            "readOnly": true
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0
+          },
+          "comment": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "is_approved": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "created_at",
+          "id",
+          "is_approved",
+          "productId",
+          "rating",
+          "user"
         ]
       },
       "SaleTypeEnum": {

@@ -120,12 +120,16 @@ class Review(models.Model):
     is_approved = models.BooleanField(default=False, db_index=True)
 
     def save(self, *args, **kwargs):
+        old_approved = self.is_approved if self.pk else False
         super().save(*args, **kwargs)
-        self.product.rating_count = self.product.reviews.filter(is_approved=True).count()
-        self.product.save(update_fields=['rating_count'])
+        if self.is_approved and not old_approved:  # Якщо щойно схвалено
+            self.product.rating_count = self.product.reviews.filter(is_approved=True).count()
+            self.product.save(update_fields=['rating_count'])
 
     def delete(self, *args, **kwargs):
         product = self.product
         super().delete(*args, **kwargs)
         product.rating_count = product.reviews.filter(is_approved=True).count()
         product.save(update_fields=['rating_count'])
+
+
