@@ -73,20 +73,20 @@
 ## 2.4 Відгуки та рейтинги
 
 | ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| REV-01 | CRUD відгуків: product, user_id, rating (0-5), comment, created_at, is_approved | [x] | `Review` model, `add_review` в `ProductViewSet` |
-| REV-02 | Валідація rating: 0-5 | [x] | `validate_rating` |
-| REV-03 | Авто-оновлення rating_count на продукті | [x] | `save/delete` в `Review` |
-| REV-04 | Інтеграція з User Service: get_user (username) | [x] | `get_user` в `ReviewSerializer` |
-| REV-05 | Тільки авторизовані: створення (user_id = user.id) | [x] | `add_review` |
-| REV-06 | Дозволи: адміни — все; користувачі — свої відгуки | [x] | `ReviewPermission` |
-| REV-07 | Авто-модерація: is_approved = False при створенні | [x] | `add_review` |
-| REV-08 | Асинхронна модерація (toxic check) | [x] | `moderate_content` task |
-| REV-09 | Ручна модерація | [x] | `ModerationViewSet` |
-| REV-10 | Нотифікація про модерацію | [x] | `send_moderation_notification` |
-| REV-11 | Фільтри: по продукту, даті, рейтингу | [ ] | — |
-| REV-12 | Відповіді на відгуки (nested) | [ ] | — |
-| REV-13 | Helpful votes | [ ] | — |
+|----|-------|-------|--------|
+| REV-01 | CRUD відгуків: product, user_id, rating (0-5), comment, created_at, is_approved | [x]   | `Review` model, `add_review` в `ProductViewSet` |
+| REV-02 | Валідація rating: 0-5 | [x]   | `validate_rating` |
+| REV-03 | Авто-оновлення rating_count на продукті | [x]   | `save/delete` в `Review` |
+| REV-04 | Інтеграція з User Service: get_user (username) | [x]   | `get_user` в `ReviewSerializer` |
+| REV-05 | Тільки авторизовані: створення (user_id = user.id) | [x]   | `add_review` |
+| REV-06 | Дозволи: адміни — все; користувачі — свої відгуки | [x]   | `ReviewPermission` |
+| REV-07 | Авто-модерація: is_approved = False при створенні | [x]   | `add_review` |
+| REV-08 | Асинхронна модерація (toxic check) | [x]   | `moderate_content` task |
+| REV-09 | Ручна модерація | [x]   | `ModerationViewSet` |
+| REV-10 | Нотифікація про модерацію | [x]   | `send_moderation_notification` |
+| REV-11 | Фільтри: по продукту, даті, рейтингу | [x]   | — |
+| REV-12 | Відповіді на відгуки (nested) | [ ]   | — |
+| REV-13 | Helpful votes | [ ]   | — |
 
 ---
 
@@ -157,9 +157,9 @@
 
 | ID | Вимога | Статус |
 |----|-------|--------|
-| TEST-01 | Unit + integration tests | [ ] |
-| TEST-02 | Load testing | [ ] |
-| TEST-03 | Security scan | [ ] |
+| TEST-01 | Unit + integration tests | [ ~ ]  |
+| TEST-02 | Load testing | [ ]    |
+| TEST-03 | Security scan | [ ]    |
 
 ---
 

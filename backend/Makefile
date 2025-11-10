@@ -102,3 +102,34 @@ flush-product:
 seed-product:
 	@echo "Заповнення продуктів в product_service..."
 	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service python manage.py seed_products
+
+
+# === ТЕСТУВАННЯ ===
+
+# Запуск тестів для product_service
+test-product:
+	@echo "Запуск тестів для product_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service python manage.py test products --verbosity=2
+
+# Запуск тестів з покриттям (coverage)
+test-product-cov:
+	@echo "Запуск тестів з покриттям (coverage)..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service sh -c "\
+		pip install coverage && \
+		coverage run --source=products manage.py test products && \
+		coverage report -m && \
+		coverage html"
+
+# Запуск тестів для user_service (на майбутнє)
+test-user:
+	@echo "Запуск тестів для user_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user-service python manage.py test users --verbosity=2
+
+# Запуск всіх тестів
+test-all: test-user test-product
+	@echo "Всі тести завершено!"
+
+# Очищення кешу тестів
+test-clean:
+	@echo "Очищення кешу тестів..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec product-service rm -rf .coverage htmlcov/

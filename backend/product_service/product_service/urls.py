@@ -16,12 +16,13 @@ Including another URLconf
 from drf_spectacular.renderers import OpenApiJsonRenderer
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from products.views import ProductViewSet, ModerationViewSet, HealthCheckView
+from products.views import ProductViewSet, ModerationViewSet, HealthCheckView, ReviewViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
 router.register(r'moderation', ModerationViewSet, basename='moderation')
+router.register(r'reviews', ReviewViewSet)
 
 urlpatterns = [
     path('health/', HealthCheckView.as_view(), name='health_check'),

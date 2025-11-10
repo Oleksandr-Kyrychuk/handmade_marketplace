@@ -7,7 +7,7 @@ from .models import Product, Category, Review
 from .serializers import ProductSerializer, ProductImageUploadSerializer, ReviewSerializer, HealthCheckSerializer
 from .filters import ProductFilter
 from rest_framework.permissions import IsAuthenticated
-from .permissions import HasRolePermission
+from .permissions import HasRolePermission, ReviewPermission
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import upload_image_to_cloudinary, send_moderation_notification
 import logging
@@ -24,6 +24,24 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_class = ProductFilter
     filter_backends = [DjangoFilterBackend]
     throttle_scope = 'products'
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='category', type=int, description='ID категорії'),
+            OpenApiParameter(name='min_price', type=float, description='Мінімальна ціна'),
+            OpenApiParameter(name='max_price', type=float, description='Максимальна ціна'),
+            OpenApiParameter(name='sale_type', type=str, description='Тип продажу: fixed або auction'),
+            OpenApiParameter(name='is_approved', type=bool, description='Статус схвалення'),
+            OpenApiParameter(name='created_after', type={'format': 'date'},
+                                          description='Створено після (YYYY-MM-DD)'),
+            OpenApiParameter(name='created_before', type={'format': 'date'},
+                                          description='Створено до (YYYY-MM-DD)'),
+            OpenApiParameter(name='min_rating', type=float,
+                                          description='Мінімальний середній рейтинг (0.0–5.0)'),
+            OpenApiParameter(name='max_rating', type=float,
+                                          description='Максимальний середній рейтинг (0.0–5.0)'),
+        ]
+    )
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -105,6 +123,13 @@ class ProductViewSet(viewsets.ModelViewSet):
             {"success": False, "errors": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def reviews(self, request, pk=None):
+        product = self.get_object()
+        reviews = product.reviews.filter(is_approved=True)  # Тільки схвалені
+        serializer = ReviewSerializer(reviews, many=True, context={'request': request})
+        return Response(serializer.data)
 
 class ModerationViewSet(viewsets.ViewSet):
     permission_classes = [HasRolePermission]
@@ -258,3 +283,32 @@ class HealthCheckView(GenericAPIView):
                 'database': {'status': 'ok'}
             }
         })
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [ReviewPermission]
+    allowed_roles = ['user', 'admin']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['product', 'rating', 'is_approved', 'created_at'] #фільтри по продукту, рейтингу тощо
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            # Тільки схвалені відгуки для звичайних користувачів
+            if 'admin' not in self.request.user.roles:
+                queryset = queryset.filter(is_approved=True)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user_id=self.request.user.id, is_approved=False)
+        # Асинхронна модерація (REV-08)
+        from .tasks import moderate_content
+        moderate_content.delay('review', serializer.instance.id, serializer.instance.comment)
+
+    def perform_update(self, serializer):
+        # Логіка для редагування (тільки адміни або власник)
+        instance = serializer.instance
+        if instance.user_id != self.request.user.id and 'admin' not in self.request.user.roles:
+            raise PermissionDenied("Ви не можете редагувати цей відгук")
+        serializer.save()

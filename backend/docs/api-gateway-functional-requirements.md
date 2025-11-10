@@ -131,11 +131,11 @@
 
 ## 2.13 Тестування
 
-| ID | Вимога | Статус |
-|----|-------|--------|
-| TEST-01 | Unit + integration tests | [ ] |
-| TEST-02 | Load testing (k6, Locust) | [ ] |
-| TEST-03 | Chaos testing (сервіс down) | [ ] |
+| ID | Вимога | Статус         |
+|----|-------|----------------|
+| TEST-01 | Unit + integration tests | [ ]            |
+| TEST-02 | Load testing (k6, Locust) | [ ~ ] (locust) |
+| TEST-03 | Chaos testing (сервіс down) | [ ]            |
 
 ---
 
