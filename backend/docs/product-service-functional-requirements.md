@@ -157,9 +157,9 @@
 
 | ID | Вимога | Статус |
 |----|-------|--------|
-| TEST-01 | Unit + integration tests | [ ] |
-| TEST-02 | Load testing | [ ] |
-| TEST-03 | Security scan | [ ] |
+| TEST-01 | Unit + integration tests | [ ~ ]  |
+| TEST-02 | Load testing | [ ]    |
+| TEST-03 | Security scan | [ ]    |
 
 ---
 

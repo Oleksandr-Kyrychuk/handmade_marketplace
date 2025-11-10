@@ -123,6 +123,7 @@ class User(AbstractUser):
 
     class Meta:
         indexes = [
+            models.Index(fields=['date_joined']),
             GinIndex(fields=['search_vector'], name='user_search_idx'),
         ]
 
