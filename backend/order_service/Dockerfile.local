@@ -1,0 +1,17 @@
+#order
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y postgresql-client dos2unix && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Перетворюємо всі скрипти
+RUN find . -name "entrypoint*.sh" -exec dos2unix {} \;
+RUN find . -name "entrypoint*.sh" -exec chmod +x {} \;
+
+ENTRYPOINT []
+CMD ["./entrypoint.sh"]

@@ -3,13 +3,16 @@
   "info": {
     "title": "User Service API",
     "version": "1.0.0",
-    "description": "User management, registration, auth, profile"
+    "description": "API for User Service in Handmade Marketplace"
   },
   "paths": {
     "/health": {
       "get": {
-        "operationId": "root_retrieve",
-        "summary": "Перевірка здоров'я сервісів",
+        "operationId": "health_retrieve",
+        "summary": "\u041f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0430 \u0437\u0434\u043e\u0440\u043e\u0432'\u044f \u0441\u0435\u0440\u0432\u0456\u0441\u0456\u0432",
+        "tags": [
+          "health"
+        ],
         "security": [
           {
             "jwtAuth": []
@@ -42,24 +45,27 @@
     },
     "/login/": {
       "post": {
-        "operationId": "root_create",
+        "operationId": "login_create",
         "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
-        "summary": "Логін користувача",
+        "summary": "\u041b\u043e\u0433\u0456\u043d \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430",
+        "tags": [
+          "login"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
+                "$ref": "#/components/schemas/Login"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
+                "$ref": "#/components/schemas/Login"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
+                "$ref": "#/components/schemas/Login"
               }
             }
           },
@@ -67,15 +73,25 @@
         },
         "responses": {
           "200": {
-            "description": "No response body"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login"
+                }
+              }
+            },
+            "description": ""
           }
         }
       }
     },
     "/logout/": {
       "post": {
-        "operationId": "root_create_2",
-        "summary": "Логаут користувача",
+        "operationId": "logout_create",
+        "summary": "\u041b\u043e\u0433\u0430\u0443\u0442 \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430",
+        "tags": [
+          "logout"
+        ],
         "security": [
           {
             "jwtAuth": []
@@ -90,23 +106,26 @@
     },
     "/password-reset/": {
       "post": {
-        "operationId": "root_create_4",
-        "summary": "Запит на скидання паролю",
+        "operationId": "password_reset_create",
+        "summary": "\u0417\u0430\u043f\u0438\u0442 \u043d\u0430 \u0441\u043a\u0438\u0434\u0430\u043d\u043d\u044f \u043f\u0430\u0440\u043e\u043b\u044e",
+        "tags": [
+          "password-reset"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordResetRequestRequest"
+                "$ref": "#/components/schemas/PasswordResetRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordResetRequestRequest"
+                "$ref": "#/components/schemas/PasswordResetRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordResetRequestRequest"
+                "$ref": "#/components/schemas/PasswordResetRequest"
               }
             }
           },
@@ -134,8 +153,8 @@
     },
     "/password-reset-confirm/{uidb64}/{token}/": {
       "post": {
-        "operationId": "root_create_3",
-        "summary": "Підтвердження скидання паролю",
+        "operationId": "password_reset_confirm_create",
+        "summary": "\u041f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043d\u043d\u044f \u0441\u043a\u0438\u0434\u0430\u043d\u043d\u044f \u043f\u0430\u0440\u043e\u043b\u044e",
         "parameters": [
           {
             "in": "path",
@@ -154,21 +173,24 @@
             "required": true
           }
         ],
+        "tags": [
+          "password-reset-confirm"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+                "$ref": "#/components/schemas/PasswordResetConfirm"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+                "$ref": "#/components/schemas/PasswordResetConfirm"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+                "$ref": "#/components/schemas/PasswordResetConfirm"
               }
             }
           },
@@ -182,14 +204,24 @@
         ],
         "responses": {
           "200": {
-            "description": "No response body"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetConfirm"
+                }
+              }
+            },
+            "description": ""
           }
         }
       }
     },
     "/profile/": {
       "get": {
-        "operationId": "root_retrieve_2",
+        "operationId": "profile_retrieve",
+        "tags": [
+          "profile"
+        ],
         "security": [
           {
             "jwtAuth": []
@@ -209,17 +241,20 @@
         }
       },
       "put": {
-        "operationId": "root_update",
+        "operationId": "profile_update",
+        "tags": [
+          "profile"
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UserProfileRequest"
+                "$ref": "#/components/schemas/UserProfile"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/UserProfileRequest"
+                "$ref": "#/components/schemas/UserProfile"
               }
             }
           },
@@ -244,17 +279,20 @@
         }
       },
       "patch": {
-        "operationId": "root_partial_update",
+        "operationId": "profile_partial_update",
+        "tags": [
+          "profile"
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedUserProfileRequest"
+                "$ref": "#/components/schemas/PatchedUserProfile"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedUserProfileRequest"
+                "$ref": "#/components/schemas/PatchedUserProfile"
               }
             }
           }
@@ -280,23 +318,26 @@
     },
     "/register/": {
       "post": {
-        "operationId": "root_create_5",
-        "summary": "Реєстрація нового користувача",
+        "operationId": "register_create",
+        "summary": "\u0420\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430",
+        "tags": [
+          "register"
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
+                "$ref": "#/components/schemas/Register"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
+                "$ref": "#/components/schemas/Register"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
+                "$ref": "#/components/schemas/Register"
               }
             }
           },
@@ -324,23 +365,26 @@
     },
     "/resend-verification/": {
       "post": {
-        "operationId": "root_create_6",
-        "summary": "Повторна відправка коду верифікації",
+        "operationId": "resend_verification_create",
+        "summary": "\u041f\u043e\u0432\u0442\u043e\u0440\u043d\u0430 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0430 \u043a\u043e\u0434\u0443 \u0432\u0435\u0440\u0438\u0444\u0456\u043a\u0430\u0446\u0456\u0457",
+        "tags": [
+          "resend-verification"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ResendVerificationCodeRequest"
+                "$ref": "#/components/schemas/ResendVerificationCode"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/ResendVerificationCodeRequest"
+                "$ref": "#/components/schemas/ResendVerificationCode"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/ResendVerificationCodeRequest"
+                "$ref": "#/components/schemas/ResendVerificationCode"
               }
             }
           },
@@ -368,24 +412,27 @@
     },
     "/token/refresh/": {
       "post": {
-        "operationId": "root_create_7",
+        "operationId": "token_refresh_create",
         "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
-        "summary": "Оновлення токену",
+        "summary": "\u041e\u043d\u043e\u0432\u043b\u0435\u043d\u043d\u044f \u0442\u043e\u043a\u0435\u043d\u0443",
+        "tags": [
+          "token"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TokenRefreshRequest"
+                "$ref": "#/components/schemas/TokenRefresh"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/TokenRefreshRequest"
+                "$ref": "#/components/schemas/TokenRefresh"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/TokenRefreshRequest"
+                "$ref": "#/components/schemas/TokenRefresh"
               }
             }
           },
@@ -407,7 +454,7 @@
     },
     "/users-list": {
       "get": {
-        "operationId": "root_list",
+        "operationId": "users_list_list",
         "parameters": [
           {
             "in": "query",
@@ -481,6 +528,9 @@
             }
           }
         ],
+        "tags": [
+          "users-list"
+        ],
         "security": [
           {
             "jwtAuth": []
@@ -502,7 +552,7 @@
     },
     "/users-list/{id}": {
       "get": {
-        "operationId": "root_retrieve_3",
+        "operationId": "users_list_retrieve",
         "parameters": [
           {
             "in": "path",
@@ -513,6 +563,9 @@
             "description": "A unique integer value identifying this user.",
             "required": true
           }
+        ],
+        "tags": [
+          "users-list"
         ],
         "security": [
           {
@@ -533,7 +586,7 @@
         }
       },
       "put": {
-        "operationId": "root_update_2",
+        "operationId": "users_list_update",
         "parameters": [
           {
             "in": "path",
@@ -545,21 +598,24 @@
             "required": true
           }
         ],
+        "tags": [
+          "users-list"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserRequest"
+                "$ref": "#/components/schemas/User"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/UserRequest"
+                "$ref": "#/components/schemas/User"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UserRequest"
+                "$ref": "#/components/schemas/User"
               }
             }
           },
@@ -584,7 +640,7 @@
         }
       },
       "patch": {
-        "operationId": "root_partial_update_2",
+        "operationId": "users_list_partial_update",
         "parameters": [
           {
             "in": "path",
@@ -596,21 +652,24 @@
             "required": true
           }
         ],
+        "tags": [
+          "users-list"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedUserRequest"
+                "$ref": "#/components/schemas/PatchedUser"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedUserRequest"
+                "$ref": "#/components/schemas/PatchedUser"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedUserRequest"
+                "$ref": "#/components/schemas/PatchedUser"
               }
             }
           }
@@ -634,7 +693,7 @@
         }
       },
       "delete": {
-        "operationId": "root_destroy",
+        "operationId": "users_list_destroy",
         "parameters": [
           {
             "in": "path",
@@ -645,6 +704,9 @@
             "description": "A unique integer value identifying this user.",
             "required": true
           }
+        ],
+        "tags": [
+          "users-list"
         ],
         "security": [
           {
@@ -660,8 +722,8 @@
     },
     "/verify-email/{uidb64}/{token}/": {
       "get": {
-        "operationId": "root_retrieve_4",
-        "summary": "Підтвердження email",
+        "operationId": "verify_email_retrieve",
+        "summary": "\u041f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043d\u043d\u044f email",
         "parameters": [
           {
             "in": "path",
@@ -679,6 +741,9 @@
             },
             "required": true
           }
+        ],
+        "tags": [
+          "verify-email"
         ],
         "security": [
           {
@@ -726,18 +791,16 @@
           "status"
         ]
       },
-      "LoginRequest": {
+      "Login": {
         "type": "object",
         "properties": {
           "email": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           },
           "password": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           }
         },
         "required": [
@@ -776,18 +839,16 @@
           }
         }
       },
-      "PasswordResetConfirmRequest": {
+      "PasswordResetConfirm": {
         "type": "object",
         "properties": {
           "new_password": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           },
           "confirm_password": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           }
         },
         "required": [
@@ -807,40 +868,30 @@
           "email"
         ]
       },
-      "PasswordResetRequestRequest": {
+      "PatchedUser": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "email"
-        ]
-      },
-      "PatchedUserProfileRequest": {
-        "type": "object",
-        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
           "username": {
             "type": "string",
-            "minLength": 1,
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u0406\u043c'\u044f: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
+            "maxLength": 50,
+            "minLength": 1
           },
           "surname": {
             "type": "string",
-            "minLength": 1,
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u041f\u0440\u0456\u0437\u0432\u0438\u0449\u0435: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
+            "maxLength": 50,
+            "minLength": 1
           },
           "email": {
             "type": "string",
-            "minLength": 1,
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "description": "Email: \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0430 \u0447\u0430\u0441\u0442\u0438\u043d\u0430 1\u201335, \u0434\u043e\u043c\u0435\u043d 3\u201335, \u0431\u0435\u0437 \u043f\u043e\u0441\u043b\u0456\u0434\u043e\u0432\u043d\u0438\u0445 \u043a\u0440\u0430\u043f\u043e\u043a",
             "maxLength": 71
           },
           "roles": {
@@ -851,31 +902,35 @@
           },
           "avatar": {
             "type": "string",
-            "format": "binary"
+            "format": "uri",
+            "writeOnly": true
           }
         }
       },
-      "PatchedUserRequest": {
+      "PatchedUserProfile": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
           "username": {
             "type": "string",
-            "minLength": 1,
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u0406\u043c'\u044f: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
+            "maxLength": 50,
+            "minLength": 1
           },
           "surname": {
             "type": "string",
-            "minLength": 1,
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u041f\u0440\u0456\u0437\u0432\u0438\u0449\u0435: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
+            "maxLength": 50,
+            "minLength": 1
           },
           "email": {
             "type": "string",
-            "minLength": 1,
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "description": "Email: \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0430 \u0447\u0430\u0441\u0442\u0438\u043d\u0430 1\u201335, \u0434\u043e\u043c\u0435\u043d 3\u201335, \u0431\u0435\u0437 \u043f\u043e\u0441\u043b\u0456\u0434\u043e\u0432\u043d\u0438\u0445 \u043a\u0440\u0430\u043f\u043e\u043a",
             "maxLength": 71
           },
           "roles": {
@@ -886,8 +941,7 @@
           },
           "avatar": {
             "type": "string",
-            "format": "binary",
-            "writeOnly": true
+            "format": "uri"
           }
         }
       },
@@ -896,66 +950,34 @@
         "properties": {
           "email": {
             "type": "string",
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "description": "Email: \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0430 \u0447\u0430\u0441\u0442\u0438\u043d\u0430 1\u201335, \u0434\u043e\u043c\u0435\u043d 3\u201335, \u0431\u0435\u0437 \u043f\u043e\u0441\u043b\u0456\u0434\u043e\u0432\u043d\u0438\u0445 \u043a\u0440\u0430\u043f\u043e\u043a",
             "maxLength": 71
           },
           "username": {
             "type": "string",
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u0406\u043c'\u044f: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
             "maxLength": 50,
             "minLength": 1
           },
           "surname": {
             "type": "string",
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u041f\u0440\u0456\u0437\u0432\u0438\u0449\u0435: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
             "maxLength": 50,
             "minLength": 1
-          }
-        },
-        "required": [
-          "email",
-          "surname",
-          "username"
-        ]
-      },
-      "RegisterRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
-            "maxLength": 71
-          },
-          "username": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
-          },
-          "surname": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
           },
           "password": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           },
           "password_confirm": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           },
           "avatar": {
             "type": "string",
-            "format": "binary",
+            "format": "uri",
             "writeOnly": true
           }
         },
@@ -979,19 +1001,6 @@
           "email"
         ]
       },
-      "ResendVerificationCodeRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "email"
-        ]
-      },
       "RolesEnum": {
         "enum": [
           "user",
@@ -1006,22 +1015,14 @@
           "access": {
             "type": "string",
             "readOnly": true
-          }
-        },
-        "required": [
-          "access"
-        ]
-      },
-      "TokenRefreshRequest": {
-        "type": "object",
-        "properties": {
+          },
           "refresh": {
             "type": "string",
-            "writeOnly": true,
-            "minLength": 1
+            "writeOnly": true
           }
         },
         "required": [
+          "access",
           "refresh"
         ]
       },
@@ -1034,21 +1035,21 @@
           },
           "username": {
             "type": "string",
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u0406\u043c'\u044f: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
             "maxLength": 50,
             "minLength": 1
           },
           "surname": {
             "type": "string",
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u041f\u0440\u0456\u0437\u0432\u0438\u0449\u0435: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
             "maxLength": 50,
             "minLength": 1
           },
           "email": {
             "type": "string",
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "description": "Email: \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0430 \u0447\u0430\u0441\u0442\u0438\u043d\u0430 1\u201335, \u0434\u043e\u043c\u0435\u043d 3\u201335, \u0431\u0435\u0437 \u043f\u043e\u0441\u043b\u0456\u0434\u043e\u0432\u043d\u0438\u0445 \u043a\u0440\u0430\u043f\u043e\u043a",
             "maxLength": 71
           },
           "roles": {
@@ -1056,6 +1057,11 @@
             "items": {
               "$ref": "#/components/schemas/RolesEnum"
             }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri",
+            "writeOnly": true
           }
         },
         "required": [
@@ -1074,21 +1080,21 @@
           },
           "username": {
             "type": "string",
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u0406\u043c'\u044f: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
             "maxLength": 50,
             "minLength": 1
           },
           "surname": {
             "type": "string",
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "description": "\u041f\u0440\u0456\u0437\u0432\u0438\u0449\u0435: 1\u201350 \u0441\u0438\u043c\u0432\u043e\u043b\u0456\u0432, \u043a\u0438\u0440\u0438\u043b\u0438\u0446\u044f/\u043b\u0430\u0442\u0438\u043d\u0438\u0446\u044f, \u0434\u0435\u0444\u0456\u0441 (\u043d\u0435 \u043d\u0430 \u043f\u043e\u0447\u0430\u0442\u043a\u0443/\u043a\u0456\u043d\u0446\u0456)",
             "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
             "maxLength": 50,
             "minLength": 1
           },
           "email": {
             "type": "string",
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "description": "Email: \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0430 \u0447\u0430\u0441\u0442\u0438\u043d\u0430 1\u201335, \u0434\u043e\u043c\u0435\u043d 3\u201335, \u0431\u0435\u0437 \u043f\u043e\u0441\u043b\u0456\u0434\u043e\u0432\u043d\u0438\u0445 \u043a\u0440\u0430\u043f\u043e\u043a",
             "maxLength": 71
           },
           "roles": {
@@ -1105,87 +1111,6 @@
         "required": [
           "email",
           "id",
-          "surname",
-          "username"
-        ]
-      },
-      "UserProfileRequest": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
-          },
-          "surname": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
-          },
-          "email": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
-            "maxLength": 71
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
-          },
-          "avatar": {
-            "type": "string",
-            "format": "binary"
-          }
-        },
-        "required": [
-          "email",
-          "surname",
-          "username"
-        ]
-      },
-      "UserRequest": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
-          },
-          "surname": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50
-          },
-          "email": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
-            "maxLength": 71
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
-          },
-          "avatar": {
-            "type": "string",
-            "format": "binary",
-            "writeOnly": true
-          }
-        },
-        "required": [
-          "email",
           "surname",
           "username"
         ]
@@ -1213,19 +1138,5 @@
         "bearerFormat": "JWT"
       }
     }
-  },
-  "tags": [
-    {
-      "name": "auth",
-      "description": "Authentication & Registration"
-    },
-    {
-      "name": "users",
-      "description": "User management"
-    },
-    {
-      "name": "profile",
-      "description": "User profile"
-    }
-  ]
+  }
 }

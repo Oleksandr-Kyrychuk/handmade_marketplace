@@ -153,7 +153,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Product Service API',
-    'DESCRIPTION': 'API for Product Service in Handmade Marketplace',
+    'DESCRIPTION': 'Products, reviews, moderation',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'^/?.*',
+    'TAGS': [
+        {'name': 'products', 'description': 'Products CRUD & filtering'},
+        {'name': 'reviews', 'description': 'Product reviews'},
+        {'name': 'moderation', 'description': 'Content moderation'},
+    ],
+    'OPERATION_ID_SUFFIX': 'ViewSet',
 }

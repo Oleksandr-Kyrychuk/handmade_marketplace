@@ -136,7 +136,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'User Service API',
-    'DESCRIPTION': 'API for User Service in Handmade Marketplace',
+    'DESCRIPTION': 'User management, registration, auth, profile',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'^/?.*',
+    'TAGS': [
+        {'name': 'auth', 'description': 'Authentication & Registration'},
+        {'name': 'users', 'description': 'User management'},
+        {'name': 'profile', 'description': 'User profile'},
+    ],
+    'OPERATION_ID_SUFFIX': 'ViewSet',
 }

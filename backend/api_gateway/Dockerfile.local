@@ -1,10 +1,24 @@
+#gateway
 FROM python:3.12-slim
 
 WORKDIR /app
+
+# Встановлюємо залежності + dos2unix
+RUN apt-get update && \
+    apt-get install -y postgresql-client curl dos2unix && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y postgresql-client curl && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-RUN python manage.py collectstatic --noinput
+
+# Фіксимо line endings
+RUN find . -name "entrypoint*.sh" -exec dos2unix {} \; && \
+    find . -name "entrypoint*.sh" -exec chmod +x {} \;
+
+# Статичні файли (якщо є)
+RUN python manage.py collectstatic --noinput || true
+
 ENV PYTHONUNBUFFERED=1
 CMD ["sh", "entrypoint.sh"]
