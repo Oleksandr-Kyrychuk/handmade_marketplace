@@ -3,7 +3,7 @@
   "info": {
     "title": "Product Service API",
     "version": "1.0.0",
-    "description": "Products, reviews, moderation"
+    "description": "Products, reviews, moderation, images"
   },
   "paths": {
     "/health": {

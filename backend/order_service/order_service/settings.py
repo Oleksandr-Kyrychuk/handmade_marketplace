@@ -176,4 +176,5 @@ SPECTACULAR_SETTINGS = {
         {'name': 'orders', 'description': 'Order management'},
     ],
     'OPERATION_ID_SUFFIX': 'ViewSet',
+    'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
 }

@@ -18,4 +18,5 @@ whitenoise
 django-redis==5.4.0
 dj_rest_auth
 djangorestframework-recursive
+django-allauth==0.61.1
 

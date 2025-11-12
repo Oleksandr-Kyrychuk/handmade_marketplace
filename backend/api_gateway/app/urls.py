@@ -1,3 +1,4 @@
+#gateway
 import logging
 from django.urls import path, re_path
 from django.conf import settings
@@ -9,7 +10,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
-from drf_spectacular.views import SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from drf_spectacular.utils import extend_schema
 
 from .serializers import HealthCheckSerializer, EmptySerializer
@@ -188,46 +189,47 @@ class ProxyView(APIView):
     @extend_schema(exclude=True)
     def handle_request(self, request, path):
         # === Чітка маршрутизація ===
-        if path.startswith('users/') or path == 'users' or path.startswith('api/users'):
+        if path.startswith('users/') or path == 'users':
             service_name = 'user_service'
-            clean_path = path.replace('users/', '', 1).replace('api/users/', 'api/users/', 1)
-            target_url = f"{settings.USER_SERVICE_URL}/{clean_path or ''}"
+            # /users/ → users-list/
+            # /users/1 → users-list/1
+            clean_path = path.replace('users/', 'users-list/', 1) if path != 'users' else 'users-list/'
+            target_url = f"{settings.USER_SERVICE_URL}/{clean_path}".rstrip('/')
 
-        elif path.startswith('products/') or path == 'products' or path.startswith('api/products'):
+        elif path.startswith('products/') or path == 'products':
             service_name = 'product_service'
-            clean_path = path.replace('api/products/', '', 1)
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/api/products/{clean_path}"
+            clean_path = path.replace('products/', '', 1) if path != 'products' else ''
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/products/{clean_path}".rstrip('/')
 
         elif path.startswith('moderation/'):
             service_name = 'product_service'
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/{path}"
+            clean_path = path.replace('moderation/', '', 1)
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{clean_path}".rstrip('/')
 
-        elif path.startswith('orders/') or path == 'orders' or path.startswith('api/orders'):
+        elif path.startswith('orders/') or path == 'orders':
             service_name = 'order_service'
-            clean_path = path.replace('api/orders/', '', 1)
-            target_url = f"{settings.ORDER_SERVICE_URL}/{clean_path or ''}"
+            clean_path = path.replace('orders/', '', 1) if path != 'orders' else ''
+            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{clean_path}".rstrip('/')
 
-        elif path.startswith('carts/') or path == 'carts' or path.startswith('api/carts'):
+        elif path.startswith('carts/') or path == 'carts':
             service_name = 'order_service'
-            clean_path = path.replace('api/carts/', '', 1)
-            target_url = f"{settings.ORDER_SERVICE_URL}/{clean_path or ''}"
+            clean_path = path.replace('carts/', '', 1) if path != 'carts' else ''
+            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{clean_path}".rstrip('/')
 
         else:
             logger.warning(f"No route for path: {path}")
-            return Response({'error': f'No microservice for path: /{path}'}, status=404)
+            return Response({'error': 'Not found'}, status=404)
 
-        # === Прокидуємо заголовки (включаючи Authorization) ===
+        # === Прокидуємо заголовки ===
         headers = {
             k: v for k, v in request.headers.items()
-            if k.lower() not in ('host', 'content-length', 'connection', 'transfer-encoding')
+            if k.lower() not in ('host', 'content-length')
         }
-        if request.body:
-            headers['Content-Length'] = str(len(request.body))
 
         try:
             resp = requests.request(
                 method=request.method,
-                url=target_url.rstrip('/') + '/',  # виправляємо подвійні слеші
+                url=target_url,
                 headers=headers,
                 data=request.body,
                 params=request.GET,
@@ -237,7 +239,7 @@ class ProxyView(APIView):
 
             # Прокидуємо Content-Type
             response_headers = {}
-            content_type = resp.headers.get('Content-Type')
+            content_type = resp.headers.get('Content-Type', '')
             if content_type:
                 response_headers['Content-Type'] = content_type
 
@@ -246,34 +248,22 @@ class ProxyView(APIView):
                     return Response(resp.json(), status=resp.status_code, headers=response_headers)
                 except ValueError:
                     logger.error(f"Invalid JSON from {target_url}")
-                    return Response({'error': 'Invalid JSON from service'}, status=502)
+                    return Response({'error': 'Invalid JSON'}, status=502)
             else:
                 return Response(resp.content, status=resp.status_code, headers=response_headers)
 
         except requests.Timeout:
-            logger.error(f"Timeout: {service_name} -> {target_url}")
             return Response({'error': f'{service_name} timed out'}, status=504)
         except requests.ConnectionError:
-            logger.error(f"Connection error: {service_name} -> {target_url}")
             return Response({'error': f'Cannot connect to {service_name}'}, status=502)
         except requests.RequestException as e:
-            logger.error(f"Proxy error: {service_name} -> {target_url} | {e}")
-            return Response({'error': f'Proxy error: {str(e)}'}, status=502)
+            return Response({'error': str(e)}, status=502)
 
-    def get(self, request, path):
-        return self.handle_request(request, path)
-
-    def post(self, request, path):
-        return self.handle_request(request, path)
-
-    def put(self, request, path):
-        return self.handle_request(request, path)
-
-    def patch(self, request, path):
-        return self.handle_request(request, path)
-
-    def delete(self, request, path):
-        return self.handle_request(request, path)
+    def get(self, request, path): return self.handle_request(request, path)
+    def post(self, request, path): return self.handle_request(request, path)
+    def put(self, request, path): return self.handle_request(request, path)
+    def patch(self, request, path): return self.handle_request(request, path)
+    def delete(self, request, path): return self.handle_request(request, path)
 
 
 # ============================
@@ -283,6 +273,9 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     path('', RootView.as_view(), name='root'),
     path('health', HealthCheckView.as_view(), name='health'),
+    path('users/schema/', SpectacularAPIView.as_view(), name='user_schema_proxy'),
+    path('products/schema/', SpectacularAPIView.as_view(), name='product_schema_proxy'),
+    path('orders/schema/', SpectacularAPIView.as_view(), name='order_schema_proxy'),
     path('schema/', MergedSchemaView.as_view(), name='schema'),
     path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     re_path(r'^(?P<path>.*)/?$', ProxyView.as_view(), name='proxy'),  # дозволяє / і без /

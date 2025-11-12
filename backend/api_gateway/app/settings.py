@@ -1,3 +1,4 @@
+#gateway
 import environ
 import os
 from pathlib import Path
@@ -140,4 +141,5 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API Gateway for Handmade Marketplace',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
 }
