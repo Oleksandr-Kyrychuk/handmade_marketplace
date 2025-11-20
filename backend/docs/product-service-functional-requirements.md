@@ -1,184 +1,143 @@
 # Функціональні Вимоги до Product Service  
-*Версія 1.0 — Enterprise-Ready Product Management Service*
+*Версія 1.6 — Актуальний стан проекту (20 листопада 2025)*
 
-> **Мета**: Забезпечити ефективне керування продуктами, категоріями, відгуками та модерацією в системі Handmade Marketplace.  
-> **Стан**: 45% реалізованих вимог, 55% — у плані розширення.  
-> **Технології**: Django, DRF, JWT, Celery, Redis, PostgreSQL, Cloudinary, Swagger.
+> **Мета**: Забезпечити повноцінне керування продуктами, категоріями, відгуками, зображеннями, модерацією контенту та резервуванням stock в мікросервісній архітектурі Handmade Marketplace.  
+> **Стан**: ≈ **89–91%** реалізованих вимог  
+> (MVP — 100%, MVP+ — **82%**, Production-готовність — **35%**)  
+> **Технології**: Django 5.1, DRF, Celery + Redis, PostgreSQL (GIN + search_vector), Cloudinary (асинхронний upload), drf-spectacular, кастомний JWT middleware (verify у User Service), RBAC vendor/admin, авто-модерація (заглушка працює).
 
 ---
 
 ## Легенда
-- [x] — **вже реалізовано**  
-- [ ] — **планується до реалізації**  
-- [~] — **частково реалізовано**
+- [x] — повністю реалізовано та працює  
+- [~] — частково реалізовано (вказано деталі)  
+- [ ] — не реалізовано
 
 ---
 
 ## 2.1 Керування категоріями
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| CAT-01 | Ієрархічні категорії: назва, parent, image (Cloudinary), slug (авто-генерація) | [x] | `Category` model |
-| CAT-02 | Full-text пошук по назві (search_vector) | [x] | `search_vector` в `Category` |
-| CAT-03 | Upload зображення для категорії (≤32MB, JPG/PNG/GIF) | [x] | `upload_category_image` в `ProductViewSet` |
-| CAT-04 | Авто-генерація унікального slug | [x] | `save()` в `Category` |
-| CAT-05 | CRUD для категорій (створення/редагування/видалення) | [~] | Serializer є, але ViewSet відсутній |
-| CAT-06 | Валідація назви: літери, цифри, пробіли, дефіси, лапки | [x] | `name_validator` в models |
-| CAT-07 | Імпорт/експорт категорій (CSV/JSON) | [ ] | — |
-| CAT-08 | Авто-дерево категорій (nested sets або materialized path) | [ ] | — |
-| CAT-09 | Кешування дерева категорій (Redis) | [ ] | — |
+| ID     | Вимога                                                                 | Статус | Коментар |
+|--------|------------------------------------------------------------------------|--------|---------|
+| CAT-01 | Ієрархічні категорії (name, parent, image, slug)                       | [x] | Модель повністю готова |
+| CAT-02 | Full-text пошук по назві (search_vector + GIN)                         | [x] | Працює |
+| CAT-03 | Upload зображення для категорії (Cloudinary, ≤32MB, JPG/PNG/GIF)       | [x] | Є серіалізатор + Celery task працює (model_type="category") |
+| CAT-04 | Авто-генерація унікального slug                                        | [x] | В save() моделі |
+| CAT-05 | CRUD для категорій (ViewSet)                                           | [ ] | **Немає ендпоінтів!** (немає CategoryViewSet) |
+| CAT-06 | Валідація назви категорії                                              | [ ] | Немає |
+| CAT-07 | Tree structure / nested response                                       | [ ] | Поки простий FK |
+
+**Висновок**: категорії технічно готові на 90%, але **немає API** — тільки фільтр по продуктах.
 
 ---
 
 ## 2.2 Керування продуктами
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| PROD-01 | CRUD продуктів: vendor_id, category, name, description, sale_type (fixed/auction), price, discount_price, start_price, auction_end_time, stock, rating_count, product_href, is_approved | [x] | `Product` model, `ProductViewSet` |
-| PROD-02 | Валідація назви: літери, цифри, пробіли, дефіси, лапки | [x] | `name_validator` |
-| PROD-03 | Валідація для fixed: price обов'язкова, discount < price | [x] | `save()` в `Product` |
-| PROD-04 | Для auction: start_price, auction_end_time; discount = None | [x] | `save()` |
-| PROD-05 | Авто-генерація унікального slug (product_href) | [x] | `save()` |
-| PROD-06 | Full-text пошук: name (A), description (B) | [x] | `search_vector` |
-| PROD-07 | Фільтри: category, min/max price, sale_type, is_approved | [x] | `ProductFilter` |
-| PROD-08 | Доступність: stock > 0 та is_approved | [x] | `is_available()` |
-| PROD-09 | Інтеграція з User Service: get_vendor (username, surname) | [x] | `get_vendor` в `ProductSerializer` |
-| PROD-10 | Тільки авторизовані: створення/редагування (vendor_id = user.id) | [x] | `perform_create/update` |
-| PROD-11 | Адміни: повний доступ; користувачі: тільки свої продукти | [x] | `HasRolePermission` |
-| PROD-12 | Авто-модерація при створенні (is_approved = False) | [x] | `perform_create` |
-| PROD-13 | Асинхронна модерація контенту (toxic check via external API) | [x] | `moderate_content` task |
-| PROD-14 | Ручна модерація: схвалити/відхилити (update is_approved) | [x] | `ModerationViewSet` |
-| PROD-15 | Нотифікація про модерацію (email via User Service) | [x] | `send_moderation_notification` |
-| PROD-16 | Пагінація для списку продуктів | [~] | ViewSet, але не явно |
-| PROD-17 | Варіанти продуктів (розміри, кольори) | [ ] | — |
-| PROD-18 | Рекомендації (similar products via ML) | [ ] | — |
-| PROD-19 | Імпорт/експорт продуктів (CSV) | [ ] | — |
-| PROD-20 | Аукціон: біддинг, таймер, авто-закриття | [ ] | — |
+| ID      | Вимога                                                                 | Статус | Коментар |
+|---------|------------------------------------------------------------------------|--------|----------|
+| 
+| PROD-01 | Повний CRUD продуктів (всі поля)                                       | [x] | ProductViewSet |
+| PROD-02 | RBAC: vendor — свої, admin — всі                                       | [x] | HasRolePermission + vendor_id check |
+| PROD-03 | Нові продукти → is_approved=False + авто-модерація                     | [x] | moderate_content.delay() в perform_create |
+| PROD-04 | Редагування продукту → повторна модерація (is_approved=False)          | [x] | Так, в perform_update |
+| PROD-05 | Асинхронний upload зображень (Cloudinary)                              | [x] | Celery task + action upload_image |
+| PROD-06 | Резервування stock (PATCH /products/{id}/reserve/)                     | [x] | Повністю працює + Reservation модель + expires_at |
+| PROD-07 | Скасування резерву (cancel_reservation/)                               | [x] | Є action |
+| PROD-08 | Авто-очищення прострочених резервів                                    | [x] | Celery beat задача cleanup_expired_reservations (є в коді!) |
+| PROD-09 | Фільтри: category, price, rating, sale_type, dates, is_approved       | [x] | ProductFilter — один з найкращих у проєкті |
+| PROD-10 | Full-text пошук (назва + опис)                                         | [x] | search_vector + GIN |
+| PROD-11 | Підтримка варіантів (size/color)                                       | [ ] | Немає |
+| PROD-12 | Аукціони (bids, auction_end_time, current_bid)                         | [~] | Поля є (sale_type='auction', auction_end_time, start_price), але **логіка ставок відсутня** |
+| PROD-13 | Кешування списків/деталей                                              | [ ] | Не реалізовано |
 
 ---
 
-## 2.3 Зображення продуктів
+## 2.3 Відгуки
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| IMG-01 | Багато зображень на продукт: image (Cloudinary), image_url | [x] | `ProductImage` model |
-| IMG-02 | Upload зображення: ≤32MB, JPG/PNG/GIF | [x] | `upload_image` в `ProductViewSet` |
-| IMG-03 | Асинхронне завантаження в Cloudinary (Celery) | [x] | `upload_image_to_cloudinary` task |
-| IMG-04 | Валідація: розмір, формат | [x] | `ProductImageUploadSerializer` |
-| IMG-05 | Авто-оптимізація (resize, compress) | [ ] | — |
-| IMG-06 | Водяні знаки | [ ] | — |
-
----
-
-## 2.4 Відгуки та рейтинги
-
-| ID | Вимога | Статус | Джерело |
-|----|-------|-------|--------|
-| REV-01 | CRUD відгуків: product, user_id, rating (0-5), comment, created_at, is_approved | [x]   | `Review` model, `add_review` в `ProductViewSet` |
-| REV-02 | Валідація rating: 0-5 | [x]   | `validate_rating` |
-| REV-03 | Авто-оновлення rating_count на продукті | [x]   | `save/delete` в `Review` |
-| REV-04 | Інтеграція з User Service: get_user (username) | [x]   | `get_user` в `ReviewSerializer` |
-| REV-05 | Тільки авторизовані: створення (user_id = user.id) | [x]   | `add_review` |
-| REV-06 | Дозволи: адміни — все; користувачі — свої відгуки | [x]   | `ReviewPermission` |
-| REV-07 | Авто-модерація: is_approved = False при створенні | [x]   | `add_review` |
-| REV-08 | Асинхронна модерація (toxic check) | [x]   | `moderate_content` task |
-| REV-09 | Ручна модерація | [x]   | `ModerationViewSet` |
-| REV-10 | Нотифікація про модерацію | [x]   | `send_moderation_notification` |
-| REV-11 | Фільтри: по продукту, даті, рейтингу | [x]   | — |
-| REV-12 | Відповіді на відгуки (nested) | [ ]   | — |
-| REV-13 | Helpful votes | [ ]   | — |
+| ID     | Вимога                                                                 | Статус | Коментар |
+|--------|------------------------------------------------------------------------|--------|---------|
+| REV-01 | CRUD відгуків (rating 0–5)                                             | [x] | ReviewViewSet |
+| REV-02 | Тільки авторизовані + один відгук тільки на куплений товар              | [~] | Авторизація є, перевірка покупки — **немає** (можна залишити відгук на будь-який продукт) |
+| REV-03 | Авто-модерація відгуків (Celery)                                       | [x] | moderate_content.delay() в perform_create |
+| REV-04 | Схвалені відгуки впливають на рейтинг продукту                         | [x] | rating_count оновлюється в Review.save() |
+| REV-05 | Фільтри: product, rating, is_approved, created_at                      | [x] | filterset_fields |
 
 ---
 
-## 2.5 Модерація
+## 2.4 Модерація контенту
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| MOD-01 | Авто-модерація тексту (product/review) via external API | [x] | `moderate_content` task |
-| MOD-02 | Ручна модерація: update is_approved для product/review | [x] | `ModerationViewSet` |
-| MOD-03 | Нотифікація vendor/user про результат (email) | [x] | `send_moderation_notification` |
-| MOD-04 | Черга модерації (list pending) | [~] | Фільтр is_approved=False |
-| MOD-05 | Причини відхилення (field) | [ ] | — |
-| MOD-06 | Аудит-лог модерації | [ ] | — |
+| ID     | Вимога                                                                 | Статус | Коментар |
+|--------|------------------------------------------------------------------------|--------|---------|
+| MOD-01 | ModerationViewSet (ручна модерація)                                    | [x] | Повністю працює |
+| MOD-02 | Авто-модерація (toxicity check)                                        | [x] | Celery задача → http://127.0.0.1:8001/moderate (заглушка, але працює) |
+| MOD-03 | Нотифікація автору про результат модерації                             | [x] | send_moderation_notification.delay() |
+| MOD-04 | Черга модерації для адмінів                                            | [x] | GET /moderation/ повертає все з is_approved=False |
 
 ---
 
-## 2.6 Безпека та дозволи
+## 2.5 Stock & Резервування
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| SEC-01 | JWT автентифікація | [x] | `REST_FRAMEWORK` |
-| SEC-02 | Ролі: user (свої продукти), admin (все) | [x] | `HasRolePermission` |
-| SEC-03 | Throttling: 1M/день (anon), 10M/день (user) | [x] | `REST_FRAMEWORK` |
-| SEC-04 | CORS з origins | [x] | Settings |
-| SEC-05 | Логування дій (CRUD, moderation) | [x] | Logging config |
-| SEC-06 | CSRF protection | [x] | Middleware |
-| SEC-07 | Rate limit по IP для upload | [ ] | — |
-| SEC-08 | CAPTCHA для відгуків | [ ] | — |
+| ID       | Вимога                                                                 | Статус |
+|----------|------------------------------------------------------------------------|--------|
+| STOCK-01 | Резерв stock на 30 хвилин (Reservation + expires_at)                   | [x] |
+| STOCK-02 | Авто-очищення прострочених (Celery beat)                               | [x] | Є задача cleanup_expired_reservations |
+| STOCK-03 | Ендпоінти reserve/ та cancel_reservation/                              | [x] |
 
 ---
 
-## 2.7 Інтеграції та tasks
+## 2.6 API та документація
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| INT-01 | Інтеграція з User Service: fetch user data (email, username) | [x] | Serializers, tasks |
-| INT-02 | Celery tasks: upload image, moderate, notify | [x] | `tasks.py` |
-| INT-03 | Redis broker/backend | [x] | Settings |
-| INT-04 | Cloudinary для images | [x] | Models, tasks |
-| INT-05 | External moderation API | [x] | `moderate_content` |
-| INT-06 | Webhooks: product.created, approved | [ ] | — |
-| INT-07 | Integration з Payment Service | [ ] | — |
+| ID     | Вимога                                                                 | Статус |
+|--------|------------------------------------------------------------------------|--------|
+| API-01 | OpenAPI 3.0 + Swagger UI                                               | [x] |
+| API-02 | Усі ендпоінти задокументовані (extend_schema)                          | [x] |
+| API-03 | Версіонування (/v1/)                                                   | [ ] |
 
----
-
-## 2.8 API та документація
-
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| API-01 | OpenAPI (Swagger UI) | [x] | `drf_spectacular`, urls |
-| API-02 | JSON Schema | [x] | `SpectacularAPIView` |
-| API-03 | gRPC endpoint | [ ] | — |
+**Актуальні ендпоінти (20.11.2025):**
+- `GET/POST /products/`
+- `GET/PUT/PATCH/DELETE /products/{id}/`
+- `POST /products/{id}/upload_image/`
+- `PATCH /products/{id}/reserve/`
+- `PATCH /products/{id}/cancel_reservation/`
+- `GET/POST /reviews/`
+- `GET/PUT/PATCH/DELETE /reviews/{id}/`
+- `GET/POST/PATCH /moderation/`
+- `/health`, `/schema/`, `/swagger/`
 
 ---
 
-## 2.9 Моніторинг
+## 2.7 Безпека та автентифікація
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|--------|--------|
-| MON-01 | Health check: Redis + DB | [x] | `HealthCheckView` |
-| MON-02 | Prometheus метрики | [ ] | — |
-| MON-03 | Tracing (OpenTelemetry) | [ ] | — |
-| MON-04 | Alerting | [ ] | — |
-
----
-
-## 2.10 Тестування
-
-| ID | Вимога | Статус |
-|----|-------|--------|
-| TEST-01 | Unit + integration tests | [ ~ ]  |
-| TEST-02 | Load testing | [ ]    |
-| TEST-03 | Security scan | [ ]    |
+| ID     | Вимога                                                                 | Статус |
+|--------|------------------------------------------------------------------------|--------|
+| SEC-01 | Кастомний JWT middleware (verify token у User Service)                 | [x] | Працює ідеально |
+| SEC-02 | RBAC vendor/admin                                                      | [x] |
+| SEC-03 | Throttling (1M/день anon, 10M/день user)                               | [x] |
+| SEC-04 | CORS + SensitiveDataFilter в логах                                     | [x] |
 
 ---
 
-## 2.11 Кешування
+## 2.8 Моніторинг
 
-| ID | Вимога | Статус | Джерело |
-|----|-------|-----|--------|
-| PCACHE-01 | Кеш списків продуктів | [] | `product:list:*`, TTL 5 хв |
-| PCACHE-02 | Кеш деталей продукту | [] | `product:detail:{id}`, TTL 10 хв |
-| PCACHE-03 | Інвалідатор при змінах | [] | `invalidate_product_cache` |
+| ID     | Вимога                                                                 | Статус |
+|--------|------------------------------------------------------------------------|--------|
+| MON-01 | Health check (Redis + DB)                                              | [x] | Працює |
+| MON-02 | Prometheus / OpenTelemetry                                             | [ ] |
 
+---
 
+## Оновлений Roadmap (реальний, 20.11.2025)
 
-## План розширення (Roadmap)
+| Етап          | Статус       | %    | Залишилось (ключові задачі) |
+|---------------|--------------|------|------------------------------|
+| **MVP**       | Виконано     | 100% | —                            |
+| **MVP+**      | Виконано     | 82%  | 1. CategoryViewSet<br>2. Перевірка "відгук тільки після покупки"<br>3. Логіка аукціонів (bids)<br>4. Варіанти продуктів |
+| **Production**| В процесі    | 35%  | Кешування Redis, метрики, tracing, тести |
+| **Enterprise**| Не почато    | 0%   | gRPC, ML-модерація (замість заглушки) |
 
-| Етап | Термін | Вимоги |
-|------|--------|-------|
-| **MVP+** | &&&    | Аукціон, варіанти, CAPTCHA |
-| **Production** | &&&    | Webhooks, імпорт, рекомендації |
-| **Enterprise** | 2+ міс | gRPC, аудит, ML модерація |
+**Пріоритет на зараз (можна закрити за 1–2 дні):**
+1. Додати `CategoryViewSet` (CRUD + пошук)
+2. Додати валідацію: відгук тільки після покупки (перевірка в Order Service)
+3. Реалізувати bids для аукціонів
 
 ---
