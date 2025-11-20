@@ -13,6 +13,8 @@ from .tasks import upload_image_to_cloudinary, send_moderation_notification
 import logging
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework.generics import GenericAPIView
+from django.utils import timezone
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +132,48 @@ class ProductViewSet(viewsets.ModelViewSet):
         reviews = product.reviews.filter(is_approved=True)  # Тільки схвалені
         serializer = ReviewSerializer(reviews, many=True, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'], url_path='reserve')
+    def reserve(self, request, pk=None):
+        product = self.get_object()
+        quantity = int(request.data.get('quantity', 0))
+        order_id = request.data.get('order_id')
+
+        if quantity <= 0 or not order_id:
+            return Response({"error": "quantity and order_id required"}, status=400)
+
+        if product.stock < quantity:
+            return Response({"error": "Not enough stock"}, status=400)
+
+        expires_at = timezone.now() + timedelta(hours=24)
+
+        with transaction.atomic():
+            Reservation.objects.create(
+                product=product,
+                order_id=order_id,
+                quantity=quantity,
+                expires_at=expires_at
+            )
+            product.stock -= quantity
+            product.save(update_fields=['stock'])
+
+        return Response({"success": True, "reserved": quantity})
+
+    @action(detail=True, methods=['post'], url_path='release')
+    def release(self, request, pk=None):
+        product = self.get_object()
+        order_id = request.data.get('order_id')
+        if not order_id:
+            return Response({"error": "order_id required"}, status=400)
+
+        with transaction.atomic():
+            reservations = product.reservations.filter(order_id=order_id)
+            total = sum(r.quantity for r in reservations)
+            reservations.delete()
+            product.stock += total
+            product.save(update_fields=['stock'])
+
+        return Response({"success": True, "released": total})
 
 class ModerationViewSet(viewsets.ViewSet):
     permission_classes = [HasRolePermission]

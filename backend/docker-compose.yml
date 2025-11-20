@@ -87,7 +87,7 @@ services:
     build:
       context: ./user_service
       dockerfile: Dockerfile
-    container_name: user_service
+    container_name: user_service.py
     restart: unless-stopped
     ports:
       - "8001:8001"
@@ -99,7 +99,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@marketplace_database:5432/${DB_DATABASE}?options=-csearch_path=users_schema
       - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
     volumes:
-      - ./user_service:/app
+      - ./user_service.py:/app
     depends_on:
       marketplace_database:
         condition: service_healthy

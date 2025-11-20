@@ -110,6 +110,25 @@ class ProductImage(models.Model):
     image_url = models.URLField(null=True, blank=True)
     image = CloudinaryField('image', null=True, blank=True)
 
+# Резервування stock
+class Reservation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reservations')
+    order_id = models.UUIDField(db_index=True)
+    quantity = models.PositiveIntegerField()
+    reserved_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        unique_together = ('product', 'order_id')
+        indexes = [
+            models.Index(fields=['expires_at'], name='reservation_expires_idx'),
+        ]
+
+    def __str__(self):
+        return f"Reservation {self.quantity} of {self.product.name} for order {self.order_id}"
+
+
+
 # Відгуки
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')

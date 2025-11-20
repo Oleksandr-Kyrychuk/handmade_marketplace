@@ -22,6 +22,10 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',      # якщо соціальна авторизація
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -35,12 +39,15 @@ INSTALLED_APPS = [
     'users',
 ]
 
+SITE_ID = 1
+
 AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     # WhiteNoiseMiddleware видалено
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,7 +143,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'User Service API',
-    'DESCRIPTION': 'API for User Service in Handmade Marketplace',
+    'DESCRIPTION': 'User management, registration, auth, profile',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'^/?.*',
+    'TAGS': [
+        {'name': 'auth', 'description': 'Authentication & Registration'},
+        {'name': 'users', 'description': 'User management'},
+        {'name': 'profile', 'description': 'User profile'},
+    ],
+    'OPERATION_ID_SUFFIX': 'ViewSet',
+    'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
 }

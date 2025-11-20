@@ -3,17 +3,14 @@
   "info": {
     "title": "Product Service API",
     "version": "1.0.0",
-    "description": "API for Product Service in Handmade Marketplace"
+    "description": "Products, reviews, moderation, images"
   },
   "paths": {
-    "/health/": {
+    "/health": {
       "get": {
-        "operationId": "health_retrieve",
+        "operationId": "root_retrieve",
         "description": "Checks Redis and database availability.",
         "summary": "Health check for Product Service",
-        "tags": [
-          "health"
-        ],
         "security": [
           {
             "jwtAuth": []
@@ -34,9 +31,9 @@
         }
       }
     },
-    "/moderation/": {
+    "/moderation": {
       "get": {
-        "operationId": "moderation_list",
+        "operationId": "root_list",
         "description": "Retrieve content pending moderation (products or reviews)",
         "parameters": [
           {
@@ -56,9 +53,6 @@
             "description": "Type of content to moderate (product/review)",
             "required": true
           }
-        ],
-        "tags": [
-          "moderation"
         ],
         "security": [
           {
@@ -82,11 +76,8 @@
         }
       },
       "post": {
-        "operationId": "moderation_create",
+        "operationId": "root_create",
         "description": "Approve or reject content (product or review)",
-        "tags": [
-          "moderation"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -155,9 +146,9 @@
         }
       }
     },
-    "/products/": {
+    "/products": {
       "get": {
-        "operationId": "products_list",
+        "operationId": "root_list_2",
         "parameters": [
           {
             "in": "query",
@@ -230,9 +221,6 @@
             "description": "* `fixed` - Fixed Price\n* `auction` - Auction"
           }
         ],
-        "tags": [
-          "products"
-        ],
         "security": [
           {
             "jwtAuth": []
@@ -255,25 +243,22 @@
         }
       },
       "post": {
-        "operationId": "products_create",
-        "tags": [
-          "products"
-        ],
+        "operationId": "root_create_2",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             }
           },
@@ -298,9 +283,9 @@
         }
       }
     },
-    "/products/{id}/": {
+    "/products/{id}": {
       "get": {
-        "operationId": "products_retrieve",
+        "operationId": "root_retrieve_2",
         "parameters": [
           {
             "in": "path",
@@ -311,9 +296,6 @@
             "description": "A unique integer value identifying this product.",
             "required": true
           }
-        ],
-        "tags": [
-          "products"
         ],
         "security": [
           {
@@ -334,7 +316,7 @@
         }
       },
       "put": {
-        "operationId": "products_update",
+        "operationId": "root_update",
         "parameters": [
           {
             "in": "path",
@@ -346,24 +328,21 @@
             "required": true
           }
         ],
-        "tags": [
-          "products"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             }
           },
@@ -388,7 +367,7 @@
         }
       },
       "patch": {
-        "operationId": "products_partial_update",
+        "operationId": "root_partial_update",
         "parameters": [
           {
             "in": "path",
@@ -400,24 +379,21 @@
             "required": true
           }
         ],
-        "tags": [
-          "products"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedProduct"
+                "$ref": "#/components/schemas/PatchedProductRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedProduct"
+                "$ref": "#/components/schemas/PatchedProductRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedProduct"
+                "$ref": "#/components/schemas/PatchedProductRequest"
               }
             }
           }
@@ -441,7 +417,7 @@
         }
       },
       "delete": {
-        "operationId": "products_destroy",
+        "operationId": "root_destroy",
         "parameters": [
           {
             "in": "path",
@@ -452,9 +428,6 @@
             "description": "A unique integer value identifying this product.",
             "required": true
           }
-        ],
-        "tags": [
-          "products"
         ],
         "security": [
           {
@@ -468,45 +441,9 @@
         }
       }
     },
-    "/products/{id}/reviews/": {
-      "get": {
-        "operationId": "products_reviews_retrieve",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "integer"
-            },
-            "description": "A unique integer value identifying this product.",
-            "required": true
-          }
-        ],
-        "tags": [
-          "products"
-        ],
-        "security": [
-          {
-            "jwtAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Product"
-                }
-              }
-            },
-            "description": ""
-          }
-        }
-      }
-    },
-    "/products/{id}/upload_image/": {
+    "/products/{id}/release": {
       "post": {
-        "operationId": "products_upload_image_create",
+        "operationId": "root_create_3",
         "parameters": [
           {
             "in": "path",
@@ -517,25 +454,22 @@
             "description": "A unique integer value identifying this product.",
             "required": true
           }
-        ],
-        "tags": [
-          "products"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Product"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             }
           },
@@ -560,9 +494,147 @@
         }
       }
     },
-    "/reviews/": {
+    "/products/{id}/reserve": {
+      "patch": {
+        "operationId": "root_partial_update_2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/products/{id}/reviews": {
       "get": {
-        "operationId": "reviews_list",
+        "operationId": "root_retrieve_3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/products/{id}/upload_image": {
+      "post": {
+        "operationId": "root_create_4",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "jwtAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/reviews": {
+      "get": {
+        "operationId": "root_list_3",
         "parameters": [
           {
             "in": "query",
@@ -594,9 +666,6 @@
             }
           }
         ],
-        "tags": [
-          "reviews"
-        ],
         "security": [
           {
             "jwtAuth": []
@@ -619,25 +688,22 @@
         }
       },
       "post": {
-        "operationId": "reviews_create",
-        "tags": [
-          "reviews"
-        ],
+        "operationId": "root_create_5",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Review"
+                "$ref": "#/components/schemas/ReviewRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/Review"
+                "$ref": "#/components/schemas/ReviewRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Review"
+                "$ref": "#/components/schemas/ReviewRequest"
               }
             }
           },
@@ -662,9 +728,9 @@
         }
       }
     },
-    "/reviews/{id}/": {
+    "/reviews/{id}": {
       "get": {
-        "operationId": "reviews_retrieve",
+        "operationId": "root_retrieve_4",
         "parameters": [
           {
             "in": "path",
@@ -675,9 +741,6 @@
             "description": "A unique integer value identifying this review.",
             "required": true
           }
-        ],
-        "tags": [
-          "reviews"
         ],
         "security": [
           {
@@ -698,7 +761,7 @@
         }
       },
       "put": {
-        "operationId": "reviews_update",
+        "operationId": "root_update_2",
         "parameters": [
           {
             "in": "path",
@@ -710,24 +773,21 @@
             "required": true
           }
         ],
-        "tags": [
-          "reviews"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Review"
+                "$ref": "#/components/schemas/ReviewRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/Review"
+                "$ref": "#/components/schemas/ReviewRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Review"
+                "$ref": "#/components/schemas/ReviewRequest"
               }
             }
           },
@@ -752,7 +812,7 @@
         }
       },
       "patch": {
-        "operationId": "reviews_partial_update",
+        "operationId": "root_partial_update_3",
         "parameters": [
           {
             "in": "path",
@@ -764,24 +824,21 @@
             "required": true
           }
         ],
-        "tags": [
-          "reviews"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedReview"
+                "$ref": "#/components/schemas/PatchedReviewRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedReview"
+                "$ref": "#/components/schemas/PatchedReviewRequest"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/PatchedReview"
+                "$ref": "#/components/schemas/PatchedReviewRequest"
               }
             }
           }
@@ -805,7 +862,7 @@
         }
       },
       "delete": {
-        "operationId": "reviews_destroy",
+        "operationId": "root_destroy_2",
         "parameters": [
           {
             "in": "path",
@@ -816,9 +873,6 @@
             "description": "A unique integer value identifying this review.",
             "required": true
           }
-        ],
-        "tags": [
-          "reviews"
         ],
         "security": [
           {
@@ -857,22 +911,9 @@
           "status"
         ]
       },
-      "PatchedProduct": {
+      "PatchedProductRequest": {
         "type": "object",
         "properties": {
-          "productId": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "vendor": {
-            "type": "object",
-            "additionalProperties": {},
-            "readOnly": true
-          },
-          "categoryId": {
-            "type": "integer",
-            "readOnly": true
-          },
           "category": {
             "type": "integer",
             "writeOnly": true,
@@ -880,6 +921,7 @@
           },
           "name": {
             "type": "string",
+            "minLength": 1,
             "pattern": "^[A-Za-z\\u0410-\\u042f\\u0430-\\u044f0-9\\s\\-\\']+$",
             "maxLength": 255
           },
@@ -917,60 +959,18 @@
             "maximum": 2147483647,
             "minimum": 0
           },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          },
-          "images": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductImage"
-            },
-            "readOnly": true
-          },
           "product_href": {
             "type": "string",
             "maxLength": 255,
             "pattern": "^[-a-zA-Z0-9_]+$"
-          },
-          "isAvailable": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "reviews_count": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "rating": {
-            "type": "number",
-            "format": "double",
-            "readOnly": true
-          },
-          "discount_tag": {
-            "type": "string",
-            "readOnly": true
-          },
-          "is_approved": {
-            "type": "boolean",
-            "readOnly": true
           }
         }
       },
-      "PatchedReview": {
+      "PatchedReviewRequest": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true
-          },
           "productId": {
             "type": "integer"
-          },
-          "user": {
-            "type": "object",
-            "additionalProperties": {},
-            "readOnly": true
           },
           "rating": {
             "type": "integer",
@@ -979,15 +979,6 @@
           },
           "comment": {
             "type": "string"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          },
-          "is_approved": {
-            "type": "boolean",
-            "readOnly": true
           }
         }
       },
@@ -1006,11 +997,6 @@
           "categoryId": {
             "type": "integer",
             "readOnly": true
-          },
-          "category": {
-            "type": "integer",
-            "writeOnly": true,
-            "nullable": true
           },
           "name": {
             "type": "string",
@@ -1132,6 +1118,88 @@
           "user_id"
         ]
       },
+      "ProductImageRequest": {
+        "type": "object",
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 200
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1,
+            "nullable": true
+          },
+          "user_id": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648
+          }
+        },
+        "required": [
+          "user_id"
+        ]
+      },
+      "ProductRequest": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "integer",
+            "writeOnly": true,
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z\\u0410-\\u042f\\u0430-\\u044f0-9\\s\\-\\']+$",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          },
+          "sale_type": {
+            "$ref": "#/components/schemas/SaleTypeEnum"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "discount_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "start_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "auction_end_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stock": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "product_href": {
+            "type": "string",
+            "maxLength": 255,
+            "pattern": "^[-a-zA-Z0-9_]+$"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
       "Review": {
         "type": "object",
         "properties": {
@@ -1174,6 +1242,26 @@
           "user"
         ]
       },
+      "ReviewRequest": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productId",
+          "rating"
+        ]
+      },
       "SaleTypeEnum": {
         "enum": [
           "fixed",
@@ -1190,5 +1278,19 @@
         "bearerFormat": "JWT"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "products",
+      "description": "Products CRUD & filtering"
+    },
+    {
+      "name": "reviews",
+      "description": "Product reviews"
+    },
+    {
+      "name": "moderation",
+      "description": "Content moderation"
+    }
+  ]
 }
