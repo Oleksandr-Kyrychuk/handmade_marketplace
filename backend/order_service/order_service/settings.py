@@ -2,17 +2,15 @@ import environ
 import os
 from pathlib import Path
 import dj_database_url
-from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, 'django-insecure-change-me-in-production!'),
-    DATABASE_URL=(str, 'postgresql://dev:sysadmin@localhost:5432/marketplace'),  # Default як в product, але з sysadmin
+    DATABASE_URL=(str, 'postgresql://dev:dev@localhost:5432/marketplace'),
     USER_SERVICE_URL=(str, 'http://user-service:8001'),
     PRODUCT_SERVICE_URL=(str, 'http://product-service:8002'),
-    ORDER_SERVICE_URL=(str, 'http://order-service:8003'),
     REDIS_URL=(str, 'redis://redis:6379/1'),
     CORS_ALLOWED_ORIGINS=(str, 'http://localhost:5173,http://localhost:3000'),
 )
@@ -26,6 +24,8 @@ else:
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
+USER_SERVICE_URL = env('USER_SERVICE_URL')
+PRODUCT_SERVICE_URL = env('PRODUCT_SERVICE_URL')
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 
@@ -81,9 +81,6 @@ DATABASES = {
 DATABASES['default']['OPTIONS'] = {'options': '-c search_path=orders_schema,public'}
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
@@ -117,16 +114,10 @@ LOGGING = {
             'format': '[%(asctime)s] %(levelname)s %(name)s %(message)s',
         },
     },
-    'filters': {
-        'sensitive_filter': {
-            '()': 'orders.log_filters.SensitiveDataFilter',
-        },
-    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
-            'filters': ['sensitive_filter'],
         },
     },
     'loggers': {
@@ -146,35 +137,17 @@ LOGGING = {
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
-USER_SERVICE_URL = env('USER_SERVICE_URL')
-PRODUCT_SERVICE_URL = env('PRODUCT_SERVICE_URL')
-ORDER_SERVICE_URL = env('ORDER_SERVICE_URL')
-
-CELERY_BEAT_SCHEDULE = {
-    'cancel-pending-orders': {
-        'task': 'orders.tasks.cancel_pending_orders',
-        'schedule': crontab(minute=0, hour=0),  # щодня
-    },
-}
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Order Service API',
-    'DESCRIPTION': 'Cart, orders, checkout',
+    'DESCRIPTION': 'Orders and cart management',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
     'SCHEMA_PATH_PREFIX': r'^/?.*',
-    'TAGS': [
-        {'name': 'cart', 'description': 'Shopping cart'},
-        {'name': 'orders', 'description': 'Order management'},
-    ],
     'OPERATION_ID_SUFFIX': 'ViewSet',
+    'TAGS': [
+        {'name': 'orders', 'description': 'Order management'},
+        {'name': 'cart', 'description': 'Cart operations'},
+    ],
     'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
 }

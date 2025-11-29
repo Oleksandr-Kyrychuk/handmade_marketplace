@@ -17,7 +17,6 @@ env = environ.Env(
     CORS_ALLOWED_ORIGINS=(str, 'http://localhost:5173,http://localhost:3000'),
 )
 
-# Читаємо .env файл,, якщо він є
 env_path = BASE_DIR / ('.env.local' if os.getenv('ENV') == 'local' else '.env')
 if env_path.exists():
     print(f"Loading {env_path.name}")
@@ -25,10 +24,9 @@ if env_path.exists():
 else:
     print(f"{env_path.name} not found — using Docker environment variables")
 
-# Тепер читаємо змінні
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
-USER_SERVICE_URL = env('USER_SERVICE_URL')  # тепер працює і з Docker!
+USER_SERVICE_URL = env('USER_SERVICE_URL')
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 
@@ -83,18 +81,7 @@ DATABASES = {
 }
 DATABASES['default']['OPTIONS'] = {'options': '-c search_path=products_schema,public'}
 
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': env('CLOUD_NAME'),
-    'API_KEY': env('API_KEY'),
-    'API_SECRET': env('API_SECRET'),
-}
-
-
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
