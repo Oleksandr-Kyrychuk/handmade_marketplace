@@ -1,4 +1,3 @@
-#gateway
 import environ
 import os
 from pathlib import Path
@@ -47,7 +46,6 @@ MIDDLEWARE = [
 USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://user-service:8001")
 PRODUCT_SERVICE_URL = os.getenv("PRODUCT_SERVICE_URL", "http://product-service:8002")
 ORDER_SERVICE_URL = os.getenv("ORDER_SERVICE_URL", "http://order-service:8003")
-
 
 ROOT_URLCONF = 'app.urls'
 

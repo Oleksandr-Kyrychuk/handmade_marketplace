@@ -13,6 +13,7 @@ until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; do
   echo "$(date) - Database is unavailable - sleeping"
   sleep 2
 done
+
 echo "Database ready!"
 
 echo "Creating orders_schema if not exists..."
@@ -21,6 +22,9 @@ CREATE SCHEMA IF NOT EXISTS orders_schema;
 GRANT ALL ON SCHEMA orders_schema TO $DB_USER;
 ALTER SCHEMA orders_schema OWNER TO $DB_USER;
 EOF
+
+echo "Fixing possible inconsistent migration history..."
+python manage.py migrate --fake-initial || true
 
 echo "Making migrations for orders app..."
 python manage.py makemigrations orders --noinput

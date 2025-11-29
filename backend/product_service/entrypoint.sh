@@ -13,6 +13,7 @@ until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; do
   echo "$(date) - Database is unavailable - sleeping"
   sleep 2
 done
+
 echo "Database ready!"
 
 echo "Creating products_schema if not exists..."
@@ -21,6 +22,9 @@ CREATE SCHEMA IF NOT EXISTS products_schema;
 GRANT ALL ON SCHEMA products_schema TO $DB_USER;
 ALTER SCHEMA products_schema OWNER TO $DB_USER;
 EOF
+
+echo "Fixing possible inconsistent migration history..."
+python manage.py migrate --fake-initial || true
 
 echo "Making migrations for products app..."
 python manage.py makemigrations products --noinput

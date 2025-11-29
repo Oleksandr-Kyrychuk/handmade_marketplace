@@ -13,6 +13,7 @@ until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; do
   echo "$(date) - Database is unavailable - sleeping"
   sleep 2
 done
+
 echo "Database ready!"
 
 echo "Creating gateway_schema if not exists..."
@@ -21,6 +22,9 @@ CREATE SCHEMA IF NOT EXISTS gateway_schema;
 GRANT ALL ON SCHEMA gateway_schema TO $DB_USER;
 ALTER SCHEMA gateway_schema OWNER TO $DB_USER;
 EOF
+
+echo "Fixing possible inconsistent migration history..."
+python manage.py migrate --fake-initial || true
 
 echo "Applying migrations..."
 python manage.py migrate

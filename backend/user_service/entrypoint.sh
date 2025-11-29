@@ -1,10 +1,8 @@
 #!/bin/sh
 set -e
 
-# Перевірка, що DATABASE_URL встановлено
 : "${DATABASE_URL:?DATABASE_URL is not set}"
 
-# Розбираємо DATABASE_URL за допомогою Python
 DB_HOST=$(python -c "import dj_database_url, os; print(dj_database_url.parse(os.environ['DATABASE_URL'])['HOST'])")
 DB_PORT=$(python -c "import dj_database_url, os; print(dj_database_url.parse(os.environ['DATABASE_URL'])['PORT'] or 5432)")
 DB_USER=$(python -c "import dj_database_url, os; print(dj_database_url.parse(os.environ['DATABASE_URL'])['USER'])")
@@ -24,6 +22,9 @@ CREATE SCHEMA IF NOT EXISTS users_schema;
 GRANT ALL ON SCHEMA users_schema TO $DB_USER;
 ALTER SCHEMA users_schema OWNER TO $DB_USER;
 EOF
+
+echo "Fixing possible inconsistent migration history..."
+python manage.py migrate --fake-initial || true
 
 echo "Making migrations for all apps..."
 python manage.py makemigrations --noinput
