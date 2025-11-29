@@ -1,4 +1,4 @@
-# render.yaml — 100% валідний Blueprint за документацією Render 2025
+# render.yaml — остаточна валідна версія за документацією Render 2025
 services:
   # Redis (keyvalue)
   - type: keyvalue
@@ -17,14 +17,14 @@ services:
     dockerContext: backend/api_gateway
     dockerfilePath: Dockerfile
     autoDeploy: true
-    healthCheckPath: /health  # дозволено тільки тут
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         sync: false  # додай секрет з Neon + gateway_schema в Dashboard
       - key: REDIS_URL
         fromService:
           name: handmade-redis
-          type: keyvalue  # обов'язкове!
+          type: keyvalue
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
@@ -33,7 +33,7 @@ services:
       - key: USER_SERVICE_URL
         fromService:
           name: user-service
-          type: pserv  # обов'язкове!
+          type: pserv
           envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: PRODUCT_SERVICE_URL
         fromService:
@@ -67,6 +67,7 @@ services:
       - key: SECRET_KEY
         fromService:
           name: api-gateway
+          type: web
           envVarKey: SECRET_KEY
 
   # Product Service (приватний pserv — без healthCheckPath)
@@ -90,6 +91,7 @@ services:
       - key: SECRET_KEY
         fromService:
           name: api-gateway
+          type: web
           envVarKey: SECRET_KEY
 
   # Order Service (приватний pserv — без healthCheckPath)
@@ -113,4 +115,5 @@ services:
       - key: SECRET_KEY
         fromService:
           name: api-gateway
+          type: web
           envVarKey: SECRET_KEY
