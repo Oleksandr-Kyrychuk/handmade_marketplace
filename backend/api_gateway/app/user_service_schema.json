@@ -12,7 +12,10 @@
         "summary": "Перевірка здоров'я сервісів",
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -78,7 +81,10 @@
         "summary": "Логаут користувача",
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -114,7 +120,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -176,7 +185,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -192,7 +204,10 @@
         "operationId": "root_retrieve_2",
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -227,7 +242,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -261,7 +279,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -304,7 +325,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -348,7 +372,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -483,7 +510,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -516,7 +546,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -567,7 +600,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -617,7 +653,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -648,7 +687,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -682,7 +724,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -1207,10 +1252,14 @@
       }
     },
     "securitySchemes": {
-      "jwtAuth": {
+      "basicAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
       }
     }
   },
