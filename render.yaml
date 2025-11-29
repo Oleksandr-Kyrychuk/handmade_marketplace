@@ -1,207 +1,119 @@
-# render.yaml — повний Blueprint для Handmade Marketplace
-
-previews:
-  enabled: true
-  # preview для фронтенду (якщо захочеш додати пізніше)
-  # - name: frontend-preview
-  #   ...
-
+# render.yaml — виправлена версія з type: pserv (працює на Render 2025)
 services:
-  # ====================== PostgreSQL ======================
-  - type: pgsql
-    name: marketplace-db
-    region: frankfurt
-    plan: free            # або starter/pro коли виростеш
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere (тимчасово, потім закриєш)
-    postgresMajorVersion: "16"   # 18 ще не стабільна на Render у 2025
-
-  # ====================== Redis ======================
-  - type: redis
+  # Redis
+  - type: keyvalue
     name: handmade-redis
     region: frankfurt
     plan: free
-    ipAllowList: []                     # доступ тільки з внутрішньої мережі Render
-    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
 
-  # ====================== API Gateway (публічний) ======================
+  # API Gateway (публічний)
   - type: web
     name: api-gateway
     region: frankfurt
-    plan: starter                         # free не витримає навантаження
+    plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    dockerContext: ./backend/api_gateway
-    dockerfilePath: Dockerfile            # той, що для продакшну
+    rootDirectory: backend/api_gateway
+    dockerfilePath: Dockerfile
     autoDeploy: true
-
+    healthCheckPath: /health
     envVars:
-      - key: ENV
-        value: production
-      - key: DEBUG
-        value: "False"
       - key: DATABASE_URL
-        fromDatabase:
-          name: marketplace-db
-          property: connectionString
-          # важливо: схема для api-gateway схема gateway_schema
+        sync: false  # ← додаємо секрет з Neon + search_path=gateway_schema в Dashboard
       - key: REDIS_URL
         fromService:
+          type: keyvalue
           name: handmade-redis
-          type: redis
           property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
       - key: FRONTEND_URL
-        value: https://твій-домен.com         # або https://marketplace.onrender.com
+        value: https://твій-фронтенд.com  # ← заміни на реальний (Vercel тощо)
       - key: USER_SERVICE_URL
         fromService:
+          type: pserv
           name: user-service
-          type: web
-          envVarKey: RENDER_INTERNAL_URL      # внутрішня URL[](https://user-service.onrender.com)
+          envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: PRODUCT_SERVICE_URL
         fromService:
+          type: pserv
           name: product-service
-          type: web
-          envVarKey: RENDER_INTERNAL_URL
+          envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: ORDER_SERVICE_URL
         fromService:
+          type: pserv
           name: order-service
-          type: web
-          envVarKey: RENDER_INTERNAL_URL
-      - key: SECRET_KEY
-        generateValue: true                  # Render згенерує безпечний ключ
-      - key: CORS_ALLOWED_ORIGINS
-        value: https://твій-домен.com,https://marketplace.onrender.com
+          envVarKey: RENDER_INTERNAL_HOSTNAME }
 
-    healthCheckPath: /health
-
-  # ====================== User Service (приватний) ======================
-  - type: private
+  # User Service (приватний)
+  - type: pserv
     name: user-service
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    dockerContext: ./backend/user_service
+    rootDirectory: backend/user_service
     dockerfilePath: Dockerfile
     autoDeploy: true
-
+    healthCheckPath: /health
     envVars:
-      - key: ENV
-        value: production
-      - key: DEBUG
-        value: "False"
       - key: DATABASE_URL
-        sync: false                         # задамо вручну нижче
+        sync: false  # ← секрет з Neon + search_path=users_schema
       - key: REDIS_URL
         fromService:
+          type: keyvalue
           name: handmade-redis
-          type: redis
           property: connectionString
       - key: SECRET_KEY
         fromService:
-          name: api-gateway                  # той самий ключ, що й у гейтвеї
+          name: api-gateway
           envVarKey: SECRET_KEY
-      - key: CELERY_BROKER_URL
-        fromService:
-          name: handmade-redis
-          type: redis
-          property: connectionString
-      - key: CORS_ALLOWED_ORIGINS
-        value: "*"
 
-    # Схема users_schema
-    postDeployCommand: python manage.py migrate --schema=users_schema
-
-    healthCheckPath: /health
-
-  # ====================== Product Service (приватний) ======================
-  - type: private
+  # Product Service (приватний)
+  - type: pserv
     name: product-service
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    dockerContext: ./backend/product_service
+    rootDirectory: backend/product_service
     dockerfilePath: Dockerfile
     autoDeploy: true
-
+    healthCheckPath: /health
     envVars:
-      - key: ENV
-        value: production
       - key: DATABASE_URL
-        sync: false
+        sync: false  # ← секрет з Neon + search_path=products_schema
       - key: REDIS_URL
         fromService:
+          type: keyvalue
           name: handmade-redis
-          type: redis
           property: connectionString
       - key: SECRET_KEY
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
 
-    postDeployCommand: python manage.py migrate --schema=products_schema
-
-    healthCheckPath: /health
-
-  # ====================== Order Service (приватний) ======================
-  - type: private
+  # Order Service (приватний)
+  - type: pserv
     name: order-service
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    dockerContext: ./backend/order_service
+    rootDirectory: backend/order_service
     dockerfilePath: Dockerfile
     autoDeploy: true
-
+    healthCheckPath: /health
     envVars:
-      - key: ENV
-        value: production
       - key: DATABASE_URL
-        sync: false
+        sync: false  # ← секрет з Neon + search_path=orders_schema
       - key: REDIS_URL
         fromService:
+          type: keyvalue
           name: handmade-redis
-          type: redis
           property: connectionString
       - key: SECRET_KEY
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
-
-    postDeployCommand: python manage.py migrate --schema=orders_schema
-
-    healthCheckPath: /health
-
-# ====================== DATABASE_URL для всіх мікросервісів ======================
-databases:
-  - name: marketplace-db
-    databaseName: marketplace
-    user: marketplace_user
-
-# Після деплою треба один раз вручну або через скрипт встановити схеми і search_path
-# Найпростіший спосіб — додати Environment Variable для кожного сервісу вручну:
-#   DATABASE_URL = postgres://.../marketplace?options=-csearch_path=users_schema
-# або використати Render "Post-Deploy Script" (нижче)
-
-# ====================== Один разовий скрипт створення схем ======================
-# Додай це як окремий сервіс або виконай вручну після першого деплою
-- type: web
-  name: init-db-schemas
-  runtime: docker
-  dockerCommand: sh -c "
-    psql $DATABASE_URL -c 'CREATE SCHEMA IF NOT EXISTS gateway_schema;'
-    psql $DATABASE_URL -c 'CREATE SCHEMA IF NOT EXISTS users_schema;'
-    psql $DATABASE_URL -c 'CREATE SCHEMA IF NOT EXISTS products_schema;'
-    psql $DATABASE_URL -c 'CREATE SCHEMA IF NOT EXISTS orders_schema;'
-    echo 'Schemas created'
-  "
-  plan: free
-  autoDeploy: false        # запустиш один раз вручну
-  envVars:
-    - key: DATABASE_URL
-      fromDatabase:
-        name: marketplace-db
-        property: connectionString
