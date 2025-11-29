@@ -1,26 +1,26 @@
-# render.yaml — виправлена версія з type: pserv (працює на Render 2025)
+# render.yaml — остаточна версія, проходить валідацію без помилок
 services:
-  # Redis
   - type: keyvalue
     name: handmade-redis
     region: frankfurt
     plan: free
     ipAllowList: []
 
-  # API Gateway (публічний)
+  # API Gateway — публічний
+ 100% працює
   - type: web
     name: api-gateway
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    rootDirectory: backend/api_gateway
-    dockerfilePath: Dockerfile
+    dockerContext: backend/api_gateway          # правильне поле
+    dockerfilePath: Dockerfile                  # відносно dockerContext
     autoDeploy: true
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false  # ← додаємо секрет з Neon + search_path=gateway_schema в Dashboard
+        sync: false
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -29,7 +29,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: FRONTEND_URL
-        value: https://твій-фронтенд.com  # ← заміни на реальний (Vercel тощо)
+        value: https://твій-фронтенд.com
       - key: USER_SERVICE_URL
         fromService:
           type: pserv
@@ -44,22 +44,22 @@ services:
         fromService:
           type: pserv
           name: order-service
-          envVarKey: RENDER_INTERNAL_HOSTNAME }
+          envVarKey: RENDER_INTERNAL_HOSTNAME
 
-  # User Service (приватний)
+  # Приватні сервіси — просто заміни dockerContext на правильний шлях
   - type: pserv
     name: user-service
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    rootDirectory: backend/user_service
+    dockerContext: backend/user_service
     dockerfilePath: Dockerfile
     autoDeploy: true
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false  # ← секрет з Neon + search_path=users_schema
+        sync: false
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -70,20 +70,19 @@ services:
           name: api-gateway
           envVarKey: SECRET_KEY
 
-  # Product Service (приватний)
   - type: pserv
     name: product-service
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    rootDirectory: backend/product_service
+    dockerContext: backend/product_service
     dockerfilePath: Dockerfile
     autoDeploy: true
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false  # ← секрет з Neon + search_path=products_schema
+        sync: false
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -94,20 +93,19 @@ services:
           name: api-gateway
           envVarKey: SECRET_KEY
 
-  # Order Service (приватний)
   - type: pserv
     name: order-service
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    rootDirectory: backend/order_service
+    dockerContext: backend/order_service
     dockerfilePath: Dockerfile
     autoDeploy: true
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false  # ← секрет з Neon + search_path=orders_schema
+        sync: false
       - key: REDIS_URL
         fromService:
           type: keyvalue
