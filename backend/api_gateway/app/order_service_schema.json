@@ -3,7 +3,7 @@
   "info": {
     "title": "Order Service API",
     "version": "1.0.0",
-    "description": "Cart, orders, checkout"
+    "description": "Orders and cart management"
   },
   "paths": {
     "/cart": {
@@ -11,7 +11,10 @@
         "operationId": "root_list",
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -53,7 +56,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -86,7 +92,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -136,7 +145,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -186,7 +198,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -217,7 +232,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -291,7 +309,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -333,7 +354,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -366,7 +390,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -416,7 +443,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -466,7 +496,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -497,7 +530,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -542,7 +578,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -584,7 +623,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -798,21 +840,25 @@
       }
     },
     "securitySchemes": {
-      "jwtAuth": {
+      "basicAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
       }
     }
   },
   "tags": [
     {
-      "name": "cart",
-      "description": "Shopping cart"
-    },
-    {
       "name": "orders",
       "description": "Order management"
+    },
+    {
+      "name": "cart",
+      "description": "Cart operations"
     }
   ]
 }

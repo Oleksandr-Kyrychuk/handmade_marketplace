@@ -55,8 +55,8 @@ ps:
 
 # Створення міграцій для user_service
 makemigrations-user:
-	@echo "🛠 Створення нових міграцій для user_service..."
-	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user_service python manage.py makemigrations
+	@echo "Створення нових міграцій для user_service..."
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user-service-local python manage.py makemigrations
 
 # Створення міграцій для product_service
 makemigrations-product:

@@ -5,6 +5,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 1. Ініціалізація env
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, 'django-insecure-change-me-in-production!'),
@@ -17,12 +18,20 @@ env = environ.Env(
     CORS_ALLOWED_ORIGINS=(str, 'http://localhost:5173,http://localhost:3000'),
 )
 
+# 2. Завантаження .env
 env_path = BASE_DIR / ('.env.local' if os.getenv('ENV') == 'local' else '.env')
 if env_path.exists():
     print(f"Loading {env_path.name}")
     environ.Env.read_env(str(env_path))
 else:
     print(f"{env_path.name} not found — using Docker environment variables")
+
+# 3. Cloudinary після завантаження .env
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUD_NAME'),
+    'API_KEY': env('API_KEY'),
+    'API_SECRET': env('API_SECRET'),
+}
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')

@@ -13,7 +13,10 @@
         "summary": "Health check for Product Service",
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -56,7 +59,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -109,7 +115,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -223,7 +232,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -266,7 +278,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -299,7 +314,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -350,7 +368,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -400,7 +421,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -431,7 +455,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -477,7 +504,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -529,7 +559,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -562,7 +595,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -615,7 +651,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -668,7 +707,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -711,7 +753,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -744,7 +789,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -795,7 +843,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -845,7 +896,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -876,7 +930,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -1272,10 +1329,14 @@
       }
     },
     "securitySchemes": {
-      "jwtAuth": {
+      "basicAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
       }
     }
   },
