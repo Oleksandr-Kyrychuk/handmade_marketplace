@@ -1,4 +1,4 @@
-# render.yaml — валідний Blueprint за документацією Render 2025
+# render.yaml — 100% валідний Blueprint за документацією Render 2025
 services:
   # Redis (keyvalue)
   - type: keyvalue
@@ -14,39 +14,39 @@ services:
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    dockerContext: backend/api_gateway  # шлях до контексту (правильне поле)
-    dockerfilePath: Dockerfile          # відносно dockerContext
+    dockerContext: backend/api_gateway
+    dockerfilePath: Dockerfile
     autoDeploy: true
-    healthCheckPath: /health
+    healthCheckPath: /health  # дозволено тільки тут
     envVars:
       - key: DATABASE_URL
-        sync: false  # додаємо секрет з Neon + gateway_schema в Dashboard
+        sync: false  # додай секрет з Neon + gateway_schema в Dashboard
       - key: REDIS_URL
         fromService:
-          type: keyvalue
           name: handmade-redis
+          type: keyvalue  # обов'язкове!
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: FRONTEND_URL
-        value: https://твій-фронтенд.com  # заміни на реальний (e.g., Vercel)
+        value: https://твій-фронтенд.com  # заміни на реальний
       - key: USER_SERVICE_URL
         fromService:
-          type: pserv
           name: user-service
-          envVarKey: RENDER_INTERNAL_HOSTNAME  # внутрішня адреса (e.g., user-service.internal)
+          type: pserv  # обов'язкове!
+          envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: PRODUCT_SERVICE_URL
         fromService:
-          type: pserv
           name: product-service
+          type: pserv
           envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: ORDER_SERVICE_URL
         fromService:
-          type: pserv
           name: order-service
+          type: pserv
           envVarKey: RENDER_INTERNAL_HOSTNAME
 
-  # User Service (приватний pserv)
+  # User Service (приватний pserv — без healthCheckPath)
   - type: pserv
     name: user-service
     region: frankfurt
@@ -56,26 +56,20 @@ services:
     dockerContext: backend/user_service
     dockerfilePath: Dockerfile
     autoDeploy: true
-    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         sync: false  # секрет з Neon + users_schema
       - key: REDIS_URL
         fromService:
-          type: keyvalue
           name: handmade-redis
+          type: keyvalue
           property: connectionString
       - key: SECRET_KEY
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: keyvalue
-          name: handmade-redis
-          property: connectionString
 
-  # Product Service (приватний pserv)
+  # Product Service (приватний pserv — без healthCheckPath)
   - type: pserv
     name: product-service
     region: frankfurt
@@ -85,26 +79,20 @@ services:
     dockerContext: backend/product_service
     dockerfilePath: Dockerfile
     autoDeploy: true
-    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         sync: false  # секрет з Neon + products_schema
       - key: REDIS_URL
         fromService:
-          type: keyvalue
           name: handmade-redis
+          type: keyvalue
           property: connectionString
       - key: SECRET_KEY
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: keyvalue
-          name: handmade-redis
-          property: connectionString
 
-  # Order Service (приватний pserv)
+  # Order Service (приватний pserv — без healthCheckPath)
   - type: pserv
     name: order-service
     region: frankfurt
@@ -114,21 +102,15 @@ services:
     dockerContext: backend/order_service
     dockerfilePath: Dockerfile
     autoDeploy: true
-    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         sync: false  # секрет з Neon + orders_schema
       - key: REDIS_URL
         fromService:
-          type: keyvalue
           name: handmade-redis
+          type: keyvalue
           property: connectionString
       - key: SECRET_KEY
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: keyvalue
-          name: handmade-redis
-          property: connectionString
