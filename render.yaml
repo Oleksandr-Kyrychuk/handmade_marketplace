@@ -1,26 +1,26 @@
-# render.yaml — остаточна версія, проходить валідацію без помилок
+# render.yaml — валідний Blueprint за документацією Render 2025
 services:
+  # Redis (keyvalue)
   - type: keyvalue
     name: handmade-redis
     region: frankfurt
     plan: free
     ipAllowList: []
 
-  # API Gateway — публічний
- 100% працює
+  # API Gateway (публічний web)
   - type: web
     name: api-gateway
     region: frankfurt
     plan: starter
     runtime: docker
     repo: https://github.com/Oleksandr-Kyrychuk/handmade_marketplace
-    dockerContext: backend/api_gateway          # правильне поле
-    dockerfilePath: Dockerfile                  # відносно dockerContext
+    dockerContext: backend/api_gateway  # шлях до контексту (правильне поле)
+    dockerfilePath: Dockerfile          # відносно dockerContext
     autoDeploy: true
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false
+        sync: false  # додаємо секрет з Neon + gateway_schema в Dashboard
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -29,12 +29,12 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: FRONTEND_URL
-        value: https://твій-фронтенд.com
+        value: https://твій-фронтенд.com  # заміни на реальний (e.g., Vercel)
       - key: USER_SERVICE_URL
         fromService:
           type: pserv
           name: user-service
-          envVarKey: RENDER_INTERNAL_HOSTNAME
+          envVarKey: RENDER_INTERNAL_HOSTNAME  # внутрішня адреса (e.g., user-service.internal)
       - key: PRODUCT_SERVICE_URL
         fromService:
           type: pserv
@@ -46,7 +46,7 @@ services:
           name: order-service
           envVarKey: RENDER_INTERNAL_HOSTNAME
 
-  # Приватні сервіси — просто заміни dockerContext на правильний шлях
+  # User Service (приватний pserv)
   - type: pserv
     name: user-service
     region: frankfurt
@@ -59,7 +59,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false
+        sync: false  # секрет з Neon + users_schema
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -69,7 +69,13 @@ services:
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: handmade-redis
+          property: connectionString
 
+  # Product Service (приватний pserv)
   - type: pserv
     name: product-service
     region: frankfurt
@@ -82,7 +88,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false
+        sync: false  # секрет з Neon + products_schema
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -92,7 +98,13 @@ services:
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: handmade-redis
+          property: connectionString
 
+  # Order Service (приватний pserv)
   - type: pserv
     name: order-service
     region: frankfurt
@@ -105,7 +117,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false
+        sync: false  # секрет з Neon + orders_schema
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -115,3 +127,8 @@ services:
         fromService:
           name: api-gateway
           envVarKey: SECRET_KEY
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: handmade-redis
+          property: connectionString
