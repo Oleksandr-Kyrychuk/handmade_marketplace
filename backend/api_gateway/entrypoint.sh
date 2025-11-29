@@ -14,7 +14,7 @@ until printf '.' && nc -z $DB_HOST $DB_PORT; do
     sleep 2
 done
 echo "Database ready!"
-68
+
 
 echo "Database ready!"
 
