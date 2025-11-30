@@ -215,6 +215,17 @@ class ProxyView(APIView):
             if k.lower() not in ('host', 'content-length')
         }
 
+        # ВИПРАВЛЕННЯ: Render.com повертає Brotli, а requests його не розуміє → прибираємо br
+        if 'Accept-Encoding' in headers:
+            encodings = [enc.strip() for enc in headers['Accept-Encoding'].split(',')]
+            # Видаляємо brotli/br — залишаємо тільки те, що requests точно розпакує
+            safe_encodings = [enc for enc in encodings if enc.lower() not in {'br', 'brotli'}]
+            if safe_encodings:
+                headers['Accept-Encoding'] = ', '.join(safe_encodings)
+            else:
+                # Якщо клієнт зовсім нічого не приймає — попросимо хоча б gzip
+                headers['Accept-Encoding'] = 'gzip, deflate'
+
         try:
             resp = requests.request(
                 method=request.method,
@@ -231,7 +242,7 @@ class ProxyView(APIView):
             if content_type:
                 response_headers['Content-Type'] = content_type
 
-            # requests сам розпакує gzip, якщо був Content-Encoding: gzip
+            # requests сам розпакує gzip/deflate, а тепер і Brotli ми прибрали
             if 'application/json' in content_type:
                 try:
                     return Response(resp.json(), status=resp.status_code, headers=response_headers)
@@ -260,7 +271,7 @@ class ProxyView(APIView):
 urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     path('', RootView.as_view(), name='root'),
-    path('health', HealthCheckView.as_view(), name='health'),
+    path('health', HealthCheckView.as_view.as_view(), name='health'),
     path('schema/', MergedSchemaView.as_view(), name='schema'),
     path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
