@@ -1,43 +1,63 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from drf_spectacular.utils import extend_schema
+from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.tokens import RefreshToken
 import os
 import certifi
 import re
-from django.utils.timezone import now
-from datetime import timedelta
 import logging
-from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
-
-User = get_user_model()
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+
 class UserSerializer(serializers.ModelSerializer):
-    roles = serializers.ListField(child=serializers.ChoiceField(choices=User.ROLE_CHOICES), required=False)
-    avatar = serializers.ImageField(write_only=True, required=False)  # Додано для завантаження аватара
+    roles = serializers.ListField(
+        child=serializers.ChoiceField(choices=User.ROLE_CHOICES),
+        required=False
+    )
+
+    # Тільки для запису
+    avatar = serializers.ImageField(write_only=True, required=False)
+
+    # Тільки для читання — правильний URL
+    avatar_url = serializers.CharField(source='avatar.url', read_only=True, allow_null=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar']
+        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar', 'avatar_url']
+
+    def validate_avatar(self, value):
+        if value is None:
+            return value
+        max_size = 5 * 1024 * 1024  # 5MB
+        if value.size > max_size:
+            raise ValidationError("Розмір зображення не повинен перевищувати 5MB.")
+        valid_types = ['image/png', 'image/jpeg', 'image/jpg']
+        if value.content_type not in valid_types:
+            raise ValidationError("Дозволені формати: PNG, JPEG.")
+        return value
 
     def update(self, instance, validated_data):
         if 'avatar' in validated_data:
             instance.avatar = validated_data.pop('avatar')
+            instance.save(update_fields=['avatar'])  # оптимізуємо
         return super().update(instance, validated_data)
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
-    avatar = serializers.ImageField(write_only=True, required=False)  # Додано для аватара
+    avatar = serializers.ImageField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -46,92 +66,48 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['password'] != data['password_confirm']:
             raise ValidationError({"password": _("Паролі не співпадають.")})
-        # Додаткові перевірки складності пароля
+
         password = data['password']
-        if len(password) < 12:
-            raise ValidationError({"password": _("Пароль має бути довжиною щонайменше 12 символів.")})
+        if not (8 <= len(password) <= 16):
+            raise ValidationError({"password": _("Пароль повинен містити від 8 до 16 символів.")})
         if not re.search(r'[A-Z]', password):
             raise ValidationError({"password": _("Пароль має містити принаймні одну велику літеру.")})
         if not re.search(r'[0-9]', password):
             raise ValidationError({"password": _("Пароль має містити принаймні одну цифру.")})
         if not re.search(r'[!@#$%^&*]', password):
-            raise ValidationError({"password": _("Пароль має містити принаймні один спеціальний символ.")})
+            raise ValidationError({"password": _("Пароль має містити принаймні один спеціальний символ: !@#$%^&*")})
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        avatar = validated_data.pop('avatar', None)
-        user = User.objects.create_user(**validated_data)
-        if avatar:
-            user.avatar = avatar
-            user.save()
+        validated_data.pop('password_confirm', None)  # видаляємо зайве поле
+        password = validated_data.pop('password')
+        user = User.objects.create_user(password=password, **validated_data)
         return user
 
-class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, write_only=True)
-
-    def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
-
-        if email and password:
-            try:
-                user = User.objects.get(email=email)
-                if not user.check_password(password):
-                    raise serializers.ValidationError(
-                        {'email': [_('Невірний email або пароль')], 'password': [_('Невірний email або пароль')]})
-                if not user.is_active:
-                    raise serializers.ValidationError({'email': [_('Обліковий запис не активний')]})
-                if not user.is_verified:
-                    raise serializers.ValidationError({'email': [_('Email не підтверджений')]})
-            except User.DoesNotExist:
-                raise serializers.ValidationError(
-                    {'email': [_('Невірний email або пароль')], 'password': [_('Невірний email або пароль')]})
-        else:
-            raise serializers.ValidationError({'email': [_('Це поле обов’язкове')], 'password': [_('Це поле обов’язкове')]})
-
-        # Генерація JWT-токенів
-        refresh = RefreshToken.for_user(user)
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
-        data['user'] = {
-            'id': user.id,
-            'email': user.email,
-            'username': user.username,
-            'surname': user.surname,
-            'roles': user.roles
-        }
-
-        return data
-
-class VerifyEmailSerializer(serializers.Serializer):
-    uidb64 = serializers.CharField()
-    token = serializers.CharField()
 
 class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(required=True)
+
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
-    uidb64 = serializers.CharField()
-    token = serializers.CharField()
     new_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
     confirm_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
         if data['new_password'] != data['confirm_password']:
             raise ValidationError({"new_password": _("Паролі не співпадають.")})
-        # Додаткові перевірки складності пароля
+
         password = data['new_password']
-        if len(password) < 12:
-            raise ValidationError({"new_password": _("Пароль має бути довжиною щонайменше 12 символів.")})
+        if not (8 <= len(password) <= 16):
+            raise ValidationError({"new_password": _("Пароль повинен містити від 8 до 16 символів.")})
         if not re.search(r'[A-Z]', password):
             raise ValidationError({"new_password": _("Пароль має містити принаймні одну велику літеру.")})
         if not re.search(r'[0-9]', password):
             raise ValidationError({"new_password": _("Пароль має містити принаймні одну цифру.")})
         if not re.search(r'[!@#$%^&*]', password):
-            raise ValidationError({"new_password": _("Пароль має містити принаймні один спеціальний символ.")})
+            raise ValidationError({"new_password": _("Пароль має містити принаймні один спеціальний символ: !@#$%^&*")})
         return data
+
 
 class ResendVerificationCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
@@ -165,11 +141,34 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
         )
         return user
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)  # Додано для аватара
+    roles = serializers.ListField(read_only=True)
+
+    avatar = serializers.ImageField(write_only=True, required=False)
+    avatar_url = serializers.CharField(source='avatar.url', read_only=True, allow_null=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar']
+        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar', 'avatar_url']
+
+    def validate_avatar(self, value):
+        if value is None:
+            return value
+        max_size = 5 * 1024 * 1024
+        if value.size > max_size:
+            raise ValidationError("Розмір зображення не повинен перевищувати 5MB.")
+        valid_types = ['image/png', 'image/jpeg', 'image/jpg']
+        if value.content_type not in valid_types:
+            raise ValidationError("Дозволені формати: PNG, JPEG.")
+        return value
+
+    def update(self, instance, validated_data):
+        if 'avatar' in validated_data:
+            instance.avatar = validated_data.pop('avatar')
+            instance.save(update_fields=['avatar'])
+        return super().update(instance, validated_data)
+
 
 class HealthCheckSerializer(serializers.Serializer):
     status = serializers.CharField(max_length=10)
@@ -178,3 +177,29 @@ class HealthCheckSerializer(serializers.Serializer):
             child=serializers.CharField(allow_null=True)
         )
     )
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+class LoginSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        data['user'] = {
+            "id": self.user.id,
+            "username": self.user.username,
+            "surname": self.user.surname,
+            "email": self.user.email,
+            "roles": self.user.roles,
+        }
+        return data
+
+

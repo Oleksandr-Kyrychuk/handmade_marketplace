@@ -1,8 +1,11 @@
 import random
+import re
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.utils.timezone import now, timedelta
-from django.core.validators import RegexValidator
+from django.utils.timezone import now
+from datetime import timedelta
+from django.core.validators import RegexValidator, MinLengthValidator
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -12,10 +15,44 @@ from django.dispatch import receiver
 from cloudinary.models import CloudinaryField
 from django.contrib.postgres.search import SearchVector
 name_validator = RegexValidator(
-    regex=r'^(?!-)([A-Za-zА-Яа-яї ЇіІєЄґҐ]+)(?<!-)$',
-    message="Ім'я та прізвище можуть містити лише кирилицю, латиницю, дефіс (не на початку чи в кінці).",
+    regex=r'^(?!-)[A-Za-zА-Яа-яїЇіІєЄґҐ]+(-[A-Za-zА-Яа-яїЇіІєЄґҐ]+)*(?<!-)$',
+    message="Ім'я та прізвище: лише літери (кирилиця/латиниця), дефіс не на початку чи в кінці.",
     code='invalid_name'
 )
+
+def validate_email_custom(value):
+    """Валідація email за суворими вимогами"""
+    if not value or '@' not in value:
+        raise ValidationError("Невірний формат email.")
+
+    parts = value.rsplit('@', 1)
+    if len(parts) != 2:
+        raise ValidationError("Невірний формат email.")
+
+    local, domain = parts
+
+    # Локальна частина
+    if not (1 <= len(local) <= 35):
+        raise ValidationError("Локальна частина email повинна бути від 1 до 35 символів.")
+    if local.startswith('.') or local.endswith('.'):
+        raise ValidationError("Крапка не може бути на початку чи в кінці локальної частини.")
+    if '..' in local:
+        raise ValidationError("Крапки не можуть йти послідовно в локальній частині.")
+    if not re.match(r'^[A-Za-z0-9!#$%&\'*+/=?^_`{|}~.-]{1,35}$', local):
+        raise ValidationError(
+            "Локальна частина email може містити латиницю, цифри та спеціальні символи !#$%&'*+/=?^_`{|}~.-")
+
+    # Доменна частина
+    if not (3 <= len(domain) <= 35):
+        raise ValidationError("Доменна частина повинна бути від 3 до 35 символів.")
+    if domain[0] in '-.' or domain[-1] in '-.':
+        raise ValidationError("Дефіс або крапка не можуть бути на початку чи в кінці домену.")
+    if '..' in domain:
+        raise ValidationError("Крапки не можуть йти послідовно в домені.")
+    if not re.match(r'^[A-Za-z0-9\-\.]+$', domain):
+        raise ValidationError("Домен може містити лише латиницю, цифри, дефіс та крапку.")
+
+    return value
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, surname, password=None, **extra_fields):
@@ -46,9 +83,22 @@ class User(AbstractUser):
         ('user', 'User'),
         ('admin', 'Admin'),
     ]
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=50, validators=[name_validator])
-    surname = models.CharField(max_length=50, validators=[name_validator])
+    email = models.CharField(
+        max_length=71,  # 35 + @ + 35
+        unique=True,
+        validators=[validate_email_custom],
+        help_text="Email: локальна частина 1–35, домен 3–35, без послідовних крапок"
+    )
+    username = models.CharField(
+        max_length=50,
+        validators=[name_validator, MinLengthValidator(1)],
+        help_text="Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)"
+    )
+    surname = models.CharField(
+        max_length=50,
+        validators=[name_validator, MinLengthValidator(1)],
+        help_text="Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)"
+    )
     avatar = CloudinaryField('image', blank=True, null=True)  # Додано поле для аватара
     roles = ArrayField(
         models.CharField(max_length=10, choices=ROLE_CHOICES),
@@ -73,6 +123,7 @@ class User(AbstractUser):
 
     class Meta:
         indexes = [
+            models.Index(fields=['date_joined']),
             GinIndex(fields=['search_vector'], name='user_search_idx'),
         ]
 

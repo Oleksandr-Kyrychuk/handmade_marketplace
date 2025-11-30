@@ -34,6 +34,7 @@ from users.tasks import send_verification_email, send_password_reset_email
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 50
     page_size_query_param = 'page_size'
@@ -48,18 +49,20 @@ class StandardResultsSetPagination(PageNumberPagination):
             "results": data
         })
 
+
 class RegisterView(GenericAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]  # Додано для обробки файлів
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     @extend_schema(summary="Реєстрація нового користувача")
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        send_verification_email.delay(user.id)  # Відправка email через Celery
+        send_verification_email.delay(user.id)
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
 
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -70,13 +73,17 @@ class VerifyEmailView(APIView):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-            if default_token_generator.check_token(user, token) and (now() - user.verification_token_created_at) < timedelta(hours=1):
+            # Безпечна перевірка token + час створення
+            if user.verification_token_created_at and \
+               default_token_generator.check_token(user, token) and \
+               (now() - user.verification_token_created_at) < timedelta(hours=1):
                 user.is_verified = True
                 user.save()
                 return Response({"success": True}, status=status.HTTP_200_OK)
             return Response({"error": "Invalid token or expired"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ResendVerificationCodeView(GenericAPIView):
     serializer_class = ResendVerificationCodeSerializer
@@ -89,18 +96,20 @@ class ResendVerificationCodeView(GenericAPIView):
         user = serializer.save()
         return Response({"success": True}, status=status.HTTP_200_OK)
 
+
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
-    # serializer_class = TokenObtainPairSerializer
 
     @extend_schema(summary="Логін користувача")
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+
 class CustomTokenRefreshView(TokenRefreshView):
     @extend_schema(summary="Оновлення токену")
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
 
 class PasswordResetRequestView(GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
@@ -113,10 +122,11 @@ class PasswordResetRequestView(GenericAPIView):
         email = serializer.validated_data['email']
         try:
             user = User.objects.get(email=email)
-            send_password_reset_email.delay(user.id)  # Відправка email через Celery
+            send_password_reset_email.delay(user.id)
             return Response({"success": True}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 class PasswordResetConfirmView(GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
@@ -137,6 +147,7 @@ class PasswordResetConfirmView(GenericAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -144,16 +155,18 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = UserFilter
     allowed_roles = ['admin']
-    pagination_class = StandardResultsSetPagination  # Додано пагінацію
+    pagination_class = StandardResultsSetPagination
     http_method_names = ['get', 'put', 'patch', 'delete']
+
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]  # Додано для обробки файлів
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self):
         return self.request.user
+
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -168,6 +181,7 @@ class LogoutView(APIView):
             return Response({"success": True}, status=status.HTTP_205_RESET_CONTENT)
         except TokenError:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class HealthCheckView(APIView):
     permission_classes = [permissions.AllowAny]

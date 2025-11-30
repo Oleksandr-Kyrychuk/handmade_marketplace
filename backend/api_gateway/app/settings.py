@@ -16,8 +16,8 @@ else:
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")  # Додано для Render
-# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,8 +43,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
-ROOT_URLCONF = 'app.urls'  # Змінено на app.urls, бо це API Gateway
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://user-service:8001")
+PRODUCT_SERVICE_URL = os.getenv("PRODUCT_SERVICE_URL", "http://product-service:8002")
+ORDER_SERVICE_URL = os.getenv("ORDER_SERVICE_URL", "http://order-service:8003")
+
+ROOT_URLCONF = 'app.urls'
 
 TEMPLATES = [
     {
@@ -84,7 +87,6 @@ REST_FRAMEWORK = {
     },
 }
 
-
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS', default='http://localhost:5173,http://localhost:3000').split(',')
 CORS_ALLOW_CREDENTIALS = True
 
@@ -114,26 +116,19 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        # 'file': {
-        #     'class': 'logging.handlers.RotatingFileHandler',
-        #     'filename': os.path.join(BASE_DIR, 'logs', 'api_gateway.log'),
-        #     'maxBytes': 10 * 1024 * 1024,
-        #     'backupCount': 5,
-        #     'formatter': 'verbose',
-        # },
     },
     'loggers': {
-    'django': {
-        'handlers': ['console'],  # прибрали 'file'
-        'level': 'INFO',
-        'propagate': False,
-    },
-    'app': {
-        'handlers': ['console'],  # прибрали 'file'
-        'level': 'DEBUG',
-        'propagate': False,
-    },
-}
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'app': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    }
 }
 
 STATIC_URL = 'static/'
@@ -144,4 +139,5 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API Gateway for Handmade Marketplace',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
 }

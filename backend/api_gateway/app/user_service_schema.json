@@ -1,0 +1,1280 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "User Service API",
+    "version": "1.0.0",
+    "description": "User management, registration, auth, profile"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "root_retrieve",
+        "summary": "Перевірка здоров'я сервісів",
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            },
+            "description": ""
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/login/": {
+      "post": {
+        "operationId": "root_create",
+        "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
+        "summary": "Логін користувача",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/logout/": {
+      "post": {
+        "operationId": "root_create_2",
+        "summary": "Логаут користувача",
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/password-reset/": {
+      "post": {
+        "operationId": "root_create_4",
+        "summary": "Запит на скидання паролю",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequestRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequestRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetRequest"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/password-reset-confirm/{uidb64}/{token}/": {
+      "post": {
+        "operationId": "root_create_3",
+        "summary": "Підтвердження скидання паролю",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "uidb64",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/profile/": {
+      "get": {
+        "operationId": "root_retrieve_2",
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "root_update",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "root_partial_update",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserProfileRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserProfileRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/register/": {
+      "post": {
+        "operationId": "root_create_5",
+        "summary": "Реєстрація нового користувача",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Register"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/resend-verification/": {
+      "post": {
+        "operationId": "root_create_6",
+        "summary": "Повторна відправка коду верифікації",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationCodeRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationCodeRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendVerificationCode"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/token/refresh/": {
+      "post": {
+        "operationId": "root_create_7",
+        "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+        "summary": "Оновлення токену",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRefreshRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRefreshRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenRefresh"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users-list": {
+      "get": {
+        "operationId": "root_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "created_after",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "created_before",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_verified",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roles",
+            "schema": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "admin",
+                  "user"
+                ],
+                "type": "string",
+                "description": "* `user` - User\n* `admin` - Admin"
+              }
+            },
+            "description": "* `user` - User\n* `admin` - Admin"
+          },
+          {
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedUserList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users-list/{id}": {
+      "get": {
+        "operationId": "root_retrieve_3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "root_update_2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "root_partial_update_2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedUserRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "root_destroy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this user.",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/verify-email/{uidb64}/{token}/": {
+      "get": {
+        "operationId": "root_retrieve_4",
+        "summary": "Підтвердження email",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "uidb64",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyEmail"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "services": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "required": [
+          "services",
+          "status"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "PaginatedUserList": {
+        "type": "object",
+        "required": [
+          "count",
+          "results"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "PasswordResetConfirmRequest": {
+        "type": "object",
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          },
+          "confirm_password": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "confirm_password",
+          "new_password"
+        ]
+      },
+      "PasswordResetRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "PasswordResetRequestRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "PatchedUserProfileRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "PatchedUserRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary",
+            "writeOnly": true
+          }
+        }
+      },
+      "Register": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "username": {
+            "type": "string",
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "surname": {
+            "type": "string",
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "surname",
+          "username"
+        ]
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          },
+          "password_confirm": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "password_confirm",
+          "surname",
+          "username"
+        ]
+      },
+      "ResendVerificationCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResendVerificationCodeRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "RolesEnum": {
+        "enum": [
+          "user",
+          "admin"
+        ],
+        "type": "string",
+        "description": "* `user` - User\n* `admin` - Admin"
+      },
+      "TokenRefresh": {
+        "type": "object",
+        "properties": {
+          "access": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "access"
+        ]
+      },
+      "TokenRefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refresh": {
+            "type": "string",
+            "writeOnly": true,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "refresh"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "surname": {
+            "type": "string",
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "surname",
+          "username"
+        ]
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "surname": {
+            "type": "string",
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "surname",
+          "username"
+        ]
+      },
+      "UserProfileRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "email",
+          "surname",
+          "username"
+        ]
+      },
+      "UserRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "surname": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "surname",
+          "username"
+        ]
+      },
+      "VerifyEmail": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "uid"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication & Registration"
+    },
+    {
+      "name": "users",
+      "description": "User management"
+    },
+    {
+      "name": "profile",
+      "description": "User profile"
+    }
+  ]
+}
