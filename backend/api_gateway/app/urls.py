@@ -191,23 +191,35 @@ class ProxyView(APIView):
             target_url = mapping[path]
 
         # === Звичайні шляхи ===
-        elif path.startswith('users/') or path == 'users':
-            target_url = f"{settings.USER_SERVICE_URL}/{path}".rstrip('/')
+        base_url = None
+        service_path = path
+
+        if path.startswith('users/') or path == 'users':
+            base_url = settings.USER_SERVICE_URL
+            service_path = path.rstrip('/')
+
         elif path.startswith('products/') or path == 'products':
-            clean_path = path.replace('products/', '', 1) if path != 'products' else ''
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/products/{clean_path}".rstrip('/')
+            base_url = settings.PRODUCT_SERVICE_URL
+            service_path = 'products/' + path[len('products/'):].rstrip('/')
+
         elif path.startswith('moderation/'):
-            clean_path = path.replace('moderation/', '', 1)
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{clean_path}".rstrip('/')
+            base_url = settings.PRODUCT_SERVICE_URL
+            service_path = 'moderation/' + path[len('moderation/'):].rstrip('/')
+
         elif path.startswith('orders/') or path == 'orders':
-            clean_path = path.replace('orders/', '', 1) if path != 'orders' else ''
-            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{clean_path}".rstrip('/')
+            base_url = settings.ORDER_SERVICE_URL
+            service_path = 'orders/' + path[len('orders/'):].rstrip('/')
+
         elif path.startswith('carts/') or path == 'carts':
-            clean_path = path.replace('carts/', '', 1) if path != 'carts' else ''
-            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{clean_path}".rstrip('/')
+            base_url = settings.ORDER_SERVICE_URL
+            service_path = 'cart/' + path[len('carts/'):].rstrip('/')
+
         else:
             logger.warning(f"No route for path: {path}")
             return Response({'error': 'Not found'}, status=404)
+
+        # Формуємо фінальний URL (однаковий для всіх)
+        target_url = f"{base_url}/{service_path}".replace('//', '/').rstrip('/')
 
         # КРИТИЧНА ЗМІНА: НЕ чіпаємо Accept-Encoding!
         headers = {
