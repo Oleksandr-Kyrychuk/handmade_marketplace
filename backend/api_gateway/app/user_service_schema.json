@@ -43,7 +43,7 @@
         }
       }
     },
-    "/login/": {
+    "/login": {
       "post": {
         "operationId": "root_create",
         "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
@@ -75,7 +75,7 @@
         }
       }
     },
-    "/logout/": {
+    "/logout": {
       "post": {
         "operationId": "root_create_2",
         "summary": "Логаут користувача",
@@ -94,9 +94,9 @@
         }
       }
     },
-    "/password-reset/": {
+    "/password-reset": {
       "post": {
-        "operationId": "root_create_4",
+        "operationId": "root_create_3",
         "summary": "Запит на скидання паролю",
         "requestBody": {
           "content": {
@@ -141,9 +141,9 @@
         }
       }
     },
-    "/password-reset-confirm/{uidb64}/{token}/": {
+    "/password-reset-confirm/{uidb64}/{token}": {
       "post": {
-        "operationId": "root_create_3",
+        "operationId": "root_create_4",
         "summary": "Підтвердження скидання паролю",
         "parameters": [
           {
@@ -199,7 +199,7 @@
         }
       }
     },
-    "/profile/": {
+    "/profile": {
       "get": {
         "operationId": "root_retrieve_2",
         "security": [
@@ -299,7 +299,7 @@
         }
       }
     },
-    "/register/": {
+    "/register": {
       "post": {
         "operationId": "root_create_5",
         "summary": "Реєстрація нового користувача",
@@ -346,7 +346,7 @@
         }
       }
     },
-    "/resend-verification/": {
+    "/resend-verification": {
       "post": {
         "operationId": "root_create_6",
         "summary": "Повторна відправка коду верифікації",
@@ -393,7 +393,7 @@
         }
       }
     },
-    "/token/refresh/": {
+    "/token/refresh": {
       "post": {
         "operationId": "root_create_7",
         "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
@@ -432,7 +432,7 @@
         }
       }
     },
-    "/users-list": {
+    "/users": {
       "get": {
         "operationId": "root_list",
         "parameters": [
@@ -530,7 +530,7 @@
         }
       }
     },
-    "/users-list/{id}": {
+    "/users/{id}": {
       "get": {
         "operationId": "root_retrieve_3",
         "parameters": [
@@ -700,7 +700,7 @@
         }
       }
     },
-    "/verify-email/{uidb64}/{token}/": {
+    "/verify-email/{uidb64}/{token}": {
       "get": {
         "operationId": "root_retrieve_4",
         "summary": "Підтвердження email",
@@ -888,15 +888,10 @@
             "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
             "maxLength": 71
           },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
-          },
           "avatar": {
             "type": "string",
-            "format": "binary"
+            "format": "binary",
+            "writeOnly": true
           }
         }
       },
@@ -1101,9 +1096,15 @@
             "items": {
               "$ref": "#/components/schemas/RolesEnum"
             }
+          },
+          "avatar_url": {
+            "type": "string",
+            "readOnly": true,
+            "nullable": true
           }
         },
         "required": [
+          "avatar_url",
           "email",
           "id",
           "surname",
@@ -1138,18 +1139,20 @@
           },
           "roles": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
+            "items": {},
+            "readOnly": true
           },
-          "avatar": {
+          "avatar_url": {
             "type": "string",
-            "format": "uri"
+            "readOnly": true,
+            "nullable": true
           }
         },
         "required": [
+          "avatar_url",
           "email",
           "id",
+          "roles",
           "surname",
           "username"
         ]
@@ -1177,15 +1180,10 @@
             "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
             "maxLength": 71
           },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
-          },
           "avatar": {
             "type": "string",
-            "format": "binary"
+            "format": "binary",
+            "writeOnly": true
           }
         },
         "required": [
