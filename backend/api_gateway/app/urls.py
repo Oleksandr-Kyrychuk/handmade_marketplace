@@ -198,33 +198,33 @@ class ProxyView(APIView):
 
         # === ЗВИЧАЙНІ ШЛЯХИ ===
         if path.startswith('users/'):
-            inner_path = path[len('users/'):] or ''
-            target_url = f"{settings.USER_SERVICE_URL}/{inner_path}".replace('//', '/').rstrip('/')
+            inner_path = path[len('users/'):]
+            target_url = f"{settings.USER_SERVICE_URL}/{inner_path}"
 
         elif path == 'users':
-            target_url = settings.USER_SERVICE_URL.rstrip('/')
+            target_url = settings.USER_SERVICE_URL
 
         elif path.startswith('products/'):
             inner_path = path[len('products/'):] or 'products'
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}".replace('//', '/').rstrip('/')
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}"
 
         elif path == 'products':
             target_url = f"{settings.PRODUCT_SERVICE_URL}/products"
 
         elif path.startswith('moderation/'):
             inner_path = path[len('moderation/'):]
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}".replace('//', '/').rstrip('/')
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}"
 
         elif path.startswith('orders/'):
             inner_path = path[len('orders/'):] or 'orders'
-            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}".replace('//', '/').rstrip('/')
+            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}"
 
         elif path == 'orders':
             target_url = f"{settings.ORDER_SERVICE_URL}/orders"
 
         elif path.startswith('carts/'):
             inner_path = path[len('carts/'):]
-            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}".replace('//', '/').rstrip('/')
+            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}"
 
         elif path == 'carts':
             target_url = f"{settings.ORDER_SERVICE_URL}/cart"
