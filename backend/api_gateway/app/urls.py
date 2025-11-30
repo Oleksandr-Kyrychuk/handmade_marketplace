@@ -230,6 +230,8 @@ class ProxyView(APIView):
         }
 
         try:
+            headers['Accept-Encoding'] = 'gzip, deflate, br'
+
             resp = requests.request(
                 method=request.method,
                 url=target_url,
@@ -237,8 +239,12 @@ class ProxyView(APIView):
                 data=request.body,
                 params=request.GET,
                 allow_redirects=False,
-                timeout=20
+                timeout=30,  # краще трохи більше
+                stream=False  # requests сам розпакує gzip
             )
+
+            # requests автоматично розпаковує gzip, якщо є Content-Encoding: gzip
+            # тому resp.text і resp.json() будуть працювати коректно
 
             response_headers = {}
             content_type = resp.headers.get('Content-Type', '')
