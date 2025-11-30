@@ -10,7 +10,7 @@ from users.views import (
 )
 
 router = DefaultRouter(trailing_slash=False)
-router.register(r'users-list', UserViewSet, basename='users')
+router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

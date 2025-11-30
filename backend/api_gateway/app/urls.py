@@ -197,9 +197,7 @@ class ProxyView(APIView):
 
         # === Звичайні шляхи users/ → users-list/ ===
         elif path.startswith('users/') or path == 'users':
-            service_name = 'user_service'
-            clean_path = path.replace('users/', 'users-list/', 1) if path != 'users' else 'users-list/'
-            target_url = f"{settings.USER_SERVICE_URL}/{clean_path}".rstrip('/')
+            target_url = f"{settings.USER_SERVICE_URL}/{path}".rstrip('/')
 
         elif path.startswith('products/') or path == 'products':
             service_name = 'product_service'
