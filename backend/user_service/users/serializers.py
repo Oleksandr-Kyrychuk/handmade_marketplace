@@ -25,17 +25,24 @@ class UserSerializer(serializers.ModelSerializer):
         child=serializers.ChoiceField(choices=User.ROLE_CHOICES),
         required=False
     )
+
+    # Тільки для запису
     avatar = serializers.ImageField(write_only=True, required=False)
+
+    # Тільки для читання — правильний URL
+    avatar_url = serializers.CharField(source='avatar.url', read_only=True, allow_null=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar']
+        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar', 'avatar_url']
 
     def validate_avatar(self, value):
+        if value is None:
+            return value
         max_size = 5 * 1024 * 1024  # 5MB
         if value.size > max_size:
             raise ValidationError("Розмір зображення не повинен перевищувати 5MB.")
-        valid_types = ['image/png', 'image/jpeg']
+        valid_types = ['image/png', 'image/jpeg', 'image/jpg']
         if value.content_type not in valid_types:
             raise ValidationError("Дозволені формати: PNG, JPEG.")
         return value
@@ -43,6 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'avatar' in validated_data:
             instance.avatar = validated_data.pop('avatar')
+            instance.save(update_fields=['avatar'])  # оптимізуємо
         return super().update(instance, validated_data)
 
 
@@ -135,11 +143,31 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)
+    roles = serializers.ListField(read_only=True)
+
+    avatar = serializers.ImageField(write_only=True, required=False)
+    avatar_url = serializers.CharField(source='avatar.url', read_only=True, allow_null=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar']
+        fields = ['id', 'username', 'surname', 'email', 'roles', 'avatar', 'avatar_url']
+
+    def validate_avatar(self, value):
+        if value is None:
+            return value
+        max_size = 5 * 1024 * 1024
+        if value.size > max_size:
+            raise ValidationError("Розмір зображення не повинен перевищувати 5MB.")
+        valid_types = ['image/png', 'image/jpeg', 'image/jpg']
+        if value.content_type not in valid_types:
+            raise ValidationError("Дозволені формати: PNG, JPEG.")
+        return value
+
+    def update(self, instance, validated_data):
+        if 'avatar' in validated_data:
+            instance.avatar = validated_data.pop('avatar')
+            instance.save(update_fields=['avatar'])
+        return super().update(instance, validated_data)
 
 
 class HealthCheckSerializer(serializers.Serializer):
