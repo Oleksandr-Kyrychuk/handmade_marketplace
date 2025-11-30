@@ -1,4 +1,4 @@
-#gateway
+# gateway/urls.py
 import logging
 from django.urls import path, re_path
 from django.conf import settings
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 # ============================
-# Root View — головна сторінка
+# Root View
 # ============================
 class RootView(APIView):
     def get(self, request):
@@ -60,7 +60,7 @@ class RootView(APIView):
 
 
 # ============================
-# Health Check — перевірка всіх сервісів
+# Health Check
 # ============================
 class HealthCheckView(APIView):
     throttle_classes = []
@@ -126,7 +126,6 @@ class HealthCheckView(APIView):
                     logger.error(f"Order Service health check failed: {e}")
                 time.sleep(retry_delay)
 
-        # Кеш схем
         results['schema_cache'] = {
             'user_service': 'ok' if cache.get('user_service_schema') else 'missing',
             'product_service': 'ok' if cache.get('product_service_schema') else 'missing',
@@ -155,21 +154,17 @@ class MergedSchemaView(GenericAPIView):
         generator = SchemaGenerator()
         gateway_schema = generator.get_schema(request=request)
 
-        # Отримуємо схеми з кешу
         user_schema = cache.get('user_service_schema', {})
         product_schema = cache.get('product_service_schema', {})
         order_schema = cache.get('order_service_schema', {})
 
-        # Merge paths
         for schema in [user_schema, product_schema, order_schema]:
             gateway_schema['paths'].update(schema.get('paths', {}))
 
-        # Merge components
         for schema in [user_schema, product_schema, order_schema]:
             for comp_type, comp_data in schema.get('components', {}).items():
                 gateway_schema['components'].setdefault(comp_type, {}).update(comp_data)
 
-        # Додаємо теги для Swagger UI
         gateway_schema['tags'] = [
             {"name": "User", "description": "User Service API"},
             {"name": "Product", "description": "Product Service API"},
@@ -181,18 +176,28 @@ class MergedSchemaView(GenericAPIView):
 
 
 # ============================
-# Proxy View — маршрутизація
+# Proxy View — виправлена версія
 # ============================
 class ProxyView(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     @extend_schema(exclude=True)
     def handle_request(self, request, path):
-        # === Чітка маршрутизація ===
-        if path.startswith('users/') or path == 'users':
+        # === СПЕЦІАЛЬНІ ШЛЯХИ — НЕ чіпаємо users/ → users-list/ ===
+        if path in ('users/health', 'users/schema/', 'products/health', 'products/schema/', 'orders/health', 'orders/schema/'):
+            mapping = {
+                'users/health': f"{settings.USER_SERVICE_URL}/health",
+                'users/schema/': f"{settings.USER_SERVICE_URL}/schema/",
+                'products/health': f"{settings.PRODUCT_SERVICE_URL}/health",
+                'products/schema/': f"{settings.PRODUCT_SERVICE_URL}/schema/",
+                'orders/health': f"{settings.ORDER_SERVICE_URL}/health",
+                'orders/schema/': f"{settings.ORDER_SERVICE_URL}/schema/",
+            }
+            target_url = mapping[path]
+
+        # === Звичайні шляхи users/ → users-list/ ===
+        elif path.startswith('users/') or path == 'users':
             service_name = 'user_service'
-            # /users/ → users-list/
-            # /users/1 → users-list/1
             clean_path = path.replace('users/', 'users-list/', 1) if path != 'users' else 'users-list/'
             target_url = f"{settings.USER_SERVICE_URL}/{clean_path}".rstrip('/')
 
@@ -237,7 +242,6 @@ class ProxyView(APIView):
                 timeout=20
             )
 
-            # Прокидуємо Content-Type
             response_headers = {}
             content_type = resp.headers.get('Content-Type', '')
             if content_type:
@@ -247,17 +251,17 @@ class ProxyView(APIView):
                 try:
                     return Response(resp.json(), status=resp.status_code, headers=response_headers)
                 except ValueError:
-                    logger.error(f"Invalid JSON from {target_url}")
-                    return Response({'error': 'Invalid JSON'}, status=502)
+                    logger.error(f"Invalid JSON from {target_url}: {resp.text[:200]}")
+                    return Response({'error': 'Invalid JSON from upstream'}, status=502)
             else:
                 return Response(resp.content, status=resp.status_code, headers=response_headers)
 
         except requests.Timeout:
-            return Response({'error': f'{service_name} timed out'}, status=504)
+            return Response({'error': 'Gateway timeout'}, status=504)
         except requests.ConnectionError:
-            return Response({'error': f'Cannot connect to {service_name}'}, status=502)
+            return Response({'error': 'Service unavailable'}, status=502)
         except requests.RequestException as e:
-            return Response({'error': str(e)}, status=502)
+            return Response({'error': 'Proxy error'}, status=502)
 
     def get(self, request, path): return self.handle_request(request, path)
     def post(self, request, path): return self.handle_request(request, path)
@@ -273,12 +277,11 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     path('', RootView.as_view(), name='root'),
     path('health', HealthCheckView.as_view(), name='health'),
-    path('users/schema/', SpectacularAPIView.as_view(), name='user_schema_proxy'),
-    path('products/schema/', SpectacularAPIView.as_view(), name='product_schema_proxy'),
-    path('orders/schema/', SpectacularAPIView.as_view(), name='order_schema_proxy'),
     path('schema/', MergedSchemaView.as_view(), name='schema'),
     path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    re_path(r'^(?P<path>.*)/?$', ProxyView.as_view(), name='proxy'),  # дозволяє / і без /
+
+    # Проксі на всі шляхи — включаючи /users/health, /users/schema/ тощо
+    re_path(r'^(?P<path>.*)/?$', ProxyView.as_view(), name='proxy'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
