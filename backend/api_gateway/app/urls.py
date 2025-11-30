@@ -178,8 +178,14 @@ class ProxyView(APIView):
 
     @extend_schema(exclude=True)
     def handle_request(self, request, path):
+        target_url = None
+
         # === СПЕЦІАЛЬНІ ШЛЯХИ ===
-        if path in ('users/health', 'users/schema/', 'products/health', 'products/schema/', 'orders/health', 'orders/schema/'):
+        if path in (
+                'users/health', 'users/schema/',
+                'products/health', 'products/schema/',
+                'orders/health', 'orders/schema/'
+        ):
             mapping = {
                 'users/health': f"{settings.USER_SERVICE_URL}/health",
                 'users/schema/': f"{settings.USER_SERVICE_URL}/schema/",
@@ -190,44 +196,43 @@ class ProxyView(APIView):
             }
             target_url = mapping[path]
 
-            # === ЗВИЧАЙНІ ШЛЯХИ — правильна логіка 2025 року ===
-            if path.startswith('users/'):
-                # Відрізаємо префікс "users/" і шлемо решту в user-service
-                inner_path = path[len('users/'):] or ''
-                target_url = f"{settings.USER_SERVICE_URL}/{inner_path}".replace('//', '/').rstrip('/')
+        # === ЗВИЧАЙНІ ШЛЯХИ ===
+        if path.startswith('users/'):
+            inner_path = path[len('users/'):] or ''
+            target_url = f"{settings.USER_SERVICE_URL}/{inner_path}".replace('//', '/').rstrip('/')
 
-            elif path == 'users':
-                # Просто /users → корінь user-service
-                target_url = settings.USER_SERVICE_URL.rstrip('/')
+        elif path == 'users':
+            target_url = settings.USER_SERVICE_URL.rstrip('/')
 
-            elif path.startswith('products/'):
-                inner_path = path[len('products/'):] or 'products'
-                target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}".replace('//', '/').rstrip('/')
+        elif path.startswith('products/'):
+            inner_path = path[len('products/'):] or 'products'
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}".replace('//', '/').rstrip('/')
 
-            elif path == 'products':
-                target_url = f"{settings.PRODUCT_SERVICE_URL}/products"
+        elif path == 'products':
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/products"
 
-            elif path.startswith('moderation/'):
-                inner_path = path[len('moderation/'):]
-                target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}".replace('//', '/').rstrip('/')
+        elif path.startswith('moderation/'):
+            inner_path = path[len('moderation/'):]
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}".replace('//', '/').rstrip('/')
 
-            elif path.startswith('orders/'):
-                inner_path = path[len('orders/'):] or 'orders'
-                target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}".replace('//', '/').rstrip('/')
+        elif path.startswith('orders/'):
+            inner_path = path[len('orders/'):] or 'orders'
+            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}".replace('//', '/').rstrip('/')
 
-            elif path == 'orders':
-                target_url = f"{settings.ORDER_SERVICE_URL}/orders"
+        elif path == 'orders':
+            target_url = f"{settings.ORDER_SERVICE_URL}/orders"
 
-            elif path.startswith('carts/'):
-                inner_path = path[len('carts/'):]
-                target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}".replace('//', '/').rstrip('/')
+        elif path.startswith('carts/'):
+            inner_path = path[len('carts/'):]
+            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}".replace('//', '/').rstrip('/')
 
-            elif path == 'carts':
-                target_url = f"{settings.ORDER_SERVICE_URL}/cart"
+        elif path == 'carts':
+            target_url = f"{settings.ORDER_SERVICE_URL}/cart"
 
-            else:
-                logger.warning(f"No route for path: {path}")
-                return Response({'error': 'Not found'}, status=404)
+        # Якщо жоден маршрут не matched
+        if not target_url:
+            logger.warning(f"No route for path: {path}")
+            return Response({"error": "Not found"}, status=404)
 
 
         # КРИТИЧНА ЗМІНА: НЕ чіпаємо Accept-Encoding!
