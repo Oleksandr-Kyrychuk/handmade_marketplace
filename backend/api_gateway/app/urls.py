@@ -21,7 +21,6 @@ import redis
 
 logger = logging.getLogger(__name__)
 
-
 # ============================
 # Root View
 # ============================
@@ -57,7 +56,6 @@ class RootView(APIView):
                 "moderation": "/moderation/"
             }
         })
-
 
 # ============================
 # Health Check
@@ -138,7 +136,6 @@ class HealthCheckView(APIView):
             status=200 if all_healthy else 503
         )
 
-
 # ============================
 # Merged OpenAPI Schema
 # ============================
@@ -160,7 +157,6 @@ class MergedSchemaView(GenericAPIView):
 
         for schema in [user_schema, product_schema, order_schema]:
             gateway_schema['paths'].update(schema.get('paths', {}))
-
         for schema in [user_schema, product_schema, order_schema]:
             for comp_type, comp_data in schema.get('components', {}).items():
                 gateway_schema['components'].setdefault(comp_type, {}).update(comp_data)
@@ -174,16 +170,15 @@ class MergedSchemaView(GenericAPIView):
         cache.set('merged_schema', gateway_schema, timeout=3600)
         return Response(gateway_schema)
 
-
 # ============================
-# Proxy View — виправлена версія
+# Proxy View
 # ============================
 class ProxyView(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     @extend_schema(exclude=True)
     def handle_request(self, request, path):
-        # === СПЕЦІАЛЬНІ ШЛЯХИ — НЕ чіпаємо users/ → users-list/ ===
+        # === СПЕЦІАЛЬНІ ШЛЯХИ ===
         if path in ('users/health', 'users/schema/', 'products/health', 'products/schema/', 'orders/health', 'orders/schema/'):
             mapping = {
                 'users/health': f"{settings.USER_SERVICE_URL}/health",
@@ -195,43 +190,32 @@ class ProxyView(APIView):
             }
             target_url = mapping[path]
 
-        # === Звичайні шляхи users/ → users-list/ ===
+        # === Звичайні шляхи ===
         elif path.startswith('users/') or path == 'users':
             target_url = f"{settings.USER_SERVICE_URL}/{path}".rstrip('/')
-
         elif path.startswith('products/') or path == 'products':
-            service_name = 'product_service'
             clean_path = path.replace('products/', '', 1) if path != 'products' else ''
             target_url = f"{settings.PRODUCT_SERVICE_URL}/products/{clean_path}".rstrip('/')
-
         elif path.startswith('moderation/'):
-            service_name = 'product_service'
             clean_path = path.replace('moderation/', '', 1)
             target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{clean_path}".rstrip('/')
-
         elif path.startswith('orders/') or path == 'orders':
-            service_name = 'order_service'
             clean_path = path.replace('orders/', '', 1) if path != 'orders' else ''
             target_url = f"{settings.ORDER_SERVICE_URL}/orders/{clean_path}".rstrip('/')
-
         elif path.startswith('carts/') or path == 'carts':
-            service_name = 'order_service'
             clean_path = path.replace('carts/', '', 1) if path != 'carts' else ''
             target_url = f"{settings.ORDER_SERVICE_URL}/cart/{clean_path}".rstrip('/')
-
         else:
             logger.warning(f"No route for path: {path}")
             return Response({'error': 'Not found'}, status=404)
 
-        # === Прокидуємо заголовки ===
+        # КРИТИЧНА ЗМІНА: НЕ чіпаємо Accept-Encoding!
         headers = {
             k: v for k, v in request.headers.items()
             if k.lower() not in ('host', 'content-length')
         }
 
         try:
-            headers['Accept-Encoding'] = 'gzip, deflate, br'
-
             resp = requests.request(
                 method=request.method,
                 url=target_url,
@@ -239,18 +223,15 @@ class ProxyView(APIView):
                 data=request.body,
                 params=request.GET,
                 allow_redirects=False,
-                timeout=30,  # краще трохи більше
-                stream=False  # requests сам розпакує gzip
+                timeout=30,
             )
-
-            # requests автоматично розпаковує gzip, якщо є Content-Encoding: gzip
-            # тому resp.text і resp.json() будуть працювати коректно
 
             response_headers = {}
             content_type = resp.headers.get('Content-Type', '')
             if content_type:
                 response_headers['Content-Type'] = content_type
 
+            # requests сам розпакує gzip, якщо був Content-Encoding: gzip
             if 'application/json' in content_type:
                 try:
                     return Response(resp.json(), status=resp.status_code, headers=response_headers)
@@ -273,7 +254,6 @@ class ProxyView(APIView):
     def patch(self, request, path): return self.handle_request(request, path)
     def delete(self, request, path): return self.handle_request(request, path)
 
-
 # ============================
 # URL patterns
 # ============================
@@ -284,7 +264,6 @@ urlpatterns = [
     path('schema/', MergedSchemaView.as_view(), name='schema'),
     path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
-    # Проксі на всі шляхи — включаючи /users/health, /users/schema/ тощо
     re_path(r'^(?P<path>.*)/?$', ProxyView.as_view(), name='proxy'),
 ]
 
