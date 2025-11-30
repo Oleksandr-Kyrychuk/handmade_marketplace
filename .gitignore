@@ -210,3 +210,5 @@ __marimo__/
 .idea/
 staticfiles/
 .env.local
+
+.DS_Store
