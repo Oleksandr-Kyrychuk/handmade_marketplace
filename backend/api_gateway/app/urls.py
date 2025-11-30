@@ -271,7 +271,7 @@ class ProxyView(APIView):
 urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     path('', RootView.as_view(), name='root'),
-    path('health', HealthCheckView.as_view.as_view(), name='health'),
+    path('health', HealthCheckView.as_view(), name='health'),
     path('schema/', MergedSchemaView.as_view(), name='schema'),
     path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
