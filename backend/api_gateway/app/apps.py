@@ -20,9 +20,9 @@ def background_schema_loader():
         total_services = 3  # user, product, order
 
         for service_name, url in [
-            ('user_service', f'{settings.USER_SERVICE_URL}/schema/'),
-            ('product_service', f'{settings.PRODUCT_SERVICE_URL}/schema/'),
-            ('order_service', f'{settings.ORDER_SERVICE_URL}/schema/'),
+            ('user_service', f'{settings.USER_SERVICE_URL}/schema'),
+            ('product_service', f'{settings.PRODUCT_SERVICE_URL}/schema'),
+            ('order_service', f'{settings.ORDER_SERVICE_URL}/schema'),
         ]:
             try:
                 resp = requests.get(url, timeout=20)
