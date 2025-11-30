@@ -136,6 +136,11 @@ LOGGING = {
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+def spectacular_id(view):
+    name = view.__class__.__name__
+    action = getattr(view, "action", "index")
+    return f"{name}_{action}"
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'User Service API',
     'DESCRIPTION': 'User management, registration, auth, profile',
@@ -149,5 +154,5 @@ SPECTACULAR_SETTINGS = {
         {'name': 'profile', 'description': 'User profile'},
     ],
     'OPERATION_ID_SUFFIX': 'ViewSet',
-    'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
+    'GENERATE_UNIQUE_ID_FUNCTION': 'settings.spectacular_id',
 }
