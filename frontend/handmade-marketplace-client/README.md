@@ -67,3 +67,6 @@ src/
  ├─ features/     # фичи (Auth, Cart, Auction, Payment)
  ├─ widgets/      # большие блоки интерфейса (Header, Footer, UserMenu)
  ├─ shared/       # переиспользуемое (UI, hooks, lib, api, constants, config)
+ |- store/        #глобальный Zustand/Redux
+ |- assets/       #картинки, иконки (правильно)
+ |-features       #реализация действий

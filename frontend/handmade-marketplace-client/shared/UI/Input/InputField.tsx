@@ -12,20 +12,20 @@ function InputField({
   icon,
   label='',
   errorText='',
-  errors='',
-  type="text",
+  inputType="text",
   register,
   onChange,
   value,
   labelClassName = "",
   inputClassName = "",
+  isHasError=false,
   isRequired = false,
   isHiddenLabel = false,
   isDisabled = false
 }: IInputFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === 'password';
-  const inputTypeNew = type === 'password' && showPassword ? 'text' : type;
+  const isPassword = inputType === 'password';
+  const inputTypeNew = inputType === 'password' && showPassword ? 'text' : inputType;
 
   const togglePassword = () => setShowPassword((prev) => !prev);
 
@@ -45,7 +45,7 @@ function InputField({
             id={id}
             inputType={inputTypeNew}
             placeholder={placeholder}
-            isErrors={errors}
+            isHasError={isHasError}
             inputClassName={inputClassName}
             isDisabled={isDisabled}
             isRequired={isRequired}
@@ -53,11 +53,11 @@ function InputField({
             {...(register ? { register } : { onChange: onChange! })}
           />
 
-          {isPassword && <PasswordToggle isVisible={showPassword} onToggle={togglePassword} />}
+          {isPassword && <PasswordToggle iconClassName={`w-5  ${isHasError ? 'text-red-200' : 'text-primary-600'}`}  isVisible={showPassword} onToggle={togglePassword} />}
         </div>
       </InputLabel>
 
-      <InputError errorText={errorText} errors={errors} />
+      {errorText && <InputError errorText={errorText} />}
     </div>
   );
 }

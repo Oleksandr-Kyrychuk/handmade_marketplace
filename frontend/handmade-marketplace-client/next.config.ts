@@ -31,7 +31,8 @@ const nextConfig: NextConfig = {
                 '#ffffff': 'currentColor',
                 '#FCFCFC': 'currentColor',
                 '#1D2026': 'currentColor',
-                '#282828': 'currentColor'
+                '#282828': 'currentColor',
+                '#FB3748': 'currentColor'
               },
               svgoConfig: {
                 plugins: [

@@ -93,5 +93,33 @@
   },
   "authorization": {
     "login": "Вхід"
+  },
+  "logInPage": {
+    "title": "Увійти",
+    "subtitle": "Вітаємо на нашому маркетплейсі!"
+  },
+  "registrationPage": {
+    "title": "Реєстрація у системі",
+    "subtitle": "Вітаємо на нашому маркетплейсі!"
+  },
+  "form": {
+    "email": "Електронна адреса",
+    "forgot-password": "Забули пароль?",
+    "password": "Пароль",
+    "repeat-the-password": "Повторіть пароль",
+    "enter-password": "Введіть пароль",
+    "login": "Увійти",
+    "or-log-in-with": "або увійти з",
+    "without-registration": "Ще не зареєстровані?",
+    "registration": "Реєстрація",
+    "registration-in-the-system": "Реєстрація у системі",
+    "welcome": "Вітаємо на нашому маркетплейсі!",
+    "name": "Ім'я",
+    "last-name": "Прізвище",
+    "i-agree": "Погоджуюсь з умовами та політикою конфіденційності",
+    "sign-up": "Зареєструватися",
+    "sing-up-with": "або зареєструватися з",
+    "exit": "Вхід",
+    "not-registered-yet": "Ще не зареєстровані?"
   }
 }

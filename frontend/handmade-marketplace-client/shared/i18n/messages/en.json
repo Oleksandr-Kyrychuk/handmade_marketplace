@@ -93,5 +93,31 @@
   },
   "authorization": {
     "login": "Log In"
+  },
+  "logInPage": {
+    "title": "Log in",
+    "subtitle": "Welcome to our marketplace!"
+  },
+  "registrationPage": {
+    "title": "Registration in the system",
+    "subtitle": "Welcome to our marketplace!"
+  },
+  "form": {
+    "email": "Email address",
+    "forgot-password": "Forgot password?",
+    "password": "Password",
+    "repeat-the-password": "Repeat the password",
+    "enter-password": "Enter password",
+    "login": "Login",
+    "or-log-in-with": "or log in with",
+    "without-registration": "Not registered yet?",
+    "registration": "Registration",
+    "name": "Name",
+    "last-name": "Last name",
+    "i-agree": "I agree to the terms and conditions and privacy policy.",
+    "sign-up": "Sign up",
+    "sing-up-with": "or register with",
+    "exit": "Exit",
+    "not-registered-yet": "Not registered yet?"
   }
 }

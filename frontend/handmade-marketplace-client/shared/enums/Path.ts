@@ -18,6 +18,7 @@ export const enum Path {
   Favorite = '/favorite',
   Basket = '/basket',
   LogIn = '/logIn',
+  Reset_Password = '/reset-password',
 
   //User links
   GetMeaster = '/get-master',

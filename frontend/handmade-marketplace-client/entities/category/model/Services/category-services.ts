@@ -1,6 +1,7 @@
-import { CategoryApi } from "./category-api";
-import { ICategoryService } from "./types";
-import { CategoryRequestDTO, CategoryResponseDTO } from "./types/interfaces";
+
+import { CategoryApi } from "../API/category-api";
+import { ICategoryService } from "../types";
+import { CategoryRequestDTO, CategoryResponseDTO } from "../types/interfaces";
 
 
 class CategoryService implements ICategoryService {
