@@ -13,7 +13,7 @@ import InputField from "@/shared/UI/Input/InputField";
 import { ErrorCheckIcon, SuccessCheckIcon } from "@/assets/Icons";
 import Link from "next/link";
 import { Path } from "@/shared/enums/Path";
-import BaseControlField from "@/shared/UI/Input/checkbox/BaseControlField";
+import BaseControlField from "@/shared/UI/InputControl/BaseControlField";
 
 function RegistrationForm() {
   const t = useTranslations();
@@ -159,7 +159,6 @@ function RegistrationForm() {
                 isHasError={!!errors.agreeTerms}
                 errorText={errors?.agreeTerms?.message || ''} 
                 label={t('form.i-agree')}
-                labelClassName="flex items-center flex-row-reverse justify-end"
               />
 						</div>
 					</div>

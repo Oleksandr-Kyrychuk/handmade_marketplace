@@ -1,4 +1,4 @@
-import { IBaseCheckboxBase } from "../types/interfaces";
+import { IBaseCheckboxBase } from "./types/interfaces";
 
 
 function BaseControl({
@@ -6,6 +6,7 @@ function BaseControl({
   inputType,
   onChange,
   register,
+  inputClassName = '',
   isDisabled = false,
   isRequired = false,
   isChecked = false
@@ -29,6 +30,7 @@ function BaseControl({
       disabled={isDisabled}
       {...requiredAttr}
       {...controlProps}
+      className={`${inputClassName} absolute opacity-0 hidden w-0 h-0`}
 
     />
   );

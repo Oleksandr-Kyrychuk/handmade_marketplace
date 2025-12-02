@@ -50,6 +50,30 @@ body {
   }
 }
 
+.label__input-checkbox span:before {
+  content: '';
+  display: block;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: 4px;
+  border: 1px solid var(--color-primary-100);
+  margin-right: 12px;
+}
+.label__input-checkbox span:after {
+  position: absolute;
+  left: 11px;
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  background: url('/images/icons/Check.svg') no-repeat;
+}
+input[type="checkbox"]:checked + span:before {
+  background: var(--color-primary-900);
+}
+
 
 :root {
   /* --radius: 0.625rem;
@@ -95,16 +119,16 @@ body {
   --color-accent-700: #A0864D;
   --color-accent-800: #7C6B47; */
 
-  /* --color-primary-80:  #282828CC;
-  --color-primary-100: #EAEAEA; */
+  /* --color-primary-80:  #282828CC;*/
+  --color-primary-100: #EAEAEA;
   --color-primary-200: #D4D4D4;
   /* --color-primary-300: #BFBFBF;
   --color-primary-400: #A9A9A9;
   --color-primary-500: #949494;
   --color-primary-600: #7E7E7E;
   --color-primary-700: #505050;
-  --color-primary-800: #3A3A3A;
-  --color-primary-900: #282828; */
+  --color-primary-800: #3A3A3A;*/
+  --color-primary-900: #282828; 
   
   /* --color-snow: #FCFCFC;
   --color-snow-70: #FCFCFCB3;

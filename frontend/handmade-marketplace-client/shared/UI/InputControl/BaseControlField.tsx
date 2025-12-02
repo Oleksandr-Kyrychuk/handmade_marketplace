@@ -1,6 +1,7 @@
-import { InputError, InputLabel } from "../subcomponents";
-import { IBaseControlFieldProps } from "../types/interfaces";
+import { InputError } from "../Input/subcomponents";
 import BaseControl from "./BaseControl";
+import ControlInputLabel from "./subcomponents/ControlInputLabel";
+import { IBaseControlFieldProps } from "./types/interfaces";
 
 function BaseControlField({
   inputId,
@@ -20,7 +21,7 @@ function BaseControlField({
 
   return (
     <>
-      <InputLabel
+      <ControlInputLabel
         id={inputId}
         label={label}
         labelClassName={labelClassName}
@@ -39,7 +40,7 @@ function BaseControlField({
           register={register}
           onChange={onChange}
         />
-      </InputLabel>
+      </ControlInputLabel>
       {errorText && <InputError errorText={errorText} />}
     </>
   );

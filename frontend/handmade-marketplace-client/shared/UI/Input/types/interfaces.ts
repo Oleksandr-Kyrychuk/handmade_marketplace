@@ -1,7 +1,6 @@
-import { SignUpRequestDTO } from "@/entities/auth/model/types/interfaces";
 import { IChildren } from "@/shared/types/general-interfaces";
 import { ReactElement } from "react";
-import { UseFormRegister, UseFormRegisterReturn } from "react-hook-form";
+import { UseFormRegisterReturn } from "react-hook-form";
 
 export interface InputProps {
   id: string; 
@@ -61,41 +60,3 @@ export interface IPasswordToggleProps {
   isVisible: boolean;
   iconClassName?: string
 }
-
-export interface IBaseCheckbox {
-  inputId: string,
-  inputType: 'checkbox' | 'radio',
-  isChecked: boolean,
-  isDisabled: boolean,
-  isRequired: boolean,
-  isHasError: boolean,
-  inputClassName: string,
-}
-
-export interface IRegisterFunctionProp {
-  register?: UseFormRegisterReturn | UseFormRegister<SignUpRequestDTO>; 
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-export type IBaseCheckboxBase = IBaseCheckbox & IRegisterFunctionProp;
-
-export interface IBaseControlField {
-  inputId: string,
-  label?: string,
-  errorText?: string,
-  inputType: 'checkbox' | 'radio',
-  labelClassName?: string,
-  inputClassName?: string,
-  isHasError?: boolean,
-  isRequired?: boolean,
-  isHiddenLabel?: boolean,
-  isDisabled?: boolean,
-  isChecked?: boolean,
-}
-
-export interface IRegisterHandlerProp {
-  register: UseFormRegister<SignUpRequestDTO>;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-export type IBaseControlFieldProps = IBaseControlField & (IRegisterHandlerProp );
