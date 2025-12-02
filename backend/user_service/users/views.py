@@ -175,12 +175,18 @@ class LogoutView(APIView):
     @extend_schema(summary="Логаут користувача")
     def post(self, request):
         try:
-            refresh_token = request.data["refresh_token"]
+            # Підтримуємо обидва варіанти: "refresh" і "refresh_token"
+            refresh_token = request.data.get("refresh") or request.data.get("refresh_token")
+            if not refresh_token:
+                return Response({"error": "Refresh token is required"}, status=400)
+
             token = RefreshToken(refresh_token)
             token.blacklist()
-            return Response({"success": True}, status=status.HTTP_205_RESET_CONTENT)
-        except TokenError:
-            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": True, "detail": "Logout successful"}, status=200)
+        except TokenError as e:
+            return Response({"error": "Invalid or already blacklisted token"}, status=400)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
 
 class HealthCheckView(APIView):
