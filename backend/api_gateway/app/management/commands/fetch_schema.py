@@ -15,9 +15,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         services = {
-            'user_service': f"{settings.USER_SERVICE_URL}/schema/",
-            'product_service': f"{settings.PRODUCT_SERVICE_URL}/schema/",
-            'order_service': f"{settings.ORDER_SERVICE_URL}/schema/",
+            'user_service': f"{settings.USER_SERVICE_URL}/schema",
+            'product_service': f"{settings.PRODUCT_SERVICE_URL}/schema",
+            'order_service': f"{settings.ORDER_SERVICE_URL}/schema",
         }
 
         headers = {'Accept': 'application/json'}

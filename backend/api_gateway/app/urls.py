@@ -178,8 +178,14 @@ class ProxyView(APIView):
 
     @extend_schema(exclude=True)
     def handle_request(self, request, path):
+        target_url = None
+
         # === СПЕЦІАЛЬНІ ШЛЯХИ ===
-        if path in ('users/health', 'users/schema/', 'products/health', 'products/schema/', 'orders/health', 'orders/schema/'):
+        if path in (
+                'users/health', 'users/schema/',
+                'products/health', 'products/schema/',
+                'orders/health', 'orders/schema/'
+        ):
             mapping = {
                 'users/health': f"{settings.USER_SERVICE_URL}/health",
                 'users/schema/': f"{settings.USER_SERVICE_URL}/schema/",
@@ -190,24 +196,44 @@ class ProxyView(APIView):
             }
             target_url = mapping[path]
 
-        # === Звичайні шляхи ===
-        elif path.startswith('users/') or path == 'users':
-            target_url = f"{settings.USER_SERVICE_URL}/{path}".rstrip('/')
-        elif path.startswith('products/') or path == 'products':
-            clean_path = path.replace('products/', '', 1) if path != 'products' else ''
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/products/{clean_path}".rstrip('/')
+        # === ЗВИЧАЙНІ ШЛЯХИ ===
+        if path.startswith('users/'):
+            inner_path = path[len('users/'):]
+            target_url = f"{settings.USER_SERVICE_URL}/{inner_path}"
+
+        elif path == 'users':
+            target_url = settings.USER_SERVICE_URL
+
+        elif path.startswith('products/'):
+            inner_path = path[len('products/'):] or 'products'
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}"
+
+        elif path == 'products':
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/products"
+
         elif path.startswith('moderation/'):
-            clean_path = path.replace('moderation/', '', 1)
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{clean_path}".rstrip('/')
-        elif path.startswith('orders/') or path == 'orders':
-            clean_path = path.replace('orders/', '', 1) if path != 'orders' else ''
-            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{clean_path}".rstrip('/')
-        elif path.startswith('carts/') or path == 'carts':
-            clean_path = path.replace('carts/', '', 1) if path != 'carts' else ''
-            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{clean_path}".rstrip('/')
-        else:
+            inner_path = path[len('moderation/'):]
+            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}"
+
+        elif path.startswith('orders/'):
+            inner_path = path[len('orders/'):] or 'orders'
+            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}"
+
+        elif path == 'orders':
+            target_url = f"{settings.ORDER_SERVICE_URL}/orders"
+
+        elif path.startswith('carts/'):
+            inner_path = path[len('carts/'):]
+            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}"
+
+        elif path == 'carts':
+            target_url = f"{settings.ORDER_SERVICE_URL}/cart"
+
+        # Якщо жоден маршрут не matched
+        if not target_url:
             logger.warning(f"No route for path: {path}")
-            return Response({'error': 'Not found'}, status=404)
+            return Response({"error": "Not found"}, status=404)
+
 
         # КРИТИЧНА ЗМІНА: НЕ чіпаємо Accept-Encoding!
         headers = {

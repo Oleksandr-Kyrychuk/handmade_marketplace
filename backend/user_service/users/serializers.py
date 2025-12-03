@@ -59,29 +59,58 @@ class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     avatar = serializers.ImageField(write_only=True, required=False)
 
+    #обов’язкове поле
+    agree_terms = serializers.BooleanField(
+        required=True,
+        error_messages={
+            'required': 'Ви повинні погодитися з умовами використання та політикою конфіденційності',
+            'invalid': 'Поле agree_terms має бути true'
+        }
+    )
+
     class Meta:
         model = User
-        fields = ['email', 'username', 'surname', 'password', 'password_confirm', 'avatar']
+        fields = [
+            'email', 'username', 'surname',
+            'password', 'password_confirm',
+            'avatar', 'agree_terms'
+        ]
 
     def validate(self, data):
+        # Перевірка паролів
         if data['password'] != data['password_confirm']:
-            raise ValidationError({"password": _("Паролі не співпадають.")})
+            raise ValidationError({"password": "Паролі не співпадають."})
 
+        # Перевірка галочки
+        if not data.get('agree_terms'):
+            raise ValidationError({
+                "agree_terms": "Ви повинні погодитися з умовами використання та політикою конфіденційності"
+            })
+
+        # Валідація пароля (залишаємо як є)
         password = data['password']
         if not (8 <= len(password) <= 16):
-            raise ValidationError({"password": _("Пароль повинен містити від 8 до 16 символів.")})
+            raise ValidationError({"password": "Пароль повинен містити від 8 до 16 символів."})
         if not re.search(r'[A-Z]', password):
-            raise ValidationError({"password": _("Пароль має містити принаймні одну велику літеру.")})
+            raise ValidationError({"password": "Пароль має містити принаймні одну велику літеру."})
         if not re.search(r'[0-9]', password):
-            raise ValidationError({"password": _("Пароль має містити принаймні одну цифру.")})
+            raise ValidationError({"password": "Пароль має містити принаймні одну цифру."})
         if not re.search(r'[!@#$%^&*]', password):
-            raise ValidationError({"password": _("Пароль має містити принаймні один спеціальний символ: !@#$%^&*")})
+            raise ValidationError({"password": "Пароль має містити принаймні один спеціальний символ: !@#$%^&*"})
+
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm', None)  # видаляємо зайве поле
+        validated_data.pop('password_confirm', None)
+        validated_data.pop('agree_terms', None)  # просто видаляємо — не зберігаємо в БД (або зберігай, якщо додав поля)
+
         password = validated_data.pop('password')
         user = User.objects.create_user(password=password, **validated_data)
+
+        user.agree_terms_at = now()
+        user.agree_privacy_at = now()
+        user.save()
+
         return user
 
 

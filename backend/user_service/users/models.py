@@ -109,6 +109,8 @@ class User(AbstractUser):
     is_verified = models.BooleanField(default=False, db_index=True)
     verification_token_created_at = models.DateTimeField(null=True, blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
+    agree_terms_at = models.DateTimeField(null=True, blank=True, help_text="Час згоди з умовами")
+    agree_privacy_at = models.DateTimeField(null=True, blank=True, help_text="Час згоди з політикою конфіденційності")
 
     objects = CustomUserManager()
 
