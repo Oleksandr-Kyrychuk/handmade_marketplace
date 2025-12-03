@@ -124,20 +124,20 @@ function RegistrationForm() {
 
 						<div className="mb-4">
 							<Controller 
-									name="email"
-									control={control}
-									render={({field}) => (
-										<InputField 
-											{...field}
-											id="email"
-											inputType="email"
-											isHasError={!!errors.email}
-											errorText={errors?.email?.message || ''}
-											placeholder={t('form.email')}
-											inputClassName="rounded-5xl font-secondary"
-											labelClassName="block mb-1 font-size-body-4 leading-130"
-											label={t('form.email')}
-										/>
+								name="email"
+								control={control}
+								render={({field}) => (
+									<InputField 
+										{...field}
+										id="email"
+										inputType="email"
+										isHasError={!!errors.email}
+										errorText={errors?.email?.message || ''}
+										placeholder={t('form.email')}
+										inputClassName="rounded-5xl font-secondary"
+										labelClassName="block mb-1 font-size-body-4 leading-130"
+										label={t('form.email')}
+									/>
 									)}
 								/>
 						</div>

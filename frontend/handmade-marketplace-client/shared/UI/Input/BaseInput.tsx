@@ -9,6 +9,10 @@ function BaseInput({
   register,
   value,
   onChange,
+  maxLength,
+  inputRef,
+  onKeyDown,
+  onPaste,
   inputClassName = "",
   isHasError = false,
   isDisabled = false,
@@ -17,12 +21,16 @@ function BaseInput({
   
   return (
     <input
+      ref={inputRef}
       id={id}
       type={inputType}
       placeholder={placeholder}
       autoComplete={`new-${id}`}
       required={isRequired}
       disabled={isDisabled}
+      maxLength={maxLength}
+      onKeyDown={onKeyDown}
+      onPaste={onPaste}
       {...(register ? register : onChange ? { value: value ?? '', onChange } : { value })}
       aria-invalid={!!isHasError}
       className={`${inputClassName} border rounded-5xl p-4 bg-snow shadow-custom1 w-full 

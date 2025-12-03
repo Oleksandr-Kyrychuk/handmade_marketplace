@@ -1,16 +1,20 @@
 import { IChildren } from "@/shared/types/general-interfaces";
-import { ReactElement } from "react";
+import React, { ReactElement } from "react";
 import { UseFormRegisterReturn } from "react-hook-form";
 
 export interface InputProps {
-  id: string; 
+  id?: string; 
   inputType: string; 
   placeholder?: string;  
   inputClassName?: string; 
   isDisabled?: boolean; 
   isRequired?: boolean;
   value?: string | string[] | undefined;
-  isHasError? :boolean
+  isHasError? :boolean,
+  maxLength?: number,
+  inputRef?:  (el: HTMLInputElement | null) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onPaste?: (e: React.ClipboardEvent<HTMLInputElement>) => void;
 }
 
 export interface IInputField {

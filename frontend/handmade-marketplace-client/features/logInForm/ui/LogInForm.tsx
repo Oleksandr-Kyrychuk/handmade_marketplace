@@ -5,7 +5,7 @@ import AuthLayout from "@/entities/authLayout/ui/AuthLayout";
 import { Button } from "@/shared/UI";
 import { Path } from "@/shared/enums/Path";
 import InputField from "@/shared/UI/Input/InputField";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { LogInRequestDTO } from "../../../entities/auth/model/types/interfaces";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { logInSchema } from "../validation/validation";
@@ -21,7 +21,7 @@ function LogInForm() {
   const [globalError, setGlobalError] = useState('');
   const {mutateLogIn, mutateLoginPending} = useLogInMutation();
 
-  const {handleSubmit, register, formState: {errors}, setError} = useForm<LogInRequestDTO>({
+  const {handleSubmit, register, formState: {errors}, setError, control} = useForm<LogInRequestDTO>({
     resolver: yupResolver(logInSchema),
   });
 
@@ -34,15 +34,22 @@ function LogInForm() {
       <form autoComplete="false" onSubmit={handleSubmit(onSubmit)} className="lg:mb-12 mb-6">
 					<div className="lg:mb-12 mb-6">
 						<div className="mb-4">
-							<InputField 
-								id="email"
-								inputType="email"
-								isHasError={!!errors.email}
-                errorText={errors?.email?.message || ''}
-								{...register('email')}
-								placeholder="Email"
-                inputClassName="rounded-5xl font-secondary"
-								label={t('form.email')}
+							<Controller 
+								name="email"
+								control={control}
+								render={({field}) => (
+									<InputField 
+										{...field}
+										id="email"
+										inputType="email"
+										isHasError={!!errors.email}
+										errorText={errors?.email?.message || ''}
+										{...register('email')}
+										placeholder="Email"
+										inputClassName="rounded-5xl font-secondary"
+										label={t('form.email')}
+									/>
+								)}
 							/>
 						</div>
 						<div className="mb-4">
@@ -50,16 +57,23 @@ function LogInForm() {
 								<Link href={Path.Reset_Password} className="text-size-link-1 text-primary-600 leading-100 hover:underline duration-500">{t('form.forgot-password')}</Link>
 							</div>
 							<div className="relative">
-								<InputField
-									id="password"
-									inputType="password"
-									{...register('password')}
-									inputClassName="rounded-5xl font-secondary pr-12"
-									placeholder={t('form.enter-password')}
-									isHasError={!!errors.password}
-                  errorText={errors?.password?.message || ''}
-									label={t('form.password')}
-								/>
+								<Controller 
+								name="password"
+								control={control}
+								render={({field}) => (
+									<InputField
+										{...field}
+										id="password"
+										inputType="password"
+										{...register('password')}
+										inputClassName="rounded-5xl font-secondary pr-12"
+										placeholder={t('form.enter-password')}
+										isHasError={!!errors.password}
+										errorText={errors?.password?.message || ''}
+										label={t('form.password')}
+									/>
+								)}
+							/>	
 							</div>
 						</div>
 					</div>

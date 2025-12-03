@@ -102,6 +102,10 @@
     "title": "Registration in the system",
     "subtitle": "Welcome to our marketplace!"
   },
+  "confirmEmailPage": {
+    "title": "Enter confirmation code",
+    "subtitle": "The code has been sent to your email."
+  },
   "form": {
     "email": "Email address",
     "forgot-password": "Forgot password?",
@@ -118,6 +122,8 @@
     "sign-up": "Sign up",
     "sing-up-with": "or register with",
     "exit": "Exit",
-    "not-registered-yet": "Not registered yet?"
+    "not-registered-yet": "Not registered yet?",
+    "resend-code": "Send again",
+    "confirm": "Confirm"
   }
 }
