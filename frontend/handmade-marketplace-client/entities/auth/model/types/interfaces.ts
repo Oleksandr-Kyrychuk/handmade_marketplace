@@ -15,7 +15,7 @@ export interface SignUpRequestDTO {
   email: string,
   password: string,
   password_confirm: string,
-  agreeTerms: boolean;
+  agree_terms: boolean;
 }
 export interface SignUpResponseDTO {
   success: boolean;

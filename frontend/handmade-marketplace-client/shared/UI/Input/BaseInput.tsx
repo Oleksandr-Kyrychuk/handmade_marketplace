@@ -14,9 +14,6 @@ function BaseInput({
   isDisabled = false,
   isRequired = false
 }: IBaseInputProps) {
-  const isRHF = !!register;
-  const htmlRequired = isRHF ? false : isRequired;
-  const requiredAttr = htmlRequired ? { required: true } : {};
   
   return (
     <input
@@ -24,10 +21,9 @@ function BaseInput({
       type={inputType}
       placeholder={placeholder}
       autoComplete={`new-${id}`}
+      required={isRequired}
       disabled={isDisabled}
-      value={register ? undefined : value}
-      {...requiredAttr}
-      {...(register ?? { onChange })}
+      {...(register ? register : onChange ? { value: value ?? '', onChange } : { value })}
       aria-invalid={!!isHasError}
       className={`${inputClassName} border rounded-5xl p-4 bg-snow shadow-custom1 w-full 
         hover:border-primary-100 focus:border-accent-600 disabled:bg-primary-100 

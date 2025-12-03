@@ -4,9 +4,9 @@ import AuthLayout from "@/entities/authLayout/ui/AuthLayout";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { signupSchema } from "../validation/validation";
-import { SignUpRequestDTO } from "@/entities/auth/model/types/interfaces";
+import { CustomError, SignUpRequestDTO } from "@/entities/auth/model/types/interfaces";
 import PlatformsButtons from "@/entities/platformsButtons/PlatformsButtons";
 import { Button } from "@/shared/UI";
 import InputField from "@/shared/UI/Input/InputField";
@@ -14,28 +14,30 @@ import { ErrorCheckIcon, SuccessCheckIcon } from "@/assets/Icons";
 import Link from "next/link";
 import { Path } from "@/shared/enums/Path";
 import BaseControlField from "@/shared/UI/InputControl/BaseControlField";
+import useRegistrationMutation from "../model/Quries/useRegistrationMutation";
+import { useRouter } from "next/navigation";
 
 function RegistrationForm() {
   const t = useTranslations();
-
-  const [showPassword, setShowPassword] = useState(false);
-	const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+	const router = useRouter()
 
 	const [globalError, setGlobalError] = useState('');
+	const { registrationMutation, registrationPending, isError, error } = useRegistrationMutation();
 
 
-  const {handleSubmit, register, formState: {errors}, setError, watch} = useForm<SignUpRequestDTO>({
+  const {handleSubmit, register, formState: {errors, isSubmitting}, setError, watch, control} = useForm<SignUpRequestDTO>({
     resolver: yupResolver(signupSchema),
+		mode: 'onChange',
     defaultValues: {
       username: '',
       surname: '',
       password: '',
       password_confirm: '',
-      agreeTerms: false,
+      agree_terms: false,
     }
   });
 
-  const isTermsAccepted = watch('agreeTerms');
+  const isTermsAccepted = watch('agree_terms');
   const passwordValue = watch('password');
 	const isLengthValid = passwordValue ? passwordValue.length >= 8 : '';
 	const hasUpperCase = /[A-Z]/.test(passwordValue);
@@ -44,6 +46,32 @@ function RegistrationForm() {
 
   function onSubmit(data: SignUpRequestDTO) {
     console.log('data', data)
+
+		registrationMutation(data, {
+			onSuccess: () => {
+				router.push(Path.Send_confirm_email)
+			},
+			onError: (error: Error) => {
+				// console.log('error', error.original)
+				setGlobalError('');
+				const customError = error as CustomError;
+				let hasFieldErrors = false;
+
+				if (customError.original) {
+					Object.entries(customError.original).forEach(([key, message]) => {
+						setError(key as keyof SignUpRequestDTO, {
+							type: 'server',
+							message: message.toString() as string,
+						});
+					});
+					hasFieldErrors = true;
+				}
+
+				if(!hasFieldErrors && customError.message) {
+					setGlobalError(customError.message);
+				}
+			}
+		})
   }
 
   return (
@@ -52,76 +80,110 @@ function RegistrationForm() {
 					<div className="lg:mb-12 mb-6">
 						<div className="flex lg:gap-6 lg:flex-row flex-col">
 							<div className="mb-4 flex-1/2">
-                <InputField 
-                  id="username"
-                  inputType="text"
-                  isHasError={!!errors.username}
-                  errorText={errors?.username?.message || ''}
-                  {...register('username')}
-                  placeholder={t('form.name')}
-                  inputClassName="rounded-5xl font-secondary"
-                  labelClassName="block mb-1 font-size-body-4 leading-130"
-                  label={t('form.name')}
-                />
+							<Controller 
+								name="username"
+								control={control}
+								render={({field}) => (
+									<InputField 
+										{...field}
+										id="username"
+										inputType="text"
+										isHasError={!!errors.username}
+										errorText={errors?.username?.message || ''}
+										placeholder={t('form.name')}
+										inputClassName="rounded-5xl font-secondary"
+										labelClassName="block mb-1 font-size-body-4 leading-130"
+										label={t('form.name')}
+										isRequired
+									/>
+								)}
+							/>
+                
 							</div>
 							<div className="mb-4 flex-1/2">
-                <InputField 
-                  id="surname"
-                  inputType="text"
-                  isHasError={!!errors.surname}
-                  errorText={errors?.surname?.message || ''}
-                  {...register('surname')}
-                  placeholder={t('form.last-name')}
-                  inputClassName="rounded-5xl font-secondary"
-                  labelClassName="block mb-1 font-size-body-4 leading-130"
-                  label={t('form.last-name')}
-                />
+								<Controller 
+									name="surname"
+									control={control}
+									render={({field}) => (
+										<InputField 
+											{...field}
+											id="surname"
+											inputType="text"
+											isHasError={!!errors.surname}
+											errorText={errors?.surname?.message || ''}
+											placeholder={t('form.last-name')}
+											inputClassName="rounded-5xl font-secondary"
+											labelClassName="block mb-1 font-size-body-4 leading-130"
+											label={t('form.last-name')}
+											isRequired
+										/>
+									)}
+								/>
 							</div>
 						</div>
 
 						<div className="mb-4">
-							<InputField 
-								id="email"
-								inputType="email"
-								isHasError={!!errors.email}
-                errorText={errors?.email?.message || ''}
-								{...register('email')}
-								placeholder={t('form.email')}
-                inputClassName="rounded-5xl font-secondary"
-                labelClassName="block mb-1 font-size-body-4 leading-130"
-								label={t('form.email')}
-							/>
+							<Controller 
+									name="email"
+									control={control}
+									render={({field}) => (
+										<InputField 
+											{...field}
+											id="email"
+											inputType="email"
+											isHasError={!!errors.email}
+											errorText={errors?.email?.message || ''}
+											placeholder={t('form.email')}
+											inputClassName="rounded-5xl font-secondary"
+											labelClassName="block mb-1 font-size-body-4 leading-130"
+											label={t('form.email')}
+										/>
+									)}
+								/>
 						</div>
 
 						<div className="flex lg:gap-6 lg:flex-row flex-col">
 							<div className="flex-1/2">
 								<div className="mb-4">
-									<InputField
-                    id="password"
-                    inputType="password"
-                    {...register('password')}
-                    inputClassName="rounded-5xl font-secondary pr-12"
-                    labelClassName="block mb-1 font-size-body-4 leading-130"
-                    placeholder={t('form.enter-password')}
-                    isHasError={!!errors.password}
-                    errorText={errors?.password?.message || ''}
-                    label={t('form.password')}
-                  />
+									<Controller 
+										name="password"
+										control={control}
+										render={({field}) => (
+											<InputField
+												{...field}
+												id="password"
+												inputType="password"
+												inputClassName="rounded-5xl font-secondary pr-12"
+												labelClassName="block mb-1 font-size-body-4 leading-130"
+												placeholder={t('form.enter-password')}
+												isHasError={!!errors.password}
+												errorText={errors?.password?.message || ''}
+												label={t('form.password')}
+											/>
+										)}
+									/>
+									
 								</div>
 							</div>
 							<div className="flex-1/2">
 								<div className="mb-4">
-                    <InputField
-                      id="password_confirm"
-                      inputType="password"
-                      {...register('password_confirm')}
-                      inputClassName="rounded-5xl font-secondary pr-12"
-                      labelClassName="block mb-1 font-size-body-4 leading-130"
-                      placeholder={t('form.repeat-the-password')}
-                      isHasError={!!errors.password_confirm}
-                      errorText={errors?.password_confirm?.message || ''}
-                      label={t('form.repeat-the-password')}
-                    />
+									<Controller 
+										name="password_confirm"
+										control={control}
+										render={({field}) => (
+											<InputField
+												{...field}
+												id="password_confirm"
+												inputType="password"
+												inputClassName="rounded-5xl font-secondary pr-12"
+												labelClassName="block mb-1 font-size-body-4 leading-130"
+												placeholder={t('form.repeat-the-password')}
+												isHasError={!!errors.password_confirm}
+												errorText={errors?.password_confirm?.message || ''}
+												label={t('form.repeat-the-password')}
+											/>
+										)}
+									/>
 								</div>
 							</div>
 						</div>
@@ -130,19 +192,19 @@ function RegistrationForm() {
 							<div className="text-size-body-4 font-secondary text-primary-500 mb-2">Ваш пароль має:</div>
 								<ul className='list-none'>
 									<li className="flex items-center mb-2">
-										{hasUpperCase ? <SuccessCheckIcon className="text-green-200" /> : <ErrorCheckIcon className="text-red-200" /> }
+										{hasUpperCase ? <SuccessCheckIcon className="text-green-200 w-5" /> : <ErrorCheckIcon className="text-red-200 w-5" /> }
 										<span className="text-primary-500 text-size-body-4 font-secondary ml-1">Включати великі та малі літери</span>
 									</li>
 									<li className="flex items-center mb-2">
-										{hasNumber ? <SuccessCheckIcon className="text-green-200" /> : <ErrorCheckIcon className="text-red-200" /> }
+										{hasNumber ? <SuccessCheckIcon className="text-green-200 w-5" /> : <ErrorCheckIcon className="text-red-200 w-5" /> }
 										<span className="text-primary-500 text-size-body-4 font-secondary ml-1">Включати цифри</span>
 									</li>
 									<li className="flex items-center mb-2">
-										{isLengthValid ? <SuccessCheckIcon className="text-green-200" /> : <ErrorCheckIcon className="text-red-200" /> }
+										{isLengthValid ? <SuccessCheckIcon className="text-green-200 w-5" /> : <ErrorCheckIcon className="text-red-200 w-5" /> }
 										<span className="text-primary-500 text-size-body-4 font-secondary ml-1">Бути не менш ніж 8 символів</span>
 									</li>
 									<li className="flex items-center mb-2">
-										{hasSpecialChar ? <SuccessCheckIcon className="text-green-200" /> : <ErrorCheckIcon className="text-red-200" /> }
+										{hasSpecialChar ? <SuccessCheckIcon className="text-green-200 w-5" /> : <ErrorCheckIcon className="text-red-200 w-5" /> }
 										<span className="text-primary-500 text-size-body-4 font-secondary ml-1">Принаймні один спеціальний символ.</span>
 									</li>
 								</ul>
@@ -152,12 +214,12 @@ function RegistrationForm() {
 
 						<div className="mt-4">
               <BaseControlField 
-                inputId="agreeTerms" 
+                inputId="agree_terms" 
                 inputType="checkbox" 
                 inputClassName="w-5 h-5"
                 register={register}
-                isHasError={!!errors.agreeTerms}
-                errorText={errors?.agreeTerms?.message || ''} 
+                isHasError={!!errors.agree_terms}
+                errorText={errors?.agree_terms?.message || ''} 
                 label={t('form.i-agree')}
               />
 						</div>
@@ -170,13 +232,14 @@ function RegistrationForm() {
 					)}
 
 					<Button
-						disabled={!isTermsAccepted}
+						disabled={!isTermsAccepted || isSubmitting}
 						type="submit"
-		
+
 						className="w-full h-[55px] font-secondary text-size-body-2 font-bold leading-100"
             variant="default"
 					>
-						{t('form.sign-up')}
+						{isSubmitting ? 'Loading...' : t('form.sign-up')}
+						
 					</Button>
 				</form>
 

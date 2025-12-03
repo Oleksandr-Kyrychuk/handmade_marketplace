@@ -8,7 +8,7 @@ function ControlInputLabel({children, id, label}: IInputLabelProps) {
       
       {children}
 
-      <span className="text-primary-800 text-sm ml-2 flex items-center">
+      <span className="text-primary-800 text-sm flex items-center">
         {label}
       </span>
       

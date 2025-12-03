@@ -38,10 +38,15 @@ export interface IFormProps {
   onChange?: never;
 }
 
-export type IBaseInputProps = InputProps & (IControlledProps | IFormProps);
+export type ReadonlyProps = {
+  register?: never;
+  onChange?: never;
+};
+
+export type IBaseInputProps = InputProps & (IControlledProps | IFormProps | ReadonlyProps);
 
 
-export type IInputFieldProps = IInputField & (IControlledProps | IFormProps);
+export type IInputFieldProps = IInputField & (IControlledProps | IFormProps | ReadonlyProps);
 
 export interface IInputLabelProps extends IChildren {
   id: string;

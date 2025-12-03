@@ -50,7 +50,7 @@ function InputField({
             isDisabled={isDisabled}
             isRequired={isRequired}
             value={value}
-            {...(register ? { register } : { onChange: onChange! })}
+            {...(register ? { register } : onChange ? { onChange } : {})}
           />
 
           {isPassword && <PasswordToggle iconClassName={`w-5  ${isHasError ? 'text-red-200' : 'text-primary-600'}`}  isVisible={showPassword} onToggle={togglePassword} />}

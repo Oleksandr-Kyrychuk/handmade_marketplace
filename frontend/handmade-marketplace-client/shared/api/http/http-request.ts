@@ -7,10 +7,6 @@ import { normalizeApiError } from "./normalizeApiError";
 import { RequestOptions } from "./types/interfaces";
 import { useAuthStore } from "@/entities/auth/model/Store/auth-store";
 
-// import { RequestOptions } from "./type/interface";
-// import { getQueryClient } from "../helpers/getQueryClient";
-// import { normalizeApiError } from "./normalizeApiError";
-
 
 export async function refreshAccessToken() {
   const authStore = useAuthStore.getState();

@@ -63,7 +63,7 @@ body {
 }
 .label__input-checkbox span:after {
   position: absolute;
-  left: 11px;
+  left: 3px;
   content: '';
   display: block;
   width: 14px;
