@@ -55,7 +55,13 @@ class RegisterView(GenericAPIView):
     permission_classes = [permissions.AllowAny]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    @extend_schema(summary="Реєстрація нового користувача")
+    @extend_schema(summary="Реєстрація нового користувача",
+    request=RegisterSerializer,
+    responses={201: UserSerializer},
+    description="""
+    Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений 
+    з умовами використання та політикою конфіденційності.
+    """)
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

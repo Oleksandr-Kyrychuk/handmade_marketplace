@@ -84,9 +84,6 @@ REST_FRAMEWORK = {
 'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
@@ -110,7 +107,10 @@ SIMPLE_JWT = {
     'CHECK_REVOKE_TOKEN': True,
 }
 
-CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS', default='http://localhost:5173,http://localhost:3000').split(',')
+CORS_ALLOWED_ORIGINS = env(
+    'CORS_ALLOWED_ORIGINS',
+    default="http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000"
+).split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 REDIS_URL = env('REDIS_URL', default='redis://redis:6379/1')
