@@ -4,7 +4,7 @@ export const enum Path {
   Contacts = '/contacts',
   Help = '/help',
   Registration = '/registration',
-  Send_confirm_email= '/confirm_email',
+  Confirm_email = '/confirm_email',
   //Menu
   Home = '/',
   Masters = "/masters",
