@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.utils.timezone import now
 from datetime import timedelta
 from rest_framework import viewsets, permissions, status, generics
@@ -31,6 +31,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.pagination import PageNumberPagination
 from users.tasks import send_verification_email, send_password_reset_email
 
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -49,19 +50,22 @@ class StandardResultsSetPagination(PageNumberPagination):
             "results": data
         })
 
-
+@extend_schema(tags=["registration"], summary="Реєстрація нового користувача")
 class RegisterView(GenericAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    @extend_schema(summary="Реєстрація нового користувача",
-    request=RegisterSerializer,
-    responses={201: UserSerializer},
-    description="""
-    Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений 
-    з умовами використання та політикою конфіденційності.
-    """)
+    @extend_schema(
+        tags=["auth"],
+        summary="Реєстрація нового користувача",
+        request=RegisterSerializer,
+        responses={201: UserSerializer},
+        description="""
+        Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений 
+        з умовами використання та політикою конфіденційності.
+        """
+    )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -74,7 +78,7 @@ class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = VerifyEmailSerializer
 
-    @extend_schema(summary="Підтвердження email")
+    @extend_schema(tags=["auth"], summary="Підтвердження email")
     def get(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -95,24 +99,24 @@ class ResendVerificationCodeView(GenericAPIView):
     serializer_class = ResendVerificationCodeSerializer
     permission_classes = [permissions.AllowAny]
 
-    @extend_schema(summary="Повторна відправка коду верифікації")
+    @extend_schema(tags=["auth"], summary="Повторна відправка коду верифікації")
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response({"success": True}, status=status.HTTP_200_OK)
 
-
+@extend_schema(tags=["authentication"], summary="Логін користувача")
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
-    @extend_schema(summary="Логін користувача")
+    @extend_schema(tags=["auth"], summary="Логін користувача")
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
 
 class CustomTokenRefreshView(TokenRefreshView):
-    @extend_schema(summary="Оновлення токену")
+    @extend_schema(tags=["auth"], summary="Оновлення токену")
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -121,7 +125,7 @@ class PasswordResetRequestView(GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
     permission_classes = [permissions.AllowAny]
 
-    @extend_schema(summary="Запит на скидання паролю")
+    @extend_schema(tags=["auth"], summary="Запит на скидання паролю")
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -138,7 +142,7 @@ class PasswordResetConfirmView(GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = [permissions.AllowAny]
 
-    @extend_schema(summary="Підтвердження скидання паролю")
+    @extend_schema(tags=["auth"], summary="Підтвердження скидання паролю")
     def post(self, request, uidb64, token):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -153,7 +157,7 @@ class PasswordResetConfirmView(GenericAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@extend_schema(tags=["users"])
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -164,7 +168,11 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     http_method_names = ['get', 'put', 'patch', 'delete']
 
-
+@extend_schema_view(
+    get=extend_schema(summary="Отримати профіль користувача", tags=["profile"]),
+    put=extend_schema(summary="Повне оновлення профілю", tags=["profile"]),
+    patch=extend_schema(summary="Часткове оновлення профілю", tags=["profile"]),
+)
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -173,12 +181,21 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = None
 
-    @extend_schema(summary="Логаут користувача")
+    @extend_schema(tags=["auth"], summary="Логаут користувача")
     def post(self, request):
         try:
             # Підтримуємо обидва варіанти: "refresh" і "refresh_token"
@@ -200,6 +217,7 @@ class HealthCheckView(APIView):
     serializer_class = HealthCheckSerializer
 
     @extend_schema(
+        tags=["health"],
         summary="Перевірка здоров'я сервісів",
         request=None,
         responses={200: HealthCheckSerializer, 503: HealthCheckSerializer}
