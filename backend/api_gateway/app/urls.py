@@ -1,18 +1,14 @@
-# gateway/urls.py
 import logging
 from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
-
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from drf_spectacular.utils import extend_schema
-
 from .serializers import HealthCheckSerializer, EmptySerializer
 from django.core.cache import cache
 import requests
@@ -151,21 +147,52 @@ class MergedSchemaView(GenericAPIView):
         generator = SchemaGenerator()
         gateway_schema = generator.get_schema(request=request)
 
-        user_schema = cache.get('user_service_schema', {})
-        product_schema = cache.get('product_service_schema', {})
-        order_schema = cache.get('order_service_schema', {})
-
-        for schema in [user_schema, product_schema, order_schema]:
-            gateway_schema['paths'].update(schema.get('paths', {}))
-        for schema in [user_schema, product_schema, order_schema]:
-            for comp_type, comp_data in schema.get('components', {}).items():
-                gateway_schema['components'].setdefault(comp_type, {}).update(comp_data)
-
-        gateway_schema['tags'] = [
-            {"name": "User", "description": "User Service API"},
-            {"name": "Product", "description": "Product Service API"},
-            {"name": "Order", "description": "Order Service API"}
+        external_schemas = [
+            cache.get('user_service_schema', {}),
+            cache.get('product_service_schema', {}),
+            cache.get('order_service_schema', {}),
         ]
+
+        # Збираємо всі теги
+        all_tags = set()
+        for schema in external_schemas:
+            for tag in schema.get('tags', []):
+                all_tags.add(tag['name'])
+
+        # Додаємо теги з зовнішніх сервісів (якщо їх ще немає)
+        existing_tags = {t['name'] for t in gateway_schema.get('tags', [])}
+        for tag in all_tags:
+            if tag not in existing_tags:
+                gateway_schema.setdefault('tags', []).append({'name': tag})
+
+        # Глибоке злиття paths з збереженням тегів
+        for schema in external_schemas:
+            for path, methods in schema.get('paths', {}).items():
+                if path not in gateway_schema['paths']:
+                    gateway_schema['paths'][path] = {}
+
+                for method, operation in methods.items():
+                    if method in ('get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'):
+                        # Якщо операція вже є — зливаємо теги
+                        if method in gateway_schema['paths'][path]:
+                            existing_op = gateway_schema['paths'][path][method]
+                            new_tags = operation.get('tags', [])
+                            existing_tags = existing_op.get('tags', [])
+                            # Додаємо нові теги, якщо їх ще немає
+                            combined_tags = existing_tags + [t for t in new_tags if t not in existing_tags]
+                            existing_op['tags'] = combined_tags
+                            # Можна також злити summary, description тощо
+                            if 'summary' not in existing_op and 'summary' in operation:
+                                existing_op['summary'] = operation['summary']
+                            if 'description' not in existing_op and 'description' in operation:
+                                existing_op['description'] = operation['description']
+                        else:
+                            # Просто додаємо операцію
+                            gateway_schema['paths'][path][method] = operation
+
+            # Злиття components
+            for comp_type, components in schema.get('components', {}).items():
+                gateway_schema['components'].setdefault(comp_type, {}).update(components)
 
         cache.set('merged_schema', gateway_schema, timeout=3600)
         return Response(gateway_schema)
@@ -182,9 +209,8 @@ class ProxyView(APIView):
 
         # === СПЕЦІАЛЬНІ ШЛЯХИ ===
         if path in (
-                'users/health', 'users/schema/',
-                'products/health', 'products/schema/',
-                'orders/health', 'orders/schema/'
+            'users/health', 'users/schema/', 'products/health', 'products/schema/',
+            'orders/health', 'orders/schema/'
         ):
             mapping = {
                 'users/health': f"{settings.USER_SERVICE_URL}/health",
@@ -200,32 +226,24 @@ class ProxyView(APIView):
         if path.startswith('users/'):
             inner_path = path[len('users/'):]
             target_url = f"{settings.USER_SERVICE_URL}/{inner_path}"
-
         elif path == 'users':
             target_url = settings.USER_SERVICE_URL
-
         elif path.startswith('products/'):
             inner_path = path[len('products/'):] or 'products'
             target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}"
-
         elif path == 'products':
             target_url = f"{settings.PRODUCT_SERVICE_URL}/products"
-
         elif path.startswith('moderation/'):
             inner_path = path[len('moderation/'):]
             target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}"
-
         elif path.startswith('orders/'):
             inner_path = path[len('orders/'):] or 'orders'
             target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}"
-
         elif path == 'orders':
             target_url = f"{settings.ORDER_SERVICE_URL}/orders"
-
         elif path.startswith('carts/'):
             inner_path = path[len('carts/'):]
             target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}"
-
         elif path == 'carts':
             target_url = f"{settings.ORDER_SERVICE_URL}/cart"
 
@@ -234,12 +252,8 @@ class ProxyView(APIView):
             logger.warning(f"No route for path: {path}")
             return Response({"error": "Not found"}, status=404)
 
-
         # КРИТИЧНА ЗМІНА: НЕ чіпаємо Accept-Encoding!
-        headers = {
-            k: v for k, v in request.headers.items()
-            if k.lower() not in ('host', 'content-length')
-        }
+        headers = {k: v for k, v in request.headers.items() if k.lower() not in ('host', 'content-length')}
 
         # ВИПРАВЛЕННЯ: Render.com повертає Brotli, а requests його не розуміє → прибираємо br
         if 'Accept-Encoding' in headers:
@@ -277,7 +291,6 @@ class ProxyView(APIView):
                     return Response({'error': 'Invalid JSON from upstream'}, status=502)
             else:
                 return Response(resp.content, status=resp.status_code, headers=response_headers)
-
         except requests.Timeout:
             return Response({'error': 'Gateway timeout'}, status=504)
         except requests.ConnectionError:
@@ -285,11 +298,20 @@ class ProxyView(APIView):
         except requests.RequestException as e:
             return Response({'error': 'Proxy error'}, status=502)
 
-    def get(self, request, path): return self.handle_request(request, path)
-    def post(self, request, path): return self.handle_request(request, path)
-    def put(self, request, path): return self.handle_request(request, path)
-    def patch(self, request, path): return self.handle_request(request, path)
-    def delete(self, request, path): return self.handle_request(request, path)
+    def get(self, request, path):
+        return self.handle_request(request, path)
+
+    def post(self, request, path):
+        return self.handle_request(request, path)
+
+    def put(self, request, path):
+        return self.handle_request(request, path)
+
+    def patch(self, request, path):
+        return self.handle_request(request, path)
+
+    def delete(self, request, path):
+        return self.handle_request(request, path)
 
 # ============================
 # URL patterns
@@ -298,9 +320,8 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     path('', RootView.as_view(), name='root'),
     path('health', HealthCheckView.as_view(), name='health'),
-    path('schema/', MergedSchemaView.as_view(), name='schema'),
-    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-
+    path('schema', MergedSchemaView.as_view(), name='schema'),
+    path('swagger-ui', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     re_path(r'^(?P<path>.*)/?$', ProxyView.as_view(), name='proxy'),
 ]
 
