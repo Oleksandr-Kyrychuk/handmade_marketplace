@@ -11,6 +11,9 @@
         "operationId": "root_retrieve",
         "description": "Checks Redis and database availability.",
         "summary": "Health check for Product Service",
+        "tags": [
+          "health"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -57,6 +60,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "moderation"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -84,6 +90,9 @@
       "post": {
         "operationId": "root_create",
         "description": "Approve or reject content (product or review)",
+        "tags": [
+          "moderation"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -164,71 +173,80 @@
             "name": "category",
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "ID категорії"
           },
           {
             "in": "query",
             "name": "created_after",
             "schema": {
-              "type": "string",
               "format": "date"
-            }
+            },
+            "description": "Створено після (YYYY-MM-DD)"
           },
           {
             "in": "query",
             "name": "created_before",
             "schema": {
-              "type": "string",
               "format": "date"
-            }
+            },
+            "description": "Створено до (YYYY-MM-DD)"
           },
           {
             "in": "query",
             "name": "is_approved",
             "schema": {
               "type": "boolean"
-            }
+            },
+            "description": "Статус схвалення"
           },
           {
             "in": "query",
             "name": "max_price",
             "schema": {
-              "type": "number"
-            }
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Максимальна ціна"
           },
           {
             "in": "query",
             "name": "max_rating",
             "schema": {
-              "type": "number"
-            }
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Максимальний середній рейтинг (0.0–5.0)"
           },
           {
             "in": "query",
             "name": "min_price",
             "schema": {
-              "type": "number"
-            }
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Мінімальна ціна"
           },
           {
             "in": "query",
             "name": "min_rating",
             "schema": {
-              "type": "number"
-            }
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Мінімальний середній рейтинг (0.0–5.0)"
           },
           {
             "in": "query",
             "name": "sale_type",
             "schema": {
-              "type": "string",
-              "enum": [
-                "auction",
-                "fixed"
-              ]
+              "type": "string"
             },
-            "description": "* `fixed` - Fixed Price\n* `auction` - Auction"
+            "description": "Тип продажу: fixed або auction"
           }
+        ],
+        "tags": [
+          "products"
         ],
         "security": [
           {
@@ -256,6 +274,9 @@
       },
       "post": {
         "operationId": "root_create_2",
+        "tags": [
+          "products"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -312,6 +333,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "products"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -345,6 +369,9 @@
             "description": "A unique integer value identifying this product.",
             "required": true
           }
+        ],
+        "tags": [
+          "products"
         ],
         "requestBody": {
           "content": {
@@ -400,6 +427,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "products"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -453,6 +483,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "products"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -481,6 +514,9 @@
             "description": "A unique integer value identifying this product.",
             "required": true
           }
+        ],
+        "tags": [
+          "products"
         ],
         "requestBody": {
           "content": {
@@ -538,6 +574,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "products"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -593,6 +632,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "products"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -628,6 +670,9 @@
             "description": "A unique integer value identifying this product.",
             "required": true
           }
+        ],
+        "tags": [
+          "products"
         ],
         "requestBody": {
           "content": {
@@ -705,6 +750,9 @@
             }
           }
         ],
+        "tags": [
+          "reviews"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -731,6 +779,9 @@
       },
       "post": {
         "operationId": "root_create_5",
+        "tags": [
+          "reviews"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -787,6 +838,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "reviews"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -820,6 +874,9 @@
             "description": "A unique integer value identifying this review.",
             "required": true
           }
+        ],
+        "tags": [
+          "reviews"
         ],
         "requestBody": {
           "content": {
@@ -875,6 +932,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "reviews"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -927,6 +987,9 @@
             "description": "A unique integer value identifying this review.",
             "required": true
           }
+        ],
+        "tags": [
+          "reviews"
         ],
         "security": [
           {

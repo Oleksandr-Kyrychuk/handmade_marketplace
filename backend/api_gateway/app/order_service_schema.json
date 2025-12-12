@@ -6,7 +6,7 @@
     "description": "Orders and cart management"
   },
   "paths": {
-    "/cart": {
+    "/carts": {
       "get": {
         "operationId": "root_list",
         "security": [
@@ -76,7 +76,7 @@
         }
       }
     },
-    "/cart/{id}": {
+    "/carts/{id}": {
       "get": {
         "operationId": "root_retrieve",
         "parameters": [

@@ -53,6 +53,7 @@ class RootView(APIView):
             }
         })
 
+
 # ============================
 # Health Check
 # ============================
@@ -132,8 +133,9 @@ class HealthCheckView(APIView):
             status=200 if all_healthy else 503
         )
 
+
 # ============================
-# Merged OpenAPI Schema
+# Merged OpenAPI Schema — ВИПРАВЛЕНО
 # ============================
 class MergedSchemaView(GenericAPIView):
     serializer_class = EmptySerializer
@@ -153,53 +155,91 @@ class MergedSchemaView(GenericAPIView):
             cache.get('order_service_schema', {}),
         ]
 
-        # Збираємо всі теги
+        # === 1. Збираємо всі теги один раз (правильно) ===
         all_tags = set()
         for schema in external_schemas:
             for tag in schema.get('tags', []):
-                all_tags.add(tag['name'])
+                if isinstance(tag, dict):
+                    all_tags.add(tag.get('name'))
+                elif isinstance(tag, str):
+                    all_tags.add(tag)
 
-        # Додаємо теги з зовнішніх сервісів (якщо їх ще немає)
-        existing_tags = {t['name'] for t in gateway_schema.get('tags', [])}
-        for tag in all_tags:
-            if tag not in existing_tags:
-                gateway_schema.setdefault('tags', []).append({'name': tag})
+        existing_gateway_tags = {t.get('name') for t in gateway_schema.get('tags', [])}
+        for tag_name in all_tags:
+            if tag_name and tag_name not in existing_gateway_tags:
+                gateway_schema.setdefault('tags', []).append({'name': tag_name})
 
-        # Глибоке злиття paths з збереженням тегів
-        for schema in external_schemas:
+        # === 2. Злиття paths з гарантією тегів ===
+        service_to_tag = {
+            'user': 'users',
+            'product': 'products',
+            'order': 'orders',
+        }
+
+        service_names = ['user', 'product', 'order']
+
+        for i, schema in enumerate(external_schemas):
+            service_key = service_names[i]
+            default_tag = service_to_tag[service_key]
+
             for path, methods in schema.get('paths', {}).items():
                 if path not in gateway_schema['paths']:
                     gateway_schema['paths'][path] = {}
 
                 for method, operation in methods.items():
-                    if method in ('get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'):
-                        # Якщо операція вже є — зливаємо теги
-                        if method in gateway_schema['paths'][path]:
-                            existing_op = gateway_schema['paths'][path][method]
-                            new_tags = operation.get('tags', [])
-                            existing_tags = existing_op.get('tags', [])
-                            # Додаємо нові теги, якщо їх ще немає
-                            combined_tags = existing_tags + [t for t in new_tags if t not in existing_tags]
-                            existing_op['tags'] = combined_tags
-                            # Можна також злити summary, description тощо
-                            if 'summary' not in existing_op and 'summary' in operation:
-                                existing_op['summary'] = operation['summary']
-                            if 'description' not in existing_op and 'description' in operation:
-                                existing_op['description'] = operation['description']
-                        else:
-                            # Просто додаємо операцію
-                            gateway_schema['paths'][path][method] = operation
+                    if method not in ('get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'):
+                        continue
 
-            # Злиття components
-            for comp_type, components in schema.get('components', {}).items():
-                gateway_schema['components'].setdefault(comp_type, {}).update(components)
+                    if method in gateway_schema['paths'][path]:
+                        # Конфлікт — зливаємо теги + summary/description
+                        existing_op = gateway_schema['paths'][path][method]
+                        new_tags = operation.get('tags', [])
+                        existing_tags = existing_op.get('tags', [])
+                        combined = existing_tags + [t for t in new_tags if t not in existing_tags]
+                        existing_op['tags'] = combined
 
+                        if 'summary' not in existing_op and 'summary' in operation:
+                            existing_op['summary'] = operation.get('summary')
+                        if 'description' not in existing_op and 'description' in operation:
+                            existing_op['description'] = operation.get('description')
+                    else:
+                        # Нова операція — копіюємо + гарантуємо тег
+                        new_op = operation.copy()
+                        if not new_op.get('tags'):
+                            fallback = default_tag
+
+                            if service_key == 'user':
+                                if path.startswith('/users'): fallback = 'users'
+                                elif any(path.startswith(p) for p in ['/login', '/logout', '/register', '/token', '/password']): fallback = 'auth'
+                                elif path.startswith('/profile'): fallback = 'profile'
+                            elif service_key == 'product':
+                                if path.startswith('/products'): fallback = 'products'
+                                elif path.startswith('/moderation'): fallback = 'moderation'
+                                elif path.startswith('/reviews'): fallback = 'reviews'
+                            elif service_key == 'order':
+                                if path.startswith('/orders'): fallback = 'orders'
+                                elif path.startswith('/carts') or path.startswith('/cart'): fallback = 'carts'
+
+                            new_op['tags'] = [fallback]
+
+                        gateway_schema['paths'][path][method] = new_op
+
+            # Злиття components (schemas, responses тощо)
+            for comp_type in ('schemas', 'parameters', 'responses', 'requestBodies', 'headers', 'securitySchemes'):
+                if comp_type in schema.get('components', {}):
+                    gateway_schema['components'].setdefault(comp_type, {}).update(
+                        schema['components'][comp_type]
+                    )
+
+        # Кешуємо на 1 годину
         cache.set('merged_schema', gateway_schema, timeout=3600)
         return Response(gateway_schema)
 
+
 # ============================
-# Proxy View
+# Proxy View (без змін)
 # ============================
+@extend_schema(exclude=True)
 class ProxyView(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
@@ -220,7 +260,7 @@ class ProxyView(APIView):
                 'orders/health': f"{settings.ORDER_SERVICE_URL}/health",
                 'orders/schema/': f"{settings.ORDER_SERVICE_URL}/schema/",
             }
-            target_url = mapping[path]
+            target_url = mapping.get(path)
 
         # === ЗВИЧАЙНІ ШЛЯХИ ===
         if path.startswith('users/'):
@@ -247,23 +287,18 @@ class ProxyView(APIView):
         elif path == 'carts':
             target_url = f"{settings.ORDER_SERVICE_URL}/cart"
 
-        # Якщо жоден маршрут не matched
         if not target_url:
             logger.warning(f"No route for path: {path}")
             return Response({"error": "Not found"}, status=404)
 
-        # КРИТИЧНА ЗМІНА: НЕ чіпаємо Accept-Encoding!
         headers = {k: v for k, v in request.headers.items() if k.lower() not in ('host', 'content-length')}
 
-        # ВИПРАВЛЕННЯ: Render.com повертає Brotli, а requests його не розуміє → прибираємо br
         if 'Accept-Encoding' in headers:
             encodings = [enc.strip() for enc in headers['Accept-Encoding'].split(',')]
-            # Видаляємо brotli/br — залишаємо тільки те, що requests точно розпакує
             safe_encodings = [enc for enc in encodings if enc.lower() not in {'br', 'brotli'}]
             if safe_encodings:
                 headers['Accept-Encoding'] = ', '.join(safe_encodings)
             else:
-                # Якщо клієнт зовсім нічого не приймає — попросимо хоча б gzip
                 headers['Accept-Encoding'] = 'gzip, deflate'
 
         try:
@@ -282,7 +317,6 @@ class ProxyView(APIView):
             if content_type:
                 response_headers['Content-Type'] = content_type
 
-            # requests сам розпакує gzip/deflate, а тепер і Brotli ми прибрали
             if 'application/json' in content_type:
                 try:
                     return Response(resp.json(), status=resp.status_code, headers=response_headers)
@@ -291,27 +325,20 @@ class ProxyView(APIView):
                     return Response({'error': 'Invalid JSON from upstream'}, status=502)
             else:
                 return Response(resp.content, status=resp.status_code, headers=response_headers)
+
         except requests.Timeout:
             return Response({'error': 'Gateway timeout'}, status=504)
         except requests.ConnectionError:
             return Response({'error': 'Service unavailable'}, status=502)
-        except requests.RequestException as e:
+        except requests.RequestException:
             return Response({'error': 'Proxy error'}, status=502)
 
-    def get(self, request, path):
-        return self.handle_request(request, path)
+    def get(self, request, path): return self.handle_request(request, path)
+    def post(self, request, path): return self.handle_request(request, path)
+    def put(self, request, path): return self.handle_request(request, path)
+    def patch(self, request, path): return self.handle_request(request, path)
+    def delete(self, request, path): return self.handle_request(request, path)
 
-    def post(self, request, path):
-        return self.handle_request(request, path)
-
-    def put(self, request, path):
-        return self.handle_request(request, path)
-
-    def patch(self, request, path):
-        return self.handle_request(request, path)
-
-    def delete(self, request, path):
-        return self.handle_request(request, path)
 
 # ============================
 # URL patterns

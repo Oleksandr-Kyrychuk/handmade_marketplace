@@ -5,7 +5,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from orders.views import OrderViewSet, CartViewSet, HealthCheckView
 
 router = DefaultRouter(trailing_slash=False)
-router.register(r'cart', CartViewSet, basename='cart')
+router.register(r'carts', CartViewSet, basename='carts')
 router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
