@@ -10,6 +10,9 @@
       "get": {
         "operationId": "root_retrieve",
         "summary": "Перевірка здоров'я сервісів",
+        "tags": [
+          "health"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -48,6 +51,9 @@
         "operationId": "root_create",
         "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
         "summary": "Логін користувача",
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -79,6 +85,9 @@
       "post": {
         "operationId": "root_create_2",
         "summary": "Логаут користувача",
+        "tags": [
+          "auth"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -98,6 +107,9 @@
       "post": {
         "operationId": "root_create_4",
         "summary": "Запит на скидання паролю",
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -163,6 +175,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -202,6 +217,10 @@
     "/profile/": {
       "get": {
         "operationId": "root_retrieve_2",
+        "summary": "Отримати профіль користувача",
+        "tags": [
+          "profile"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -225,6 +244,10 @@
       },
       "put": {
         "operationId": "root_update",
+        "summary": "Повне оновлення профілю",
+        "tags": [
+          "profile"
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -263,6 +286,10 @@
       },
       "patch": {
         "operationId": "root_partial_update",
+        "summary": "Часткове оновлення профілю",
+        "tags": [
+          "profile"
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -302,7 +329,11 @@
     "/register/": {
       "post": {
         "operationId": "root_create_5",
+        "description": "\n        Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений \n        з умовами використання та політикою конфіденційності.\n        ",
         "summary": "Реєстрація нового користувача",
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -350,6 +381,9 @@
       "post": {
         "operationId": "root_create_6",
         "summary": "Повторна відправка коду верифікації",
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -398,6 +432,9 @@
         "operationId": "root_create_7",
         "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
         "summary": "Оновлення токену",
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -508,6 +545,9 @@
             }
           }
         ],
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -544,6 +584,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -577,6 +620,9 @@
             "description": "A unique integer value identifying this user.",
             "required": true
           }
+        ],
+        "tags": [
+          "users"
         ],
         "requestBody": {
           "content": {
@@ -632,6 +678,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "users"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -685,6 +734,9 @@
             "required": true
           }
         ],
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -721,6 +773,9 @@
             },
             "required": true
           }
+        ],
+        "tags": [
+          "auth"
         ],
         "security": [
           {
