@@ -1,4 +1,3 @@
-import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 
 interface IAuthLayout {
@@ -10,7 +9,6 @@ interface IAuthLayout {
 }
 
 function AuthLayout({children, title, subtitle, classSubtitle, classFormBlock}: IAuthLayout) {
-  const t = useTranslations()
   return (
     <div className="pattern-bg lg:py-[80px] py-[40px]">
       <div className="container mx-auto px-4">

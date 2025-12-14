@@ -49,7 +49,7 @@ function RegistrationForm() {
 
 		registrationMutation(data, {
 			onSuccess: () => {
-				router.push(Path.Send_confirm_email)
+				router.push(Path.Confirm_email)
 			},
 			onError: (error: Error) => {
 				// console.log('error', error.original)
@@ -75,7 +75,7 @@ function RegistrationForm() {
   }
 
   return (
-    <AuthLayout title="registrationPage.title" subtitle="registrationPage.subtitle">
+    <AuthLayout title={t('registrationPage.title')} subtitle={t("registrationPage.subtitle")}>
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit)} className="lg:mb-12 mb-6">
 					<div className="lg:mb-12 mb-6">
 						<div className="flex lg:gap-6 lg:flex-row flex-col">
