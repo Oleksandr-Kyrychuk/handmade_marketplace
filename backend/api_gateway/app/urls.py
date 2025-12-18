@@ -175,7 +175,6 @@ class MergedSchemaView(GenericAPIView):
             'product': 'products',
             'order': 'orders',
         }
-
         service_names = ['user', 'product', 'order']
 
         for i, schema in enumerate(external_schemas):
@@ -207,24 +206,31 @@ class MergedSchemaView(GenericAPIView):
                         new_op = operation.copy()
                         if not new_op.get('tags'):
                             fallback = default_tag
-
                             if service_key == 'user':
-                                if path.startswith('/users'): fallback = 'users'
-                                elif any(path.startswith(p) for p in ['/login', '/logout', '/register', '/token', '/password']): fallback = 'auth'
-                                elif path.startswith('/profile'): fallback = 'profile'
+                                if path.startswith('/users'):
+                                    fallback = 'users'
+                                elif any(path.startswith(p) for p in ['/login', '/logout', '/register', '/token', '/password']):
+                                    fallback = 'auth'
+                                elif path.startswith('/profile'):
+                                    fallback = 'profile'
                             elif service_key == 'product':
-                                if path.startswith('/products'): fallback = 'products'
-                                elif path.startswith('/moderation'): fallback = 'moderation'
-                                elif path.startswith('/reviews'): fallback = 'reviews'
+                                if path.startswith('/products'):
+                                    fallback = 'products'
+                                elif path.startswith('/moderation'):
+                                    fallback = 'moderation'
+                                elif path.startswith('/reviews'):
+                                    fallback = 'reviews'
                             elif service_key == 'order':
-                                if path.startswith('/orders'): fallback = 'orders'
-                                elif path.startswith('/carts') or path.startswith('/cart'): fallback = 'carts'
-
+                                if path.startswith('/orders'):
+                                    fallback = 'orders'
+                                elif path.startswith('/carts') or path.startswith('/cart'):
+                                    fallback = 'carts'
                             new_op['tags'] = [fallback]
 
                         gateway_schema['paths'][path][method] = new_op
 
-            # Злиття components (schemas, responses тощо)
+        # Злиття components (schemas, responses тощо)
+        for schema in external_schemas:
             for comp_type in ('schemas', 'parameters', 'responses', 'requestBodies', 'headers', 'securitySchemes'):
                 if comp_type in schema.get('components', {}):
                     gateway_schema['components'].setdefault(comp_type, {}).update(
@@ -233,11 +239,12 @@ class MergedSchemaView(GenericAPIView):
 
         # Кешуємо на 1 годину
         cache.set('merged_schema', gateway_schema, timeout=3600)
+
         return Response(gateway_schema)
 
 
 # ============================
-# Proxy View (без змін)
+# Proxy View (з фіксом для заголовків)
 # ============================
 @extend_schema(exclude=True)
 class ProxyView(APIView):
@@ -312,19 +319,33 @@ class ProxyView(APIView):
                 timeout=30,
             )
 
-            response_headers = {}
             content_type = resp.headers.get('Content-Type', '')
-            if content_type:
-                response_headers['Content-Type'] = content_type
 
             if 'application/json' in content_type:
                 try:
-                    return Response(resp.json(), status=resp.status_code, headers=response_headers)
+                    data = resp.json()
                 except ValueError:
                     logger.error(f"Invalid JSON from {target_url}: {resp.text[:200]}")
                     return Response({'error': 'Invalid JSON from upstream'}, status=502)
+                response = Response(data, status=resp.status_code)
             else:
-                return Response(resp.content, status=resp.status_code, headers=response_headers)
+                response = Response(resp.content, status=resp.status_code)
+
+            # Content-Type
+            if content_type:
+                response['Content-Type'] = content_type
+
+            # Set-Cookie — головне!
+            if 'Set-Cookie' in resp.headers:
+                response['Set-Cookie'] = resp.headers['Set-Cookie']
+                logger.debug(f"Forwarding cookie: {resp.headers['Set-Cookie']}")
+
+            # Інші заголовки
+            for header in ['Location', 'Cache-Control', 'Vary', 'Allow']:
+                if header in resp.headers:
+                    response[header] = resp.headers[header]
+
+            return response
 
         except requests.Timeout:
             return Response({'error': 'Gateway timeout'}, status=504)

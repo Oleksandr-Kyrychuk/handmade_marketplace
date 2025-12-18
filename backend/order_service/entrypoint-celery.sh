@@ -16,4 +16,4 @@ done
 
 echo "Database ready!"
 echo "Starting Celery worker for order-service..."
-exec celery -A order_service.celery worker --loglevel=info
+exec celery -A order_service.celery worker --loglevel=info -Q order_queue
