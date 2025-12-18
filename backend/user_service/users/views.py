@@ -1,4 +1,5 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
+import uuid
 from django.utils.timezone import now
 from datetime import timedelta
 from rest_framework import viewsets, permissions, status, generics
@@ -68,10 +69,36 @@ class RegisterView(GenericAPIView):
     )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response({
+                "success": False,
+                "error": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         user = serializer.save()
+
+        # Надсилаємо лист асинхронно
         send_verification_email.delay(user.id)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+        # Генеруємо унікальний токен для сесії підтвердження
+        session_token = str(uuid.uuid4())
+
+        # Зберігаємо в кеші на 15 хвилин (ключ — токен, значення — user.id або email)
+        cache.set(f"email_confirm_session:{session_token}", user.email, timeout=900)
+
+        response = Response({"success": True}, status=status.HTTP_201_CREATED)
+
+        # Встановлюємо cookie
+        response.set_cookie(
+            key='email_confirm_session',
+            value=session_token,
+            max_age=900,  # 15 хвилин
+            secure=not settings.DEBUG,  # в проді буде True
+            httponly=True,
+            samesite='Strict'
+        )
+
+        return response
 
 
 class VerifyEmailView(APIView):
@@ -94,7 +121,6 @@ class VerifyEmailView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class ResendVerificationCodeView(GenericAPIView):
     serializer_class = ResendVerificationCodeSerializer
     permission_classes = [permissions.AllowAny]
@@ -102,9 +128,29 @@ class ResendVerificationCodeView(GenericAPIView):
     @extend_schema(tags=["auth"], summary="Повторна відправка коду верифікації")
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        return Response({"success": True}, status=status.HTTP_200_OK)
+        if not serializer.is_valid():
+            return Response({
+                "success": False,
+                "error": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.save()  # тут вже відправлено лист
+
+        # Оновлюємо cookie: новий токен, нові 15 хвилин
+        session_token = str(uuid.uuid4())
+        cache.set(f"email_confirm_session:{session_token}", user.email, timeout=900)
+
+        response = Response({"success": True}, status=status.HTTP_200_OK)
+        response.set_cookie(
+            key='email_confirm_session',
+            value=session_token,
+            max_age=900,  # 15 хвилин
+            secure=not settings.DEBUG,  # в проді буде True
+            httponly=True,
+            samesite='Strict'
+        )
+
+        return response
 
 @extend_schema(tags=["authentication"], summary="Логін користувача")
 class LoginView(TokenObtainPairView):
