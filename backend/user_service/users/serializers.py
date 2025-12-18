@@ -102,7 +102,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm', None)
-        validated_data.pop('agree_terms', None)  # просто видаляємо — не зберігаємо в БД (або зберігай, якщо додав поля)
+        validated_data.pop('agree_terms', None)
 
         password = validated_data.pop('password')
         user = User.objects.create_user(password=password, **validated_data)
