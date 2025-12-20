@@ -70,12 +70,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def create_from_cart(self, request):
         if not request.user.is_authenticated:
-            return Response({"error": "Authentication required"}, status=401)
+            return Response({"errors": "Authentication required"}, status=401)
 
         with transaction.atomic():
             cart_items = Cart.objects.filter(user_id=request.user.id)
             if not cart_items.exists():
-                return Response({"error": "Кошик порожній"}, status=400)
+                return Response({"errors": "Кошик порожній"}, status=400)
 
             total = 0
             order_items_data = []
@@ -92,12 +92,12 @@ class OrderViewSet(viewsets.ModelViewSet):
                     products[item.product_id] = product
                 except Exception as e:
                     logger.error(f"Product {item.product_id} fetch error: {e}")
-                    return Response({"error": f"Продукт {item.product_id} недоступний"}, status=400)
+                    return Response({"errors": f"Продукт {item.product_id} недоступний"}, status=400)
 
             for item in cart_items:
                 product = products[item.product_id]
                 if not product.get('is_approved') or product.get('stock', 0) < item.quantity:
-                    return Response({"error": f"Недостатньо товару: {product['name']}"}, status=400)
+                    return Response({"errors": f"Недостатньо товару: {product['name']}"}, status=400)
 
                 price = product.get('discount_price') or product.get('price')
                 total += price * item.quantity
@@ -135,7 +135,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = self.get_object()
         new_status = request.data.get('status')
         if new_status not in dict(Order.STATUS_CHOICES):
-            return Response({"error": "Invalid status"}, status=400)
+            return Response({"errors": "Invalid status"}, status=400)
         order.status = new_status
         order.save()
         send_order_notification.delay(order.id, new_status)
