@@ -72,7 +72,7 @@ class RegisterView(GenericAPIView):
         if not serializer.is_valid():
             return Response({
                 "success": False,
-                "error": serializer.errors
+                "errors": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
@@ -117,9 +117,9 @@ class VerifyEmailView(APIView):
                 user.is_verified = True
                 user.save()
                 return Response({"success": True}, status=status.HTTP_200_OK)
-            return Response({"error": "Invalid token or expired"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Invalid token or expired"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class ResendVerificationCodeView(GenericAPIView):
     serializer_class = ResendVerificationCodeSerializer
@@ -131,7 +131,7 @@ class ResendVerificationCodeView(GenericAPIView):
         if not serializer.is_valid():
             return Response({
                 "success": False,
-                "error": serializer.errors
+                "errors": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()  # тут вже відправлено лист
@@ -181,7 +181,7 @@ class PasswordResetRequestView(GenericAPIView):
             send_password_reset_email.delay(user.id)
             return Response({"success": True}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"errors": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PasswordResetConfirmView(GenericAPIView):
@@ -199,9 +199,9 @@ class PasswordResetConfirmView(GenericAPIView):
                 user.set_password(serializer.validated_data['new_password'])
                 user.save()
                 return Response({"success": True}, status=status.HTTP_200_OK)
-            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @extend_schema(tags=["users"])
 class UserViewSet(viewsets.ModelViewSet):
@@ -247,15 +247,15 @@ class LogoutView(APIView):
             # Підтримуємо обидва варіанти: "refresh" і "refresh_token"
             refresh_token = request.data.get("refresh") or request.data.get("refresh_token")
             if not refresh_token:
-                return Response({"error": "Refresh token is required"}, status=400)
+                return Response({"errors": "Refresh token is required"}, status=400)
 
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response({"success": True, "detail": "Logout successful"}, status=200)
         except TokenError as e:
-            return Response({"error": "Invalid or already blacklisted token"}, status=400)
+            return Response({"errors": "Invalid or already blacklisted token"}, status=400)
         except Exception as e:
-            return Response({"error": str(e)}, status=400)
+            return Response({"errors": str(e)}, status=400)
 
 
 class HealthCheckView(APIView):

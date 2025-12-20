@@ -78,7 +78,7 @@ class HealthCheckView(APIView):
             cache.get('health_check_test')
             results['redis'] = {'status': 'ok'}
         except redis.RedisError as e:
-            results['redis'] = {'status': 'error', 'detail': str(e)}
+            results['redis'] = {'status': 'errors', 'detail': str(e)}
             all_healthy = False
             logger.error(f"Redis health check failed: {e}")
 
@@ -90,7 +90,7 @@ class HealthCheckView(APIView):
                 break
             except requests.RequestException as e:
                 if attempt == max_retries - 1:
-                    results['user_service'] = {'status': 'error', 'detail': str(e)}
+                    results['user_service'] = {'status': 'errors', 'detail': str(e)}
                     all_healthy = False
                     logger.error(f"User Service health check failed: {e}")
                 time.sleep(retry_delay)
@@ -99,7 +99,7 @@ class HealthCheckView(APIView):
         for attempt in range(max_retries):
             try:
                 resp = requests.get(f'{settings.PRODUCT_SERVICE_URL}/health', timeout=20)
-                results['product_service'] = {'status': 'ok' if resp.status_code == 200 else 'error'}
+                results['product_service'] = {'status': 'ok' if resp.status_code == 200 else 'errors'}
                 break
             except requests.RequestException as e:
                 if attempt == max_retries - 1:
@@ -112,11 +112,11 @@ class HealthCheckView(APIView):
         for attempt in range(max_retries):
             try:
                 resp = requests.get(f'{settings.ORDER_SERVICE_URL}/health', timeout=20)
-                results['order_service'] = {'status': 'ok' if resp.status_code == 200 else 'error'}
+                results['order_service'] = {'status': 'ok' if resp.status_code == 200 else 'errors'}
                 break
             except requests.RequestException as e:
                 if attempt == max_retries - 1:
-                    results['order_service'] = {'status': 'error', 'detail': str(e)}
+                    results['order_service'] = {'status': 'errors', 'detail': str(e)}
                     all_healthy = False
                     logger.error(f"Order Service health check failed: {e}")
                 time.sleep(retry_delay)
@@ -296,7 +296,7 @@ class ProxyView(APIView):
 
         if not target_url:
             logger.warning(f"No route for path: {path}")
-            return Response({"error": "Not found"}, status=404)
+            return Response({"errors": "Not found"}, status=404)
 
         headers = {k: v for k, v in request.headers.items() if k.lower() not in ('host', 'content-length')}
 
@@ -326,7 +326,7 @@ class ProxyView(APIView):
                     data = resp.json()
                 except ValueError:
                     logger.error(f"Invalid JSON from {target_url}: {resp.text[:200]}")
-                    return Response({'error': 'Invalid JSON from upstream'}, status=502)
+                    return Response({'errors': 'Invalid JSON from upstream'}, status=502)
                 response = Response(data, status=resp.status_code)
             else:
                 response = Response(resp.content, status=resp.status_code)
@@ -348,11 +348,11 @@ class ProxyView(APIView):
             return response
 
         except requests.Timeout:
-            return Response({'error': 'Gateway timeout'}, status=504)
+            return Response({'errors': 'Gateway timeout'}, status=504)
         except requests.ConnectionError:
-            return Response({'error': 'Service unavailable'}, status=502)
+            return Response({'errors': 'Service unavailable'}, status=502)
         except requests.RequestException:
-            return Response({'error': 'Proxy error'}, status=502)
+            return Response({'errors': 'Proxy error'}, status=502)
 
     def get(self, request, path): return self.handle_request(request, path)
     def post(self, request, path): return self.handle_request(request, path)

@@ -146,10 +146,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         order_id = request.data.get('order_id')
 
         if quantity <= 0 or not order_id:
-            return Response({"error": "quantity and order_id required"}, status=400)
+            return Response({"errors": "quantity and order_id required"}, status=400)
 
         if product.stock < quantity:
-            return Response({"error": "Not enough stock"}, status=400)
+            return Response({"errors": "Not enough stock"}, status=400)
 
         expires_at = timezone.now() + timedelta(hours=24)
 
@@ -171,7 +171,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         product = self.get_object()
         order_id = request.data.get('order_id')
         if not order_id:
-            return Response({"error": "order_id required"}, status=400)
+            return Response({"errors": "order_id required"}, status=400)
 
         with transaction.atomic():
             reservations = product.reservations.filter(order_id=order_id)
