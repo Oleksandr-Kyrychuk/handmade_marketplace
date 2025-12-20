@@ -22,7 +22,7 @@ function RegistrationForm() {
 	const router = useRouter()
 
 	const [globalError, setGlobalError] = useState('');
-	const { registrationMutation, registrationPending, isError, error } = useRegistrationMutation();
+	const { registrationMutation } = useRegistrationMutation();
 
 
   const {handleSubmit, register, formState: {errors, isSubmitting}, setError, watch, control} = useForm<SignUpRequestDTO>({
@@ -31,6 +31,7 @@ function RegistrationForm() {
     defaultValues: {
       username: '',
       surname: '',
+			email: '',
       password: '',
       password_confirm: '',
       agree_terms: false,

@@ -106,9 +106,13 @@
     "title": "Enter confirmation code",
     "subtitle": "The code has been sent to your email."
   },
-  "resetPasswordPage": {
+  "resendVerificationPage": {
     "title": "Confirm email",
-    "subtitle": "We have sent a verification code to your email address."
+    "subtitle": "We will send a verification code to your email address."
+  },
+  "resetPasswordPage": {
+    "title": "Password Reset",
+    "subtitle": "Enter your email address and we'll send you a code to recover your access."
   },
   "form": {
     "email": "Email address",

@@ -1,39 +1,36 @@
 'use client';
 
-import { Controller, useForm } from "react-hook-form";
-import { resetPasswordSchema } from "../model/validation/validation";
-import { yupResolver } from "@hookform/resolvers/yup";
 import AuthLayout from "@/entities/authLayout/ui/AuthLayout";
 import { useTranslations } from "next-intl";
-import InputField from "@/shared/UI/Input/InputField";
-import { useState } from "react";
-import { Button } from "@/shared/UI";
-import useResetVerificationMutation from "../model/Queries/useResetPasswordMutation";
-import { Path } from "@/shared/enums/Path";
-import { CustomError } from "@/entities/auth/model/types/interfaces";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import useResendVerificationMutation from "../model/Queries/useResendVerificationMutation";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { resendVerificationSchema } from "../model/validation/validation";
+import { Controller, useForm } from "react-hook-form";
+import { CustomError } from "@/entities/auth/model/types/interfaces";
+import { Button } from "@/shared/UI";
+import InputField from "@/shared/UI/Input/InputField";
 
-function ResetPasswordForm() {
+function ResendVerificationForm() {
   const t = useTranslations();
   const router = useRouter()
-
+  
   const [globalError, setGlobalError] = useState('');
 
-  const {mutateResetPassword, mutateResetPasswordPending} = useResetVerificationMutation();
+  const {mutateResendVerif, mutateResendVerifPending} = useResendVerificationMutation();
 
-  const {handleSubmit, register, formState: {errors}, setError, control} = useForm({
-    resolver: yupResolver(resetPasswordSchema),
+  const {handleSubmit, formState: {errors, isSubmitting}, setError, control} = useForm({
+    resolver: yupResolver(resendVerificationSchema),
     defaultValues: {
       email: ''
     }
   });
 
-  function onSubmit(data: string) {
-    console.log('data', data)
-
-    mutateResetPassword(data, {
+  function onSubmit(email: string) {
+    mutateResendVerif(email, {
       onSuccess: () => {
-        router.push(Path.Confirm_email)
+        console.log('onSuccess')
       },
       onError: (error: Error) => {
         setGlobalError('');
@@ -58,7 +55,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <AuthLayout title={t('resetPasswordPage.title')} subtitle={t('resetPasswordPage.subtitle')}>
+    <AuthLayout title={t('resendVerificationPage.title')} subtitle={t('resendVerificationPage.subtitle')}>
       <form autoComplete="false" onSubmit={handleSubmit(onSubmit)} className="lg:mb-12 mb-6">
         <div className="lg:mb-12 mb-6">
           <div className="mb-4">
@@ -72,9 +69,9 @@ function ResetPasswordForm() {
 										inputType="email"
 										isHasError={!!errors.email}
 										errorText={errors?.email?.message || ''}
-										{...register('email')}
-										placeholder="Email"
+										placeholder={t('form.email')}
 										inputClassName="rounded-5xl font-secondary"
+										labelClassName="block mb-1 font-size-body-4 leading-130"
 										label={t('form.email')}
 									/>
 								)}
@@ -92,9 +89,9 @@ function ResetPasswordForm() {
               className="w-full font-bold leading-100 text-size-body-2 h-14"
               size="md"
               variant="default"
-              disabled={mutateResetPasswordPending}
+              disabled={mutateResendVerifPending}
             >
-              {t('form.send')}
+              {isSubmitting ? 'Loading...' : t('form.send')}
             </Button>
         </div>
 
@@ -103,4 +100,4 @@ function ResetPasswordForm() {
   );
 }
 
-export default ResetPasswordForm;
+export default ResendVerificationForm;
