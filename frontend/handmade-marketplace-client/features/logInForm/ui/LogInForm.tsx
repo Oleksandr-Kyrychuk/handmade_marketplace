@@ -6,17 +6,19 @@ import { Button } from "@/shared/UI";
 import { Path } from "@/shared/enums/Path";
 import InputField from "@/shared/UI/Input/InputField";
 import { Controller, useForm } from "react-hook-form";
-import { LogInRequestDTO } from "../../../entities/auth/model/types/interfaces";
+import { CustomError, LogInRequestDTO } from "../../../entities/auth/model/types/interfaces";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { logInSchema } from "../validation/validation";
 import { useTranslations } from "next-intl";
 import PlatformsButtons from "@/entities/platformsButtons/PlatformsButtons";
 import { useState } from "react";
-import useLogInMutation from "../model/Quries/useLogInMutation";
+import useLogInMutation from "../model/Queries/useLogInMutation";
+import { useRouter } from "next/navigation";
 
 
 function LogInForm() {
   const t = useTranslations();
+	const router = useRouter()
 
   const [globalError, setGlobalError] = useState('');
   const {mutateLogIn, mutateLoginPending} = useLogInMutation();
@@ -27,10 +29,35 @@ function LogInForm() {
 
   function onSubmit(data: LogInRequestDTO) {
     console.log('data', data)
+
+		mutateLogIn(data, {
+			onSuccess: () => {
+				router.push(Path.Home)
+			},
+			onError: (error: Error) => {
+				setGlobalError('');
+				const customError = error as CustomError;
+				let hasFieldErrors = false;
+
+				if (customError.original) {
+					Object.entries(customError.original).forEach(([key, message]) => {
+						setError(key as keyof LogInRequestDTO, {
+							type: 'server',
+							message: message.toString() as string,
+						});
+					});
+					hasFieldErrors = true;
+				}
+
+				if(!hasFieldErrors && customError.message) {
+					setGlobalError(customError.message);
+				}
+			}
+		})
   }
 
   return (
-    <AuthLayout title="logInPage.title" subtitle="logInPage.subtitle">
+    <AuthLayout title={t('logInPage.title')} subtitle={t('logInPage.subtitle')}>
       <form autoComplete="false" onSubmit={handleSubmit(onSubmit)} className="lg:mb-12 mb-6">
 					<div className="lg:mb-12 mb-6">
 						<div className="mb-4">

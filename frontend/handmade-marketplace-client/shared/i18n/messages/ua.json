@@ -106,6 +106,10 @@
     "title": "Введіть код",
     "subtitle": "Код надіслано на ваш e-mail"
   },
+  "resetPasswordPage": {
+    "title": "Підтвердіть email",
+    "subtitle": "Ми надіслали код підтвердження на вашу електронну адресу"
+  },
   "form": {
     "email": "Електронна адреса",
     "forgot-password": "Забули пароль?",
@@ -126,6 +130,9 @@
     "exit": "Вхід",
     "not-registered-yet": "Ще не зареєстровані?",
     "resend-code": "Відправити ще раз",
-    "confirm": "Підтвердити"
+    "confirm": "Підтвердити",
+    "resend-verification": "Вже реєструвались, але не підтвердили email?",
+    "resend-verification-link": "Підтвердити email",
+    "send": "Відправити"
   }
 }

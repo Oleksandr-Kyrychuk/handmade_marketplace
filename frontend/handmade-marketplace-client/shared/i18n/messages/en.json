@@ -106,6 +106,10 @@
     "title": "Enter confirmation code",
     "subtitle": "The code has been sent to your email."
   },
+  "resetPasswordPage": {
+    "title": "Confirm email",
+    "subtitle": "We have sent a verification code to your email address."
+  },
   "form": {
     "email": "Email address",
     "forgot-password": "Forgot password?",
@@ -124,6 +128,9 @@
     "exit": "Exit",
     "not-registered-yet": "Not registered yet?",
     "resend-code": "Send again",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "resend-verification": "Already registered but haven't confirmed your email?",
+    "resend-verification-link": "Confirm email",
+    "send": "Send"
   }
 }

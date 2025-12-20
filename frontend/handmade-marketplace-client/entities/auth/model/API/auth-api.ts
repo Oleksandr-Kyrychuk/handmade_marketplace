@@ -39,6 +39,22 @@ class AuthApi implements IAuthApi {
     })
   }
 
+  async resetPassword(email: string) {
+    return Request({
+      url: ApiEndpoints.RESET_PASSWORD,
+      method: HttpMethods.POST,
+      body: email
+    })
+  }
+
+  async resendVerification(email: string) {
+    return Request({
+      url: ApiEndpoints.RESEND_VERIFICATION,
+      method: HttpMethods.POST,
+      body: email
+    })
+  }
+
   async getUser(): Promise<GetUserResponseDTO> {
     const ACCESS_TOKEN = useAuthStore.getState().accessToken;
 

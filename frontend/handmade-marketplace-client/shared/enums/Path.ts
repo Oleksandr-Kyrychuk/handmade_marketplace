@@ -5,6 +5,8 @@ export const enum Path {
   Help = '/help',
   Registration = '/registration',
   Confirm_email = '/confirm_email',
+  Resend_verification = '/resend-verification',
+
   //Menu
   Home = '/',
   Masters = "/masters",
@@ -18,7 +20,7 @@ export const enum Path {
   Notification = '/notification',
   Favorite = '/favorite',
   Basket = '/basket',
-  LogIn = '/logIn',
+  LogIn = '/login',
   Reset_Password = '/reset-password',
 
   //User links

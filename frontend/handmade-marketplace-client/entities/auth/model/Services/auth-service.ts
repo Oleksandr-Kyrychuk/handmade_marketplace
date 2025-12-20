@@ -26,6 +26,14 @@ class AuthService implements IAuthService {
     return this.authApi.verifyEmailAuth(data)
   }
 
+  async resendVerification(email: string) {
+    return this.authApi.resendVerification(email)
+  }
+
+  async resetPassword(email: string) {
+    return this.authApi.resetPassword(email);
+  }
+
   async getUser(): Promise<GetUserResponseDTO> {
     return this.authApi.getUser()
   }

@@ -1,8 +1,8 @@
 import ConfirmEmailForm from "@/features/confirmEmailForm/ui/confirmEmailForm";
 
-interface IConfirmEmailPage {
-  params: 
-}
+// interface IConfirmEmailPage {
+//   params: 
+// }
 
 function ConfirmEmailPage({searchParams, params}) {
   console.log('searchParam', searchParams.token)

@@ -52,7 +52,6 @@ function RegistrationForm() {
 				router.push(Path.Confirm_email)
 			},
 			onError: (error: Error) => {
-				// console.log('error', error.original)
 				setGlobalError('');
 				const customError = error as CustomError;
 				let hasFieldErrors = false;
@@ -94,7 +93,7 @@ function RegistrationForm() {
 										inputClassName="rounded-5xl font-secondary"
 										labelClassName="block mb-1 font-size-body-4 leading-130"
 										label={t('form.name')}
-										isRequired
+										
 									/>
 								)}
 							/>
@@ -115,7 +114,7 @@ function RegistrationForm() {
 											inputClassName="rounded-5xl font-secondary"
 											labelClassName="block mb-1 font-size-body-4 leading-130"
 											label={t('form.last-name')}
-											isRequired
+											
 										/>
 									)}
 								/>
@@ -250,6 +249,19 @@ function RegistrationForm() {
 				</div>
 
 				<PlatformsButtons />
+
+				<div className="formBottom mb-6">
+					<div className="flex justify-center items-center lg:flex-row flex-col ">
+						<div className="text-size-body-3 leading-130 lg:mb-0 mb-2 font-secondary">
+							{t('form.resend-verification')}
+						</div>
+						<Link href={Path.Resend_verification}
+							className="text-primary-600 text-size-link-1 ml-2 leading-100"
+						>
+							{t('form.resend-verification-link')}
+						</Link>
+					</div>
+				</div>
 
 				<div className="formBottom">
 					<div className="flex justify-center items-center lg:flex-row flex-col ">
