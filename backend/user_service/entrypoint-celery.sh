@@ -23,4 +23,4 @@ echo "Database ready!"
 # python manage.py migrate --noinput || true
 
 echo "Starting Celery worker for user-service..."
-exec celery -A user_service.celery worker --loglevel=info -Q default
+exec celery -A user_service.celery worker --loglevel=info -Q user_queue,default

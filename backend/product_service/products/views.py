@@ -11,13 +11,34 @@ from .permissions import HasRolePermission, ReviewPermission
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import upload_image_to_cloudinary, send_moderation_notification
 import logging
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from rest_framework.generics import GenericAPIView
 from django.utils import timezone
 from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=['products'],
+        parameters=[
+            OpenApiParameter(name='category', type=int, description='ID категорії'),
+            OpenApiParameter(name='min_price', type=float, description='Мінімальна ціна'),
+            OpenApiParameter(name='max_price', type=float, description='Максимальна ціна'),
+            OpenApiParameter(name='sale_type', type=str, description='Тип продажу: fixed або auction'),
+            OpenApiParameter(name='is_approved', type=bool, description='Статус схвалення'),
+            OpenApiParameter(name='created_after', type={'format': 'date'}, description='Створено після (YYYY-MM-DD)'),
+            OpenApiParameter(name='created_before', type={'format': 'date'}, description='Створено до (YYYY-MM-DD)'),
+            OpenApiParameter(name='min_rating', type=float, description='Мінімальний середній рейтинг (0.0–5.0)'),
+            OpenApiParameter(name='max_rating', type=float, description='Максимальний середній рейтинг (0.0–5.0)'),
+        ]
+    ),
+    retrieve=extend_schema(tags=['products']),
+    create=extend_schema(tags=['products']),
+    update=extend_schema(tags=['products']),
+    partial_update=extend_schema(tags=['products']),
+    destroy=extend_schema(tags=['products']),
+)
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -26,24 +47,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_class = ProductFilter
     filter_backends = [DjangoFilterBackend]
     throttle_scope = 'products'
-
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='category', type=int, description='ID категорії'),
-            OpenApiParameter(name='min_price', type=float, description='Мінімальна ціна'),
-            OpenApiParameter(name='max_price', type=float, description='Максимальна ціна'),
-            OpenApiParameter(name='sale_type', type=str, description='Тип продажу: fixed або auction'),
-            OpenApiParameter(name='is_approved', type=bool, description='Статус схвалення'),
-            OpenApiParameter(name='created_after', type={'format': 'date'},
-                                          description='Створено після (YYYY-MM-DD)'),
-            OpenApiParameter(name='created_before', type={'format': 'date'},
-                                          description='Створено до (YYYY-MM-DD)'),
-            OpenApiParameter(name='min_rating', type=float,
-                                          description='Мінімальний середній рейтинг (0.0–5.0)'),
-            OpenApiParameter(name='max_rating', type=float,
-                                          description='Максимальний середній рейтинг (0.0–5.0)'),
-        ]
-    )
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -88,6 +91,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    @extend_schema(tags=['products'])
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def upload_image(self, request, pk=None):
         product = self.get_object()
@@ -126,6 +130,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @extend_schema(tags=['products'])
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def reviews(self, request, pk=None):
         product = self.get_object()
@@ -133,6 +138,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = ReviewSerializer(reviews, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(tags=['products'])
     @action(detail=True, methods=['patch'], url_path='reserve')
     def reserve(self, request, pk=None):
         product = self.get_object()
@@ -159,6 +165,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response({"success": True, "reserved": quantity})
 
+    @extend_schema(tags=['products'])
     @action(detail=True, methods=['post'], url_path='release')
     def release(self, request, pk=None):
         product = self.get_object()
@@ -175,19 +182,42 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response({"success": True, "released": total})
 
-class ModerationViewSet(viewsets.ViewSet):
-    permission_classes = [HasRolePermission]
-    allowed_roles = ['admin']
-    throttle_scope = 'moderation'
-
-    @extend_schema(
+@extend_schema_view(
+    list=extend_schema(
+        tags=['moderation'],
         parameters=[
             OpenApiParameter(name='type', description='Type of content to moderate (product/review)', required=True, type=str),
             OpenApiParameter(name='is_approved', description='Filter by approval status', required=False, type=bool),
         ],
         responses={200: ProductSerializer(many=True)},
         description="Retrieve content pending moderation (products or reviews)"
-    )
+    ),
+    create=extend_schema(
+        tags=['moderation'],
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'type': {'type': 'string', 'enum': ['product', 'review']},
+                    'id': {'type': 'integer'},
+                    'is_approved': {'type': 'boolean'},
+                },
+                'required': ['type', 'id', 'is_approved']
+            }
+        },
+        responses={
+            200: {'description': 'Content approved or rejected'},
+            400: {'description': 'Invalid request'},
+            404: {'description': 'Content not found'},
+        },
+        description="Approve or reject content (product or review)"
+    ),
+)
+class ModerationViewSet(viewsets.ViewSet):
+    permission_classes = [HasRolePermission]
+    allowed_roles = ['admin']
+    throttle_scope = 'moderation'
+
     def list(self, request):
         content_type = request.query_params.get('type')
         is_approved = request.query_params.get('is_approved', None)
@@ -219,25 +249,6 @@ class ModerationViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    @extend_schema(
-        request={
-            'application/json': {
-                'type': 'object',
-                'properties': {
-                    'type': {'type': 'string', 'enum': ['product', 'review']},
-                    'id': {'type': 'integer'},
-                    'is_approved': {'type': 'boolean'},
-                },
-                'required': ['type', 'id', 'is_approved']
-            }
-        },
-        responses={
-            200: {'description': 'Content approved or rejected'},
-            400: {'description': 'Invalid request'},
-            404: {'description': 'Content not found'},
-        },
-        description="Approve or reject content (product or review)"
-    )
     def create(self, request):
         content_type = request.data.get('type')
         content_id = request.data.get('id')
@@ -310,15 +321,16 @@ class ModerationViewSet(viewsets.ViewSet):
             logger.error(f"Error fetching email for user {user_id}: {str(e)}")
             return ''
 
+@extend_schema(
+    tags=['health'],
+    request=None,
+    responses={200: HealthCheckSerializer},
+    summary="Health check for Product Service",
+    description="Checks Redis and database availability."
+)
 class HealthCheckView(GenericAPIView):
     serializer_class = HealthCheckSerializer
 
-    @extend_schema(
-        request=None,
-        responses={200: HealthCheckSerializer},
-        summary="Health check for Product Service",
-        description="Checks Redis and database availability."
-    )
     def get(self, request):
         return Response({
             'status': 'ok',
@@ -328,6 +340,14 @@ class HealthCheckView(GenericAPIView):
             }
         })
 
+@extend_schema_view(
+    list=extend_schema(tags=['reviews']),
+    retrieve=extend_schema(tags=['reviews']),
+    create=extend_schema(tags=['reviews']),
+    update=extend_schema(tags=['reviews']),
+    partial_update=extend_schema(tags=['reviews']),
+    destroy=extend_schema(tags=['reviews']),
+)
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer

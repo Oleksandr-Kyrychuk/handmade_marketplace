@@ -16,4 +16,4 @@ done
 
 echo "Database ready!"
 echo "Starting Celery worker for product-service..."
-exec celery -A product_service.celery worker --loglevel=info -Q images,moderation
+exec celery -A product_service.celery worker --loglevel=info -Q images,moderation,product_queue
