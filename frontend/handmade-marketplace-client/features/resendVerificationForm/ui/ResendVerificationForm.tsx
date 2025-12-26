@@ -14,7 +14,7 @@ import InputField from "@/shared/UI/Input/InputField";
 
 function ResendVerificationForm() {
   const t = useTranslations();
-  const router = useRouter()
+  const router = useRouter();
   
   const [globalError, setGlobalError] = useState('');
 

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 function useResendVerificationMutation() {
   const {mutate: mutateResendVerif, isPending: mutateResendVerifPending} = useMutation({
     mutationFn: (email: string) => authService.resendVerification(email),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast.success('We have send letter to email. Please, check it');
 
       console.log('Log in success')

@@ -4,7 +4,7 @@ export const enum Path {
   Contacts = '/contacts',
   Help = '/help',
   Registration = '/registration',
-  Confirm_email = '/confirm_email',
+  Confirm_email = '/confirm-email',
   Resend_verification = '/resend-verification',
 
   //Menu

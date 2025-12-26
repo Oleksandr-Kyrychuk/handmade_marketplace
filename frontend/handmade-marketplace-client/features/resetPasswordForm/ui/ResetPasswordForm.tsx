@@ -12,6 +12,7 @@ import useResetVerificationMutation from "../model/Queries/useResetPasswordMutat
 import { Path } from "@/shared/enums/Path";
 import { CustomError } from "@/entities/auth/model/types/interfaces";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 function ResetPasswordForm() {
   const t = useTranslations();
@@ -21,21 +22,23 @@ function ResetPasswordForm() {
 
   const {mutateResetPassword, mutateResetPasswordPending} = useResetVerificationMutation();
 
-  const {handleSubmit, register, formState: {errors}, setError, control} = useForm({
+  const {handleSubmit, formState: {errors, isSubmitting}, setError, control} = useForm({
     resolver: yupResolver(resetPasswordSchema),
     defaultValues: {
       email: ''
     }
   });
 
-  function onSubmit(data: string) {
-    console.log('data', data)
+  function onSubmit(email: string) {
+    console.log('data', email)
 
-    mutateResetPassword(data, {
+    mutateResetPassword(email, {
       onSuccess: () => {
+        toast.success('We have send letter to email. Please, check it');
         router.push(Path.Confirm_email)
       },
       onError: (error: Error) => {
+        console.log('error', error)
         setGlobalError('');
         const customError = error as CustomError;
         let hasFieldErrors = false;
@@ -72,8 +75,7 @@ function ResetPasswordForm() {
 										inputType="email"
 										isHasError={!!errors.email}
 										errorText={errors?.email?.message || ''}
-										{...register('email')}
-										placeholder="Email"
+										placeholder={t('form.email')}
 										inputClassName="rounded-5xl font-secondary"
 										label={t('form.email')}
 									/>
@@ -92,9 +94,9 @@ function ResetPasswordForm() {
               className="w-full font-bold leading-100 text-size-body-2 h-14"
               size="md"
               variant="default"
-              disabled={mutateResetPasswordPending}
+              disabled={isSubmitting}
             >
-              {t('form.send')}
+              {isSubmitting ? 'Loading...' : t('form.send')}
             </Button>
         </div>
 
