@@ -31,7 +31,7 @@ import logging
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.pagination import PageNumberPagination
 from users.tasks import send_verification_email, send_password_reset_email
-
+from users.tasks import mask_email
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -121,35 +121,78 @@ class VerifyEmailView(APIView):
         except Exception as e:
             return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class ResendVerificationCodeView(GenericAPIView):
-    serializer_class = ResendVerificationCodeSerializer
-    permission_classes = [permissions.AllowAny]
+class ResendVerificationCodeView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'resend'  # Використовує 'resend': '5/minute' з settings
 
-    @extend_schema(tags=["auth"], summary="Повторна відправка коду верифікації")
+    @extend_schema(
+        tags=["auth"],
+        summary="Повторна відправка коду верифікації",
+        request=ResendVerificationCodeSerializer,  # Якщо fallback на body
+        responses={200: dict},  # OpenAPI spec
+        description="Спробує використати сесію з куки. Якщо ні — очікує email у body. Rate-limited."
+    )
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response({
-                "success": False,
-                "errors": serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
+        email = None
+        session_token = request.COOKIES.get('email_confirm_session')
 
-        user = serializer.save()  # тут вже відправлено лист
+        # Крок 1: Спроба з куки (основний шлях для свіжої реєстрації)
+        if session_token:
+            email = cache.get(f"email_confirm_session:{session_token}")
+            if email:
+                logger.info(f"Resend attempt via cookie for masked email: {mask_email(email)}")  # З tasks.py
 
-        # Оновлюємо cookie: новий токен, нові 15 хвилин
-        session_token = str(uuid.uuid4())
-        cache.set(f"email_confirm_session:{session_token}", user.email, timeout=900)
+        # Крок 2: Fallback на body, якщо куки немає
+        if not email:
+            serializer = ResendVerificationCodeSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response({
+                    "success": False,
+                    "errors": serializer.errors,
+                    "require_email_input": True  # Для фронту: показати поле
+                }, status=status.HTTP_400_BAD_REQUEST)
+            email = serializer.validated_data['email']
+            logger.info(f"Resend attempt via body for masked email: {mask_email(email)}")
 
-        response = Response({"success": True}, status=status.HTTP_200_OK)
+        # Крок 3: Загальна логіка (atomic для consistency)
+        with transaction.atomic():
+            user = get_object_or_404(User, email=email)
+            if user.is_verified:
+                raise ValidationError({"email": "Email вже підтверджений."})
+
+            # Додатковий cache-based rate limit по email (на додачу до DRF throttle по IP)
+            cache_key = f"resend_email_limit:{email}"
+            if cache.get(cache_key):
+                logger.warning(f"Rate limit hit for email: {mask_email(email)}")
+                return Response({
+                    "success": False,
+                    "message": "Зачекайте 60 секунд перед повторною відправкою"
+                }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            cache.set(cache_key, 1, 60)
+
+            # Оновлення timestamp (щоб токен не протух)
+            user.verification_token_created_at = now()
+            user.save()
+
+        # Крок 4: Асинхронна відправка
+        send_verification_email.delay(user.id)
+
+        # Крок 5: Регенерація та оновлення куки (завжди, навіть якщо був body)
+        new_token = str(uuid.uuid4())
+        cache.set(f"email_confirm_session:{new_token}", email, 900)  # 15 хв
+
+        response = Response({"success": True, "message": "Новий код відправлено"}, status=status.HTTP_200_OK)
         response.set_cookie(
             key='email_confirm_session',
-            value=session_token,
-            max_age=900,  # 15 хвилин
-            secure=not settings.DEBUG,  # в проді буде True
+            value=new_token,
+            max_age=900,
+            secure=not settings.DEBUG,
             httponly=True,
             samesite='Strict'
         )
 
+        logger.info(f"Resend successful for masked email: {mask_email(email)}")
         return response
 
 @extend_schema(tags=["authentication"], summary="Логін користувача")

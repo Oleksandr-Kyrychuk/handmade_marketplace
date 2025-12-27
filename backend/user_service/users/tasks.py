@@ -12,6 +12,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
+
 logger = logging.getLogger(__name__)
 
 def is_valid_email(email):
