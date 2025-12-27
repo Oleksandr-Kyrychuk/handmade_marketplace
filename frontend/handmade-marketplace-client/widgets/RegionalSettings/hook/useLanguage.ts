@@ -11,16 +11,16 @@ export function useLanguage(locals: readonly Local[]) {
   const currentPath = usePathname();
   const searchParams = useSearchParams();
   const activeLocale = useLocale();
-  console.log('currentPath', currentPath)
 
   const initLocal = locals.find(local => local === activeLocale) || locals[0];
 
   const { isOpen, selectedValue, dropdownRef, handleOpen, handleSelect } = useDropdown(initLocal);
 
-  const handleLocalChange = (item: string) => {
-    const locale = item.toLocaleLowerCase() || locals[0];
-    console.log('locale', locale)
+  const handleLocalChange = (id: Local, e?: React.MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    e?.stopPropagation();
 
+    const locale = id.toLocaleLowerCase() || locals[0];
     handleSelect(locale)
 
     const queryString = searchParams.toString();
@@ -28,7 +28,6 @@ export function useLanguage(locals: readonly Local[]) {
     const newUrl = queryString ? `${currentPath}?${queryString}` : currentPath;
 
     router.replace(newUrl, {locale})
-    router.refresh();
   }
 
   return {isOpen, selectedValue, dropdownRef, handleOpen, handleLocalChange}

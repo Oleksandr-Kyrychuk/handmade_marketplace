@@ -1,10 +1,12 @@
 import { AxiosRequestConfig } from "axios"
-import { RequestOptions } from "./type/interface"
+import { RequestOptions } from "./types/interfaces";
 
-function buildRequestConfig({method, url, body, params, config, headers, accessToken}: RequestOptions): AxiosRequestConfig {
+
+function buildRequestConfig(options: RequestOptions): AxiosRequestConfig {
+  const { method, url, body, params, config, headers, accessToken } = options;
   const finalHeaders = {
     ...headers,
-    ...(accessToken && !headers.Authorization
+    ...(accessToken && !headers?.['Authorization']
       ? { Authorization: `Bearer ${accessToken}` }
       : {}),
   };

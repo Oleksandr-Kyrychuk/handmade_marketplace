@@ -30,7 +30,7 @@
       }
     ],
     "typeRoots": ["shared/types", "./node_modules/@types"],
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true, // https://eslint.org/docs/rules/no-fallthrough

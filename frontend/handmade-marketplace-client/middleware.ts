@@ -1,9 +1,27 @@
-import createMiddleware from "next-intl/middleware";
-import { routing } from "./shared/i18n/config/routing";
+import { NextRequest, NextResponse } from "next/server";
+import { routing } from "./shared/i18n";
+import createMiddleware from 'next-intl/middleware';
+import { Path } from "./shared/enums/Path";
 
-export default createMiddleware(routing);
+const intlMiddleware = createMiddleware(routing);
 
+export default async function middleware(request: NextRequest) {
+  const hasConfirmSession = request.cookies.get('email_confirm_session');
+  const url = request.nextUrl.pathname; 
+  const locale = url.split('/')[1];
+
+  if (request.nextUrl.pathname === `/${locale}/confirm-email` && !hasConfirmSession) {
+    return NextResponse.redirect(new URL(Path.Home, request.url));
+  }
+
+  const response = intlMiddleware(request);
+  if (response) return response;
+
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
+  matcher: ['/((?!api|_next|.*\\..*).*)']
+  //  matcher: ['/', '/(en|uk)/:path*'],
 }

@@ -1,10 +1,9 @@
 'use client';
 
 import { Link } from "@/shared/i18n/config/navigation";
-import { routing } from "@/shared/i18n/config/routing";
+import { Local, routing } from "@/shared/i18n/config/routing";
 import DropDown from "@/shared/UI/DropDown/DropDown";
 import { useLanguage } from "./hook/useLanguage";
-
 
 function RegionalSettings() {
   const locals = routing.locales;
@@ -15,18 +14,24 @@ function RegionalSettings() {
     label: option.toLocaleUpperCase(),
   }));
 
+  const handleClickLink = (e: React.MouseEvent<HTMLAnchorElement>, id: Local) => {
+    handleLocalChange(id, e);
+
+    handleOpen?.();
+  };
+
   return (
     <div className='regional-settings'>
       <div className='flex items-center'>
-        <DropDown 
+        <DropDown<Local> 
           isOpen={isOpen}
-          selectedValue={selectedValue.toLocaleUpperCase()}
+          selectedValue={selectedValue as Local | null}
           onToggle={handleOpen}
           handleSelect={handleLocalChange}
           options={options}
           dropdownRef={dropdownRef}
           renderOption={(option, handleClick) => (
-            <Link key={option.id} href={option.id} onClick={handleClick} className="px-3 py-2 w-full text-primary-900">{option.label}</Link>
+            <Link key={option.id} href={option.id} onClick={(e) => handleClickLink(e, option.id)} className="px-3 py-2 w-full text-primary-900">{option.label}</Link>
           )}
         />
       </div>

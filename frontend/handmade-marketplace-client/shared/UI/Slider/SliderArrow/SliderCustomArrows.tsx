@@ -1,7 +1,7 @@
-import { Button } from '@/UI/Button/Button';
 import { Swiper as SwiperType } from 'swiper';
-import LeftArrowSliderIcon from '@/assets/Icons/LeftArrowSliderIcon.svg?react'
-import RightArrowSliderIcon from '@/assets/Icons/RightArrowSliderIcon.svg?react'
+import {Button} from '../../index';
+import { LeftArrowSliderIcon, RightArrowSliderIcon } from '@/assets/Icons';
+
 
 interface SliderCustomArrowsProps {
   swiperRef: React.RefObject<SwiperType | null>;

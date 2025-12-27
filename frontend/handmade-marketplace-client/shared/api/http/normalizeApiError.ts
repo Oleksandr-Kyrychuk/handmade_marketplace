@@ -1,5 +1,6 @@
 import { isAxiosError } from "axios";
-import { ApiError } from "./type/interface";
+import { ApiError } from "./types/interfaces";
+
 
 export function normalizeApiError(error: unknown): ApiError {
   if(isAxiosError(error)) {
