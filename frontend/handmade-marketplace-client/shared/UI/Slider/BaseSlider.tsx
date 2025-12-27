@@ -12,7 +12,7 @@ import './generalSliderStyle.scss'
 import SliderCustomArrows from './SliderArrow/SliderCustomArrows';
 
 
-function BaseSlider({children, className, navigation, pagination = false, modules = [], spaceBetween = "10", breakpoints = {}, slidesPerView = 2, ...props}: BaseSliderProps) {
+function BaseSlider({children, className, navigation, pagination = false, modules = [], spaceBetween = "10", breakpoints = {}, slidesPerView = 1, ...props}: BaseSliderProps) {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
   

@@ -15,7 +15,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -43,7 +46,7 @@
         }
       }
     },
-    "/login": {
+    "/login/": {
       "post": {
         "operationId": "root_create",
         "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
@@ -78,7 +81,7 @@
         }
       }
     },
-    "/logout": {
+    "/logout/": {
       "post": {
         "operationId": "root_create_2",
         "summary": "Логаут користувача",
@@ -87,7 +90,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -97,9 +103,9 @@
         }
       }
     },
-    "/password-reset": {
+    "/password-reset/": {
       "post": {
-        "operationId": "root_create_3",
+        "operationId": "root_create_4",
         "summary": "Запит на скидання паролю",
         "tags": [
           "auth"
@@ -126,7 +132,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -144,9 +153,9 @@
         }
       }
     },
-    "/password-reset-confirm/{uidb64}/{token}": {
+    "/password-reset-confirm/{uidb64}/{token}/": {
       "post": {
-        "operationId": "root_create_4",
+        "operationId": "root_create_3",
         "summary": "Підтвердження скидання паролю",
         "parameters": [
           {
@@ -191,7 +200,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -202,7 +214,7 @@
         }
       }
     },
-    "/profile": {
+    "/profile/": {
       "get": {
         "operationId": "root_retrieve_2",
         "summary": "Отримати профіль користувача",
@@ -211,7 +223,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -250,7 +265,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -288,7 +306,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -305,7 +326,7 @@
         }
       }
     },
-    "/register": {
+    "/register/": {
       "post": {
         "operationId": "root_create_5",
         "description": "\n        Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений \n        з умовами використання та політикою конфіденційності.\n        ",
@@ -335,16 +356,19 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/Register"
                 }
               }
             },
@@ -353,7 +377,7 @@
         }
       }
     },
-    "/resend-verification": {
+    "/resend-verification/": {
       "post": {
         "operationId": "root_create_6",
         "summary": "Повторна відправка коду верифікації",
@@ -382,7 +406,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -400,7 +427,7 @@
         }
       }
     },
-    "/token/refresh": {
+    "/token/refresh/": {
       "post": {
         "operationId": "root_create_7",
         "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
@@ -442,7 +469,7 @@
         }
       }
     },
-    "/users": {
+    "/users-list": {
       "get": {
         "operationId": "root_list",
         "parameters": [
@@ -523,7 +550,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -540,7 +570,7 @@
         }
       }
     },
-    "/users/{id}": {
+    "/users-list/{id}": {
       "get": {
         "operationId": "root_retrieve_3",
         "parameters": [
@@ -559,7 +589,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -613,7 +646,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -666,7 +702,10 @@
         },
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -700,7 +739,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           }
         ],
         "responses": {
@@ -710,7 +752,7 @@
         }
       }
     },
-    "/verify-email/{uidb64}/{token}": {
+    "/verify-email/{uidb64}/{token}/": {
       "get": {
         "operationId": "root_retrieve_4",
         "summary": "Підтвердження email",
@@ -737,7 +779,10 @@
         ],
         "security": [
           {
-            "jwtAuth": []
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
           },
           {}
         ],
@@ -898,10 +943,15 @@
             "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
             "maxLength": 71
           },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
           "avatar": {
             "type": "string",
-            "format": "binary",
-            "writeOnly": true
+            "format": "binary"
           }
         }
       },
@@ -941,6 +991,35 @@
           }
         }
       },
+      "Register": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
+            "maxLength": 71
+          },
+          "username": {
+            "type": "string",
+            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "surname": {
+            "type": "string",
+            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
+            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
+            "maxLength": 50,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "surname",
+          "username"
+        ]
+      },
       "RegisterRequest": {
         "type": "object",
         "properties": {
@@ -978,13 +1057,9 @@
             "type": "string",
             "format": "binary",
             "writeOnly": true
-          },
-          "agree_terms": {
-            "type": "boolean"
           }
         },
         "required": [
-          "agree_terms",
           "email",
           "password",
           "password_confirm",
@@ -1031,14 +1106,10 @@
           "access": {
             "type": "string",
             "readOnly": true
-          },
-          "refresh": {
-            "type": "string"
           }
         },
         "required": [
-          "access",
-          "refresh"
+          "access"
         ]
       },
       "TokenRefreshRequest": {
@@ -1046,6 +1117,7 @@
         "properties": {
           "refresh": {
             "type": "string",
+            "writeOnly": true,
             "minLength": 1
           }
         },
@@ -1084,15 +1156,9 @@
             "items": {
               "$ref": "#/components/schemas/RolesEnum"
             }
-          },
-          "avatar_url": {
-            "type": "string",
-            "readOnly": true,
-            "nullable": true
           }
         },
         "required": [
-          "avatar_url",
           "email",
           "id",
           "surname",
@@ -1127,20 +1193,18 @@
           },
           "roles": {
             "type": "array",
-            "items": {},
-            "readOnly": true
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
           },
-          "avatar_url": {
+          "avatar": {
             "type": "string",
-            "readOnly": true,
-            "nullable": true
+            "format": "uri"
           }
         },
         "required": [
-          "avatar_url",
           "email",
           "id",
-          "roles",
           "surname",
           "username"
         ]
@@ -1168,10 +1232,15 @@
             "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
             "maxLength": 71
           },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolesEnum"
+            }
+          },
           "avatar": {
             "type": "string",
-            "format": "binary",
-            "writeOnly": true
+            "format": "binary"
           }
         },
         "required": [
@@ -1238,10 +1307,14 @@
       }
     },
     "securitySchemes": {
-      "jwtAuth": {
+      "basicAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
       }
     }
   },

@@ -1,12 +1,16 @@
 export const enum ApiEndpoints {
-  LOGIN = '/auth/login/',
-  SIGNUP= '/auth/register/',
-  VERIFYEMAIL= '/auth/verify-email',
-  REFRESHTOKEN= '/auth/refresh/',
-  LOGOUT= '/auth/logout/',
-  GETUSER= '/user/',
-  PLATFORMREVIEWS= '/platform-reviews/',
+  LOGIN = '/auth/login',
+  SIGNUP= '/users/register',
+  VERIFY_EMAIL= '/auth/verify-email',
+  REFRESH_TOKEN= '/auth/refresh',
+  RESEND_VERIFICATION= '/users/resend-verification',
+  RESET_PASSWORD = '/users/password-reset',
 
+  LOGOUT= '/auth/logout',
+  
+  GET_USER= '/user',
+  PLATFORM_REVIEWS= '/platform-reviews',
+  
   CATEGORY= '/categories',
-  GETHiTS= '/hits'
+  GET_HiTS= '/hits'
 }

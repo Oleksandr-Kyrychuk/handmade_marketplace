@@ -1,18 +1,18 @@
 import React, { RefObject } from "react";
 
-export interface Option {
-  id: string;
+export interface Option<ID extends string> {
+  id: ID;
   label: string;
 }
 
-export interface IDropDownProps {
-  selectedValue: string | null;
+export interface IDropDownProps<ID extends string>  {
+  selectedValue: ID | null;
   placeholder?: string;
   onToggle: () => void;
   isOpen: boolean;
   listClass?: string;
-  options: Option[];
+  options: Option<ID>[];
   dropdownRef: RefObject<HTMLDivElement | null>;
-  handleSelect?: (id: string) => void;
-  renderOption: (option: Option, handleClick: () => void) => React.ReactNode
+  handleSelect?: (id: ID, e?: React.MouseEvent<HTMLAnchorElement>) => void;
+  renderOption: (option: Option<ID>, handleClick: () => void) => React.ReactNode
 }

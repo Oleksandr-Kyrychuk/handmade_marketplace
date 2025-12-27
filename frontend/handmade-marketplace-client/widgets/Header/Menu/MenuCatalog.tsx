@@ -1,3 +1,5 @@
+import useCategoryQuery from '@/entities/category/model/Queries/useCategory';
+import { Category } from '@/entities/category/model/types/interfaces';
 import { Link } from '@/shared/i18n/config/navigation';
 import Image from 'next/image';
 import React from 'react';
