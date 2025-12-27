@@ -4,38 +4,33 @@ import buildRequestConfig from "./buildRequestConfig";
 
 import { ApiEndpoints } from "./enums";
 import { normalizeApiError } from "./normalizeApiError";
-
-// import { RequestOptions } from "./type/interface";
-// import { getQueryClient } from "../helpers/getQueryClient";
-// import { normalizeApiError } from "./normalizeApiError";
+import { RequestOptions } from "./types/interfaces";
+import { useAuthStore } from "@/entities/auth/model/Store/auth-store";
 
 
 export async function refreshAccessToken() {
+  const authStore = useAuthStore.getState();
   try {
-    const response = await axiosInstance.post(ApiEndpoints.REFRESHTOKEN)
+    const response = await axiosInstance.post(ApiEndpoints.REFRESH_TOKEN)
 
-    const access_token = response.data.access;
-    axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+    const newAccessToken = response.data.access;
+    
+    authStore.setTokens(newAccessToken)
 
-    console.log('refreshAccessToken access_token', access_token)
+    console.log('refreshAccessToken access_token', newAccessToken)
 
-    return access_token;
+    return newAccessToken;
   } catch (error) {
     console.error("Error refreshing access token:", error);
 
-
-    // const queryClient = getQueryClient();
-    // queryClient.removeQueries({ queryKey: ['user']})
-
+    authStore.clearTokens();
     return null;
   }
 }
 
 export async function  Request<T>(options:RequestOptions): Promise<T> {
-  const { method, url, body, params, config, headers, accessToken } = options;
-
   try {
-    const requestConfig = buildRequestConfig({ method, url, body, params, config, headers, accessToken });
+    const requestConfig = buildRequestConfig(options);
     const response: AxiosResponse<T> = await axiosInstance(requestConfig);
 
     // console.log('response', response)
@@ -43,34 +38,11 @@ export async function  Request<T>(options:RequestOptions): Promise<T> {
     return response.data
   } catch (error: unknown) {
     console.error("API error:", error);
-    // if(axios.isAxiosError(error) && error.response?.status === 401) {
-    //   const { isAuthInitialized } = store.getState().token;
 
-    //   console.log('error isAuthInitialized', isAuthInitialized)
-    //   if(!isAuthInitialized) {
-    //     return Promise.reject(error)
-    //   }
 
-    //   const newAccessToken = await refreshAccessToken();
-      
-    //   if(newAccessToken) {
-    //     const retryConfig = buildRequestConfig({ method, url, body, params, config, headers, accessToken });
-    //     const retryResponse = await axiosInstance(retryConfig);
+    const normalized = normalizeApiError(error);
 
-    //     return retryResponse.data
-    //   } else {
-    //     store.dispatch(clearToken());
-    //      store.dispatch(setAuthInitialized(false));
-
-    //     getQueryClient().removeQueries({ queryKey: ["user"]})
-
-    //     return Promise.reject(new Error('Unauthorized'))
-    //   }
-    // }
-
-    // const normalized = normalizeApiError(error);
-
-    // console.error("API error:", normalized);
-    // throw normalized;
+    console.error("API error:", normalized);
+    throw normalized;
   }
 }

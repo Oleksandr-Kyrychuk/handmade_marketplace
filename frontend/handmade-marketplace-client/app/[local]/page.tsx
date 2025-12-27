@@ -1,10 +1,11 @@
+import { PromoSlider } from "@/widgets";
 
-export default function Home() {
+
+function Home() {
   return (
-    <div
-
-    >
-      asd
-    </div>
+      <PromoSlider />
   );
 }
+
+
+export default Home;

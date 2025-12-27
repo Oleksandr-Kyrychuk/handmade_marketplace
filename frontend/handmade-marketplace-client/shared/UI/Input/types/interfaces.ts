@@ -1,16 +1,20 @@
 import { IChildren } from "@/shared/types/general-interfaces";
-import { ReactElement } from "react";
+import React, { ReactElement } from "react";
 import { UseFormRegisterReturn } from "react-hook-form";
 
 export interface InputProps {
-  id: string; 
+  id?: string; 
   inputType: string; 
   placeholder?: string;  
   inputClassName?: string; 
   isDisabled?: boolean; 
-  isErrors?: string; 
   isRequired?: boolean;
   value?: string | string[] | undefined;
+  isHasError? :boolean,
+  maxLength?: number,
+  inputRef?:  (el: HTMLInputElement | null) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onPaste?: (e: React.ClipboardEvent<HTMLInputElement>) => void;
 }
 
 export interface IInputField {
@@ -19,8 +23,8 @@ export interface IInputField {
   icon?: ReactElement,
   label?: string;
   errorText?: string;
-  errors?: string;
-  type?: string;
+  isHasError?: boolean;
+  inputType?: string;
   labelClassName?: string;
   inputClassName?: string;
   isRequired?: boolean;
@@ -33,16 +37,20 @@ export interface IControlledProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   register?: never;
 }
-
 export interface IFormProps {
   register: UseFormRegisterReturn;
   onChange?: never;
 }
 
-export type IBaseInputProps = InputProps & (IControlledProps | IFormProps);
+export type ReadonlyProps = {
+  register?: never;
+  onChange?: never;
+};
+
+export type IBaseInputProps = InputProps & (IControlledProps | IFormProps | ReadonlyProps);
 
 
-export type IInputFieldProps = IInputField & (IControlledProps | IFormProps);
+export type IInputFieldProps = IInputField & (IControlledProps | IFormProps | ReadonlyProps);
 
 export interface IInputLabelProps extends IChildren {
   id: string;
@@ -53,8 +61,7 @@ export interface IInputLabelProps extends IChildren {
 }
 
 export interface IInputErrorProps {
-  errorText: string;
-  errors: string
+  errorText?: string;
 }
 
 export interface IPasswordToggleProps {

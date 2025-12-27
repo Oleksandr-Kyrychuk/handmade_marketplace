@@ -1,7 +1,7 @@
 {
   "header": {
     "topLinks": {
-      "about": "AboutAbout the platform",
+      "about": "About the platform",
       "contacts": "Contacts",
       "help": "Help",
       "registration": "Registration"
@@ -47,8 +47,35 @@
       "termsOfService": "Terms of Service"
     }
   },
+  "promo-slider": {
+    "block1": {
+      "title": "Discover the world of unique products",
+      "description": {
+        "p1": "Choose what really matters! Buy or sell handmade products.",
+        "p2": "Support craftsmen, create unique gifts, and find something valuable for you and your loved ones."
+      },
+      "stats": {
+        "products": "Products",
+        "auctions": "Auctions",
+        "craftsmen": "Craftsmen"
+      }
+    },
+    "block2": {
+      "title": "Your guide in the handmade world",
+      "description": {
+        "p1": "Not sure where to start? We’ll help you figure everything out step by step.",
+        "p2": "Visit the 'About the Platform' section to learn our story, or go to the 'Help' page if you need support right away."
+      }
+    }
+  },
   "search": {
     "placeholder": "Search for product, craftsman, brand"
+  },
+  "buttons": {
+    "registration": "Registration",
+    "auction": "Auction",
+    "about": "About the platform",
+    "help": "Help"
   },
   "user-menu": {
     "navigation": {
@@ -66,5 +93,48 @@
   },
   "authorization": {
     "login": "Log In"
+  },
+  "logInPage": {
+    "title": "Log in",
+    "subtitle": "Welcome to our marketplace!"
+  },
+  "registrationPage": {
+    "title": "Registration in the system",
+    "subtitle": "Welcome to our marketplace!"
+  },
+  "confirmEmailPage": {
+    "title": "Enter confirmation code",
+    "subtitle": "The code has been sent to your email."
+  },
+  "resendVerificationPage": {
+    "title": "Confirm email",
+    "subtitle": "We will send a verification code to your email address."
+  },
+  "resetPasswordPage": {
+    "title": "Password Reset",
+    "subtitle": "Enter your email address and we'll send you a code to recover your access."
+  },
+  "form": {
+    "email": "Email address",
+    "forgot-password": "Forgot password?",
+    "password": "Password",
+    "repeat-the-password": "Repeat the password",
+    "enter-password": "Enter password",
+    "login": "Login",
+    "or-log-in-with": "or log in with",
+    "without-registration": "Not registered yet?",
+    "registration": "Registration",
+    "name": "Name",
+    "last-name": "Last name",
+    "i-agree": "I agree to the terms and conditions and privacy policy.",
+    "sign-up": "Sign up",
+    "sing-up-with": "or register with",
+    "exit": "Exit",
+    "not-registered-yet": "Not registered yet?",
+    "resend-code": "Send again",
+    "confirm": "Confirm",
+    "resend-verification": "Already registered but haven't confirmed your email?",
+    "resend-verification-link": "Confirm email",
+    "send": "Send"
   }
 }
