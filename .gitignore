@@ -210,3 +210,8 @@ __marimo__/
 .idea/
 staticfiles/
 .env.local
+
+
+api_gateway/app/order_service_schema.json
+api_gateway/app/product_service_schema.json
+api_gateway/app/user_service_schema.json
