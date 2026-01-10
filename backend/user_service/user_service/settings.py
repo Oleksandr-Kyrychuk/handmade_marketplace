@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Логування API-запитів, підключено після AuthenticationMiddleware для правильного user_id
-    'middleware.APILoggingMiddleware',  # шлях може змінюватися залежно від структури проєкту
+    'user_service.middleware.APILoggingMiddleware'
 ]
 
 ROOT_URLCONF = 'user_service.urls'
@@ -183,7 +183,7 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'User Service API',
     'DESCRIPTION': 'User management, registration, auth, profile',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_INCLUDE_SCHEMA': True,
     'COMPONENT_SPLIT_REQUEST': True,
     'SCHEMA_PATH_PREFIX': r'^/?.*',
     'TAGS': [
@@ -193,4 +193,16 @@ SPECTACULAR_SETTINGS = {
     ],
     'OPERATION_ID_SUFFIX': 'ViewSet',
     'GENERATE_UNIQUE_ID_FUNCTION': 'settings.spectacular_id',
+'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'users.hooks.postprocess_unified_schema',
+    ],
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)

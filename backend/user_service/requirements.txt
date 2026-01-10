@@ -20,3 +20,10 @@ dj_rest_auth
 djangorestframework-recursive
 django-allauth==0.61.1
 python-json-logger
+pytest
+pytest-django
+pytest-mock
+coverage
+factory-boy
+
+

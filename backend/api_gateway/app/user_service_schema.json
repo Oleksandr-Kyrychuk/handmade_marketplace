@@ -15,10 +15,7 @@
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           },
           {}
         ],
@@ -27,7 +24,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthCheck"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/HealthCheck"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -37,7 +52,41 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthCheck"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -46,7 +95,7 @@
         }
       }
     },
-    "/login/": {
+    "/login": {
       "post": {
         "operationId": "root_create",
         "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
@@ -81,19 +130,17 @@
         }
       }
     },
-    "/logout/": {
+    "/logout": {
       "post": {
         "operationId": "root_create_2",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Логаут користувача",
         "tags": [
           "auth"
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -103,9 +150,10 @@
         }
       }
     },
-    "/password-reset/": {
+    "/password-reset": {
       "post": {
-        "operationId": "root_create_4",
+        "operationId": "root_create_3",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Запит на скидання паролю",
         "tags": [
           "auth"
@@ -132,10 +180,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           },
           {}
         ],
@@ -144,7 +189,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PasswordResetRequest"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PasswordResetRequest"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -153,9 +216,10 @@
         }
       }
     },
-    "/password-reset-confirm/{uidb64}/{token}/": {
+    "/password-reset-confirm/{uidb64}/{token}": {
       "post": {
-        "operationId": "root_create_3",
+        "operationId": "root_create_4",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Підтвердження скидання паролю",
         "parameters": [
           {
@@ -200,10 +264,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           },
           {}
         ],
@@ -214,19 +275,17 @@
         }
       }
     },
-    "/profile/": {
+    "/profile": {
       "get": {
         "operationId": "root_retrieve_2",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Отримати профіль користувача",
         "tags": [
           "profile"
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -234,7 +293,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfile"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserProfile"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -244,6 +321,7 @@
       },
       "put": {
         "operationId": "root_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Повне оновлення профілю",
         "tags": [
           "profile"
@@ -265,10 +343,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -276,7 +351,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfile"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserProfile"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -286,6 +379,7 @@
       },
       "patch": {
         "operationId": "root_partial_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Часткове оновлення профілю",
         "tags": [
           "profile"
@@ -306,10 +400,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -317,7 +408,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfile"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserProfile"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -326,10 +435,10 @@
         }
       }
     },
-    "/register/": {
+    "/register": {
       "post": {
         "operationId": "root_create_5",
-        "description": "\n        Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений \n        з умовами використання та політикою конфіденційності.\n        ",
+        "description": "Обов'язкове поле `agree_terms=true` — користувач підтверджує, \n        що ознайомлений з умовами використання та політикою конфіденційності.",
         "summary": "Реєстрація нового користувача",
         "tags": [
           "auth"
@@ -356,19 +465,34 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           },
           {}
         ],
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Register"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -377,9 +501,10 @@
         }
       }
     },
-    "/resend-verification/": {
+    "/resend-verification": {
       "post": {
         "operationId": "root_create_6",
+        "description": "Спробує використати сесію з куки. Якщо ні — очікує email у body. Rate-limited.",
         "summary": "Повторна відправка коду верифікації",
         "tags": [
           "auth"
@@ -406,10 +531,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           },
           {}
         ],
@@ -418,7 +540,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResendVerificationCode"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -427,7 +568,189 @@
         }
       }
     },
-    "/token/refresh/": {
+    "/schema": {
+      "get": {
+        "operationId": "root_retrieve_3",
+        "description": "OpenApi3 schema for this API. Format can be selected via content negotiation.\n\n- YAML: application/vnd.oai.openapi\n- JSON: application/vnd.oai.openapi+json",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "yaml"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "af",
+                "ar",
+                "ar-dz",
+                "ast",
+                "az",
+                "be",
+                "bg",
+                "bn",
+                "br",
+                "bs",
+                "ca",
+                "ckb",
+                "cs",
+                "cy",
+                "da",
+                "de",
+                "dsb",
+                "el",
+                "en",
+                "en-au",
+                "en-gb",
+                "eo",
+                "es",
+                "es-ar",
+                "es-co",
+                "es-mx",
+                "es-ni",
+                "es-ve",
+                "et",
+                "eu",
+                "fa",
+                "fi",
+                "fr",
+                "fy",
+                "ga",
+                "gd",
+                "gl",
+                "he",
+                "hi",
+                "hr",
+                "hsb",
+                "hu",
+                "hy",
+                "ia",
+                "id",
+                "ig",
+                "io",
+                "is",
+                "it",
+                "ja",
+                "ka",
+                "kab",
+                "kk",
+                "km",
+                "kn",
+                "ko",
+                "ky",
+                "lb",
+                "lt",
+                "lv",
+                "mk",
+                "ml",
+                "mn",
+                "mr",
+                "ms",
+                "my",
+                "nb",
+                "ne",
+                "nl",
+                "nn",
+                "os",
+                "pa",
+                "pl",
+                "pt",
+                "pt-br",
+                "ro",
+                "ru",
+                "sk",
+                "sl",
+                "sq",
+                "sr",
+                "sr-latn",
+                "sv",
+                "sw",
+                "ta",
+                "te",
+                "tg",
+                "th",
+                "tk",
+                "tr",
+                "tt",
+                "udm",
+                "ug",
+                "uk",
+                "ur",
+                "uz",
+                "vi",
+                "zh-hans",
+                "zh-hant"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "jwtAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.oai.openapi": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "application/yaml": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "application/vnd.oai.openapi+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/token/refresh": {
       "post": {
         "operationId": "root_create_7",
         "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
@@ -460,7 +783,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenRefresh"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TokenRefresh"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -469,7 +810,7 @@
         }
       }
     },
-    "/users-list": {
+    "/users": {
       "get": {
         "operationId": "root_list",
         "parameters": [
@@ -550,10 +891,7 @@
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -561,7 +899,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedUserList"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PaginatedUserList"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -570,9 +926,9 @@
         }
       }
     },
-    "/users-list/{id}": {
+    "/users/{id}": {
       "get": {
-        "operationId": "root_retrieve_3",
+        "operationId": "root_retrieve_4",
         "parameters": [
           {
             "in": "path",
@@ -589,10 +945,7 @@
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -600,7 +953,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -646,10 +1017,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -657,7 +1025,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -702,10 +1088,7 @@
         },
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -713,7 +1096,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -739,10 +1140,7 @@
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           }
         ],
         "responses": {
@@ -752,9 +1150,10 @@
         }
       }
     },
-    "/verify-email/{uidb64}/{token}/": {
+    "/verify-email/{uidb64}/{token}": {
       "get": {
-        "operationId": "root_retrieve_4",
+        "operationId": "root_retrieve_5",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Підтвердження email",
         "parameters": [
           {
@@ -779,10 +1178,7 @@
         ],
         "security": [
           {
-            "cookieAuth": []
-          },
-          {
-            "basicAuth": []
+            "jwtAuth": []
           },
           {}
         ],
@@ -791,7 +1187,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VerifyEmail"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VerifyEmail"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -943,15 +1357,10 @@
             "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
             "maxLength": 71
           },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
-          },
           "avatar": {
             "type": "string",
-            "format": "binary"
+            "format": "binary",
+            "writeOnly": true
           }
         }
       },
@@ -991,35 +1400,6 @@
           }
         }
       },
-      "Register": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
-            "maxLength": 71
-          },
-          "username": {
-            "type": "string",
-            "description": "Ім'я: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50,
-            "minLength": 1
-          },
-          "surname": {
-            "type": "string",
-            "description": "Прізвище: 1–50 символів, кирилиця/латиниця, дефіс (не на початку/кінці)",
-            "pattern": "^(?!-)[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+(-[A-Za-z\\u0410-\\u042f\\u0430-\\u044f\\u0457\\u0407\\u0456\\u0406\\u0454\\u0404\\u0491\\u0490]+)*(?<!-)$",
-            "maxLength": 50,
-            "minLength": 1
-          }
-        },
-        "required": [
-          "email",
-          "surname",
-          "username"
-        ]
-      },
       "RegisterRequest": {
         "type": "object",
         "properties": {
@@ -1057,26 +1437,18 @@
             "type": "string",
             "format": "binary",
             "writeOnly": true
+          },
+          "agree_terms": {
+            "type": "boolean"
           }
         },
         "required": [
+          "agree_terms",
           "email",
           "password",
           "password_confirm",
           "surname",
           "username"
-        ]
-      },
-      "ResendVerificationCode": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
-          }
-        },
-        "required": [
-          "email"
         ]
       },
       "ResendVerificationCodeRequest": {
@@ -1106,10 +1478,14 @@
           "access": {
             "type": "string",
             "readOnly": true
+          },
+          "refresh": {
+            "type": "string"
           }
         },
         "required": [
-          "access"
+          "access",
+          "refresh"
         ]
       },
       "TokenRefreshRequest": {
@@ -1117,7 +1493,6 @@
         "properties": {
           "refresh": {
             "type": "string",
-            "writeOnly": true,
             "minLength": 1
           }
         },
@@ -1156,9 +1531,15 @@
             "items": {
               "$ref": "#/components/schemas/RolesEnum"
             }
+          },
+          "avatar_url": {
+            "type": "string",
+            "readOnly": true,
+            "nullable": true
           }
         },
         "required": [
+          "avatar_url",
           "email",
           "id",
           "surname",
@@ -1193,18 +1574,20 @@
           },
           "roles": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
+            "items": {},
+            "readOnly": true
           },
-          "avatar": {
+          "avatar_url": {
             "type": "string",
-            "format": "uri"
+            "readOnly": true,
+            "nullable": true
           }
         },
         "required": [
+          "avatar_url",
           "email",
           "id",
+          "roles",
           "surname",
           "username"
         ]
@@ -1232,15 +1615,10 @@
             "description": "Email: локальна частина 1–35, домен 3–35, без послідовних крапок",
             "maxLength": 71
           },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RolesEnum"
-            }
-          },
           "avatar": {
             "type": "string",
-            "format": "binary"
+            "format": "binary",
+            "writeOnly": true
           }
         },
         "required": [
@@ -1307,14 +1685,10 @@
       }
     },
     "securitySchemes": {
-      "basicAuth": {
+      "jwtAuth": {
         "type": "http",
-        "scheme": "basic"
-      },
-      "cookieAuth": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "sessionid"
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   },

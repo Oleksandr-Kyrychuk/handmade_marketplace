@@ -76,7 +76,7 @@ migrate-product:
 # Створення суперкористувача для user_service
 super-user:
 	@echo "👤 Створення суперкористувача для user_service..."
-	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user_service python manage.py createsuperuser
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml exec user-service python manage.py createsuperuser
 
 # Створення суперкористувача для product_service
 super-product:
