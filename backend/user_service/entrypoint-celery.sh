@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Гарантуємо правильний settings для Celery
+export DJANGO_SETTINGS_MODULE=user_service.settings
+
 # Перевірка, що DATABASE_URL встановлено
 : "${DATABASE_URL:?DATABASE_URL is not set}"
 

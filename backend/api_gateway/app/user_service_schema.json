@@ -845,24 +845,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "A page number within the paginated result set.",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "page_size",
-            "required": false,
-            "in": "query",
-            "description": "Number of results to return per page.",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
             "in": "query",
             "name": "roles",
             "schema": {
@@ -895,33 +877,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/PaginatedUserList"
-                    },
-                    "errors": {
-                      "type": "null"
-                    }
-                  },
-                  "required": [
-                    "success"
-                  ]
-                }
-              }
-            },
-            "description": ""
+          "204": {
+            "description": "No response body"
           }
         }
       }

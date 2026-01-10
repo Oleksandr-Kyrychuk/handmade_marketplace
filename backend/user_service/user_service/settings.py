@@ -42,7 +42,8 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'
-
+ADMIN_EMAIL = env('ADMIN_EMAIL')
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',

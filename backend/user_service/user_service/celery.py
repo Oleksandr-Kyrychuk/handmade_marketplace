@@ -1,8 +1,12 @@
 import os
 from celery import Celery
+import django
 from django.conf import settings
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "user_service.settings")
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'user_service.settings')
+django.setup()
+
 
 celery_app = Celery('user_service')
 

@@ -77,7 +77,9 @@ class RegisterView(UnifiedResponseMixin, GenericAPIView):
             raise ValidationError(serializer.errors)  # → буде оброблено mixin
 
         user = serializer.save()
+        logger.critical("TASK LAUNCHED: send_verification_email.delay(%s)", user.id)
 
+        logger.critical("ЗАРАЗ БУДЕ ЗАПУЩЕНО ЗАДАЧУ send_verification_email для user_id=%s", user.id)
         # Надсилаємо лист асинхронно
         send_verification_email.delay(user.id)
 

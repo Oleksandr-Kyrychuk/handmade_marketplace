@@ -1,3 +1,4 @@
+# users/tasks.py
 from celery import shared_task
 from django.utils.timezone import now
 from datetime import timedelta
@@ -12,12 +13,13 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
-
 logger = logging.getLogger(__name__)
+
 
 def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(email_regex, email))
+
 
 def mask_email(email: str) -> str:
     """Маскує email для логів: te***@gmail.com"""
@@ -27,6 +29,7 @@ def mask_email(email: str) -> str:
     except Exception:
         return "***"
 
+
 def is_throttled(email, action):
     key = f"email_{action}_{email}"
     if cache.get(key):
@@ -34,6 +37,7 @@ def is_throttled(email, action):
         return True
     cache.set(key, True, timeout=60)  # Блокування на 1 хвилину
     return False
+
 
 @shared_task(name="users.tasks.delete_unverified_users")
 def delete_unverified_users():
@@ -51,7 +55,7 @@ def delete_unverified_users():
             else:
                 logger.info("No unverified users found for deletion.")
     except Exception as e:
-        logger.exception("Error deleting unverified users")  # exception = автоматично traceback
+        logger.exception("Error deleting unverified users")
         send_mail(
             'Critical Error in Celery Task',
             f"Error in delete_unverified_users: {str(e)}",
@@ -60,8 +64,10 @@ def delete_unverified_users():
             fail_silently=True,
         )
 
+
 @shared_task(name="users.tasks.send_verification_email")
 def send_verification_email(user_id):
+    logger.critical("ЗАДАЧА send_verification_email ЗАПУЩЕНА!!! user_id=%s", user_id)
     try:
         with transaction.atomic():
             user = User.objects.get(pk=user_id)
@@ -86,6 +92,7 @@ def send_verification_email(user_id):
                 [user.email],
                 fail_silently=False,
             )
+
             logger.info(f"Verification email sent to user_id={user.id}, email={mask_email(user.email)}")
     except Exception as e:
         logger.exception(f"Error sending verification email to user_id={user_id}")
@@ -96,6 +103,8 @@ def send_verification_email(user_id):
             [settings.ADMIN_EMAIL],
             fail_silently=True,
         )
+
+
 
 @shared_task(name="users.tasks.send_password_reset_email")
 def send_password_reset_email(user_id):
