@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from .mixins import UnifiedResponseMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
     partial_update=extend_schema(operation_id='cart_partial_update', tags=['cart']),
     destroy=extend_schema(operation_id='cart_destroy', tags=['cart']),
 )
-class CartViewSet(viewsets.ModelViewSet):
+class CartViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [HasRolePermission]
@@ -63,7 +64,7 @@ class CartViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(operation_id='order_partial_update', tags=['orders']),
     destroy=extend_schema(operation_id='order_destroy', tags=['orders']),
 )
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [HasRolePermission]

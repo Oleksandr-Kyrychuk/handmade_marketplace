@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from .mixins import UnifiedResponseMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.timezone import now
@@ -43,7 +44,7 @@ logger = logging.getLogger(__name__)
     partial_update=extend_schema(operation_id='product_partial_update', tags=['products']),
     destroy=extend_schema(operation_id='product_destroy', tags=['products']),
 )
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [HasRolePermission]
@@ -214,7 +215,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         description="Approve or reject content (product or review)"
     ),
 )
-class ModerationViewSet(viewsets.ViewSet):
+class ModerationViewSet(UnifiedResponseMixin, viewsets.ViewSet):
     permission_classes = [HasRolePermission]
     allowed_roles = ['admin']
     throttle_scope = 'moderation'
@@ -337,7 +338,7 @@ class HealthCheckView(GenericAPIView):
     partial_update=extend_schema(operation_id='review_partial_update', tags=['reviews']),
     destroy=extend_schema(operation_id='review_destroy', tags=['reviews']),
 )
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [ReviewPermission]
