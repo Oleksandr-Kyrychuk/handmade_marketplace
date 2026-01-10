@@ -53,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Логування API-запитів, підключено після AuthenticationMiddleware для правильного user_id
+    'middleware.APILoggingMiddleware',  # шлях може змінюватися залежно від структури проєкту
 ]
 
 ROOT_URLCONF = 'user_service.urls'
@@ -129,12 +131,24 @@ LOGGING = {
         'verbose': {
             'format': '[%(asctime)s] %(levelname)s %(name)s %(message)s',
         },
+        'json': {  # Формат для структурованих логів API
+    '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+    'format': '%(asctime)s %(levelname)s %(name)s %(message)s %(request_id)s %(method)s %(path)s %(status)s %(duration_ms)s %(user_id)s %(client_ip)s'
+},
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'json_file': {  # Запис логів API у файл з обмеженням розміру та ротацією
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs/api_requests.json.log'),
+    'formatter': 'json',
+    'maxBytes': 10 * 1024 * 1024,  # макс. 10MB на файл
+    'backupCount': 5,
+},
+
     },
     'loggers': {
         'django': {
@@ -147,16 +161,23 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'api.request': {  # Новий логер для API-запитів
+            'handlers': ['console', 'json_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     }
 }
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Генерує унікальний operation_id для DRF Spectacular на основі класу і дії view
 def spectacular_id(view):
     name = view.__class__.__name__
     action = getattr(view, "action", "index")
     return f"{name}_{action}"
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'User Service API',
