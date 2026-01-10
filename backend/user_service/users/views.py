@@ -64,35 +64,28 @@ class RegisterView(UnifiedResponseMixin, GenericAPIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     @extend_schema(
+        operation_id='user_register',
         tags=["auth"],
         summary="Реєстрація нового користувача",
         request=RegisterSerializer,
         responses={201: UserSerializer},
-        description="""Обов'язкове поле `agree_terms=true` — користувач підтверджує, 
-        що ознайомлений з умовами використання та політикою конфіденційності."""
+        description="""Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений з умовами використання та політикою конфіденційності."""
     )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            raise ValidationError(serializer.errors)  # → буде оброблено mixin
-
+            raise ValidationError(serializer.errors)
         user = serializer.save()
         logger.critical("TASK LAUNCHED: send_verification_email.delay(%s)", user.id)
-
         logger.critical("ЗАРАЗ БУДЕ ЗАПУЩЕНО ЗАДАЧУ send_verification_email для user_id=%s", user.id)
-        # Надсилаємо лист асинхронно
         send_verification_email.delay(user.id)
-
         # Генеруємо унікальний токен для сесії підтвердження
         session_token = str(uuid.uuid4())
-
         cache.set(f"email_confirm_session:{session_token}", user.email, timeout=900)
-
         response = Response(
             {"detail": "Registration successful"},
             status=status.HTTP_201_CREATED
         )
-
         response.set_cookie(
             key='email_confirm_session',
             value=session_token,
@@ -101,57 +94,45 @@ class RegisterView(UnifiedResponseMixin, GenericAPIView):
             httponly=True,
             samesite='Strict'
         )
-
         return response
 
 
+@extend_schema(operation_id='user_verify_email', tags=["auth"])
 class VerifyEmailView(UnifiedResponseMixin, APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = VerifyEmailSerializer
 
-    @extend_schema(tags=["auth"], summary="Підтвердження email")
     def get(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-
             if (user.verification_token_created_at and
                 default_token_generator.check_token(user, token) and
                 (now() - user.verification_token_created_at) < timedelta(hours=1)):
                 user.is_verified = True
                 user.save()
                 return Response({"detail": "Email verified successfully"}, status=status.HTTP_200_OK)
-
             raise ValidationError("Invalid token or expired")
-
         except User.DoesNotExist:
             raise ValidationError("User not found")
         except Exception as e:
             raise ValidationError(str(e))
 
 
+@extend_schema(operation_id='user_resend_verification', tags=["auth"])
 class ResendVerificationCodeView(UnifiedResponseMixin, APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'resend'
 
-    @extend_schema(
-        tags=["auth"],
-        summary="Повторна відправка коду верифікації",
-        request=ResendVerificationCodeSerializer,
-        responses={200: dict},
-        description="Спробує використати сесію з куки. Якщо ні — очікує email у body. Rate-limited."
-    )
     def post(self, request):
         email = None
         session_token = request.COOKIES.get('email_confirm_session')
-
         # Крок 1: Спроба з куки
         if session_token:
             email = cache.get(f"email_confirm_session:{session_token}")
             if email:
                 logger.info(f"Resend via cookie: {mask_email(email)}")
-
         # Крок 2: Fallback на body
         if not email:
             serializer = ResendVerificationCodeSerializer(data=request.data)
@@ -159,36 +140,27 @@ class ResendVerificationCodeView(UnifiedResponseMixin, APIView):
                 raise ValidationError(serializer.errors)
             email = serializer.validated_data['email']
             logger.info(f"Resend via body: {mask_email(email)}")
-
         # Крок 3: Логіка
         with transaction.atomic():
             user = get_object_or_404(User, email=email)
-
             if user.is_verified:
                 raise ValidationError({"email": "Email вже підтверджений."})
-
             cache_key = f"resend_email_limit:{email}"
             if cache.get(cache_key):
                 raise ValidationError("Зачекайте 60 секунд перед повторною відправкою")
-
             cache.set(cache_key, 1, 60)
-
             # Оновлюємо timestamp токена
             user.verification_token_created_at = now()
             user.save()
-
         # Крок 4: Відправка
         send_verification_email.delay(user.id)
-
         # Крок 5: Нова кука
         new_token = str(uuid.uuid4())
         cache.set(f"email_confirm_session:{new_token}", email, 900)
-
         response = Response(
             {"detail": "Новий код відправлено"},
             status=status.HTTP_200_OK
         )
-
         response.set_cookie(
             key='email_confirm_session',
             value=new_token,
@@ -197,35 +169,28 @@ class ResendVerificationCodeView(UnifiedResponseMixin, APIView):
             httponly=True,
             samesite='Strict'
         )
-
         logger.info(f"Resend successful: {mask_email(email)}")
         return response
 
 
-@extend_schema(tags=["authentication"], summary="Логін користувача")
+@extend_schema(operation_id='user_login', tags=["authentication"])
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
-    @extend_schema(tags=["auth"], summary="Логін користувача")
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
 
-
+@extend_schema(operation_id='user_token_refresh', tags=["auth"])
 class CustomTokenRefreshView(TokenRefreshView):
-    @extend_schema(tags=["auth"], summary="Оновлення токену")
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    pass
 
 
+@extend_schema(operation_id='user_password_reset_request', tags=["auth"])
 class PasswordResetRequestView(UnifiedResponseMixin, GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
     permission_classes = [permissions.AllowAny]
 
-    @extend_schema(tags=["auth"], summary="Запит на скидання паролю")
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         email = serializer.validated_data['email']
         try:
             user = User.objects.get(email=email)
@@ -235,33 +200,35 @@ class PasswordResetRequestView(UnifiedResponseMixin, GenericAPIView):
             raise ValidationError("User not found")
 
 
+@extend_schema(operation_id='user_password_reset_confirm', tags=["auth"])
 class PasswordResetConfirmView(UnifiedResponseMixin, GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = [permissions.AllowAny]
 
-    @extend_schema(tags=["auth"], summary="Підтвердження скидання паролю")
     def post(self, request, uidb64, token):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-
             if default_token_generator.check_token(user, token):
                 user.set_password(serializer.validated_data['new_password'])
                 user.save()
                 return Response({"detail": "Password reset successful"}, status=status.HTTP_200_OK)
-
             raise ValidationError("Invalid token")
-
         except User.DoesNotExist:
             raise ValidationError("User not found")
         except Exception as e:
             raise ValidationError(str(e))
 
 
-@extend_schema(tags=["users"])
+@extend_schema_view(
+    list=extend_schema(operation_id='user_list', tags=['users']),
+    retrieve=extend_schema(operation_id='user_retrieve', tags=['users']),
+    update=extend_schema(operation_id='user_update', tags=['users']),
+    partial_update=extend_schema(operation_id='user_partial_update', tags=['users']),
+    destroy=extend_schema(operation_id='user_destroy', tags=['users']),
+)
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -274,9 +241,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    get=extend_schema(summary="Отримати профіль користувача", tags=["profile"]),
-    put=extend_schema(summary="Повне оновлення профілю", tags=["profile"]),
-    patch=extend_schema(summary="Часткове оновлення профілю", tags=["profile"]),
+    get=extend_schema(operation_id='user_profile_retrieve', summary="Отримати профіль користувача", tags=["profile"]),
+    put=extend_schema(operation_id='user_profile_update', summary="Повне оновлення профілю", tags=["profile"]),
+    patch=extend_schema(operation_id='user_profile_partial_update', summary="Часткове оновлення профілю", tags=["profile"]),
 )
 class UserProfileView(UnifiedResponseMixin, generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
@@ -287,38 +254,36 @@ class UserProfileView(UnifiedResponseMixin, generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+@extend_schema(operation_id='user_logout', tags=["auth"])
 class LogoutView(UnifiedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = None
 
-    @extend_schema(tags=["auth"], summary="Логаут користувача")
     def post(self, request):
         try:
             refresh_token = request.data.get("refresh") or request.data.get("refresh_token")
             if not refresh_token:
                 raise ValidationError("Refresh token is required")
-
             token = RefreshToken(refresh_token)
             token.blacklist()
-
             return Response({"detail": "Logout successful"}, status=200)
-
         except TokenError:
             raise ValidationError("Invalid or already blacklisted token")
         except Exception as e:
             raise ValidationError(str(e))
 
 
+@extend_schema(
+    operation_id='user_health_check',
+    tags=["health"],
+    summary="Перевірка здоров'я сервісів",
+    request=None,
+    responses={200: HealthCheckSerializer, 503: HealthCheckSerializer}
+)
 class HealthCheckView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = HealthCheckSerializer
 
-    @extend_schema(
-        tags=["health"],
-        summary="Перевірка здоров'я сервісів",
-        request=None,
-        responses={200: HealthCheckSerializer, 503: HealthCheckSerializer}
-    )
     def get(self, request):
         results = {}
         all_healthy = True
