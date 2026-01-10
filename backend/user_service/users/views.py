@@ -57,7 +57,6 @@ class StandardResultsSetPagination(PageNumberPagination):
         })
 
 
-@extend_schema(tags=["registration"], summary="Реєстрація нового користувача")
 class RegisterView(UnifiedResponseMixin, GenericAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -97,11 +96,15 @@ class RegisterView(UnifiedResponseMixin, GenericAPIView):
         return response
 
 
-@extend_schema(operation_id='user_verify_email', tags=["auth"])
 class VerifyEmailView(UnifiedResponseMixin, APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = VerifyEmailSerializer
 
+    @extend_schema(
+        operation_id='user_verify_email',
+        tags=["auth"],
+        summary="Підтвердження email"
+    )
     def get(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -119,12 +122,19 @@ class VerifyEmailView(UnifiedResponseMixin, APIView):
             raise ValidationError(str(e))
 
 
-@extend_schema(operation_id='user_resend_verification', tags=["auth"])
 class ResendVerificationCodeView(UnifiedResponseMixin, APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'resend'
 
+    @extend_schema(
+        operation_id='user_resend_verification',
+        tags=["auth"],
+        summary="Повторна відправка коду верифікації",
+        request=ResendVerificationCodeSerializer,
+        responses={200: dict},
+        description="Спробує використати сесію з куки. Якщо ні — очікує email у body. Rate-limited."
+    )
     def post(self, request):
         email = None
         session_token = request.COOKIES.get('email_confirm_session')
@@ -173,21 +183,37 @@ class ResendVerificationCodeView(UnifiedResponseMixin, APIView):
         return response
 
 
-@extend_schema(operation_id='user_login', tags=["authentication"])
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
+    @extend_schema(
+        operation_id='user_login',
+        tags=["auth"],
+        summary="Логін користувача"
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
-@extend_schema(operation_id='user_token_refresh', tags=["auth"])
+
 class CustomTokenRefreshView(TokenRefreshView):
-    pass
+    @extend_schema(
+        operation_id='user_token_refresh',
+        tags=["auth"],
+        summary="Оновлення токену"
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
-@extend_schema(operation_id='user_password_reset_request', tags=["auth"])
 class PasswordResetRequestView(UnifiedResponseMixin, GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        operation_id='user_password_reset_request',
+        tags=["auth"],
+        summary="Запит на скидання паролю"
+    )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -200,11 +226,15 @@ class PasswordResetRequestView(UnifiedResponseMixin, GenericAPIView):
             raise ValidationError("User not found")
 
 
-@extend_schema(operation_id='user_password_reset_confirm', tags=["auth"])
 class PasswordResetConfirmView(UnifiedResponseMixin, GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        operation_id='user_password_reset_confirm',
+        tags=["auth"],
+        summary="Підтвердження скидання паролю"
+    )
     def post(self, request, uidb64, token):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -240,25 +270,48 @@ class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'put', 'patch', 'delete']
 
 
-@extend_schema_view(
-    get=extend_schema(operation_id='user_profile_retrieve', summary="Отримати профіль користувача", tags=["profile"]),
-    put=extend_schema(operation_id='user_profile_update', summary="Повне оновлення профілю", tags=["profile"]),
-    patch=extend_schema(operation_id='user_profile_partial_update', summary="Часткове оновлення профілю", tags=["profile"]),
-)
 class UserProfileView(UnifiedResponseMixin, generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    @extend_schema(
+        operation_id='user_profile_retrieve',
+        summary="Отримати профіль користувача",
+        tags=["profile"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        operation_id='user_profile_update',
+        summary="Повне оновлення профілю",
+        tags=["profile"]
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @extend_schema(
+        operation_id='user_profile_partial_update',
+        summary="Часткове оновлення профілю",
+        tags=["profile"]
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
     def get_object(self):
         return self.request.user
 
 
-@extend_schema(operation_id='user_logout', tags=["auth"])
 class LogoutView(UnifiedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = None
 
+    @extend_schema(
+        operation_id='user_logout',
+        tags=["auth"],
+        summary="Логаут користувача"
+    )
     def post(self, request):
         try:
             refresh_token = request.data.get("refresh") or request.data.get("refresh_token")
@@ -273,17 +326,17 @@ class LogoutView(UnifiedResponseMixin, APIView):
             raise ValidationError(str(e))
 
 
-@extend_schema(
-    operation_id='user_health_check',
-    tags=["health"],
-    summary="Перевірка здоров'я сервісів",
-    request=None,
-    responses={200: HealthCheckSerializer, 503: HealthCheckSerializer}
-)
 class HealthCheckView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = HealthCheckSerializer
 
+    @extend_schema(
+        operation_id='user_health_check',
+        tags=["health"],
+        summary="Перевірка здоров'я сервісів",
+        request=None,
+        responses={200: HealthCheckSerializer, 503: HealthCheckSerializer}
+    )
     def get(self, request):
         results = {}
         all_healthy = True

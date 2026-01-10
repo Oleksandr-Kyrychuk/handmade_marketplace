@@ -15,5 +15,10 @@ until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; do
 done
 
 echo "Database ready!"
+
+# Додано: автоматичний collectstatic (на всяк випадок, бо іноді worker теж використовує статику)
+echo "Collecting static files (optional for worker)..."
+python manage.py collectstatic --noinput --clear || true
+
 echo "Starting Celery worker for product-service..."
 exec celery -A product_service.celery worker --loglevel=info -Q images,moderation,product_queue

@@ -14,4 +14,6 @@ django-cors-headers
 djangorestframework-simplejwt
 django-celery-beat
 dj-rest-auth
+whitenoise==6.8.2
+
 

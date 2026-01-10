@@ -8,7 +8,7 @@
   "paths": {
     "/health": {
       "get": {
-        "operationId": "root_retrieve",
+        "operationId": "user_health_check",
         "summary": "Перевірка здоров'я сервісів",
         "tags": [
           "health"
@@ -97,7 +97,7 @@
     },
     "/login": {
       "post": {
-        "operationId": "root_create",
+        "operationId": "user_login",
         "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
         "summary": "Логін користувача",
         "tags": [
@@ -132,7 +132,7 @@
     },
     "/logout": {
       "post": {
-        "operationId": "root_create_2",
+        "operationId": "user_logout",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Логаут користувача",
         "tags": [
@@ -152,7 +152,7 @@
     },
     "/password-reset": {
       "post": {
-        "operationId": "root_create_3",
+        "operationId": "user_password_reset_request",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Запит на скидання паролю",
         "tags": [
@@ -218,7 +218,7 @@
     },
     "/password-reset-confirm/{uidb64}/{token}": {
       "post": {
-        "operationId": "root_create_4",
+        "operationId": "user_password_reset_confirm",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Підтвердження скидання паролю",
         "parameters": [
@@ -277,7 +277,7 @@
     },
     "/profile": {
       "get": {
-        "operationId": "root_retrieve_2",
+        "operationId": "user_profile_retrieve",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Отримати профіль користувача",
         "tags": [
@@ -320,7 +320,7 @@
         }
       },
       "put": {
-        "operationId": "root_update",
+        "operationId": "user_profile_update",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Повне оновлення профілю",
         "tags": [
@@ -378,7 +378,7 @@
         }
       },
       "patch": {
-        "operationId": "root_partial_update",
+        "operationId": "user_profile_partial_update",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Часткове оновлення профілю",
         "tags": [
@@ -437,8 +437,8 @@
     },
     "/register": {
       "post": {
-        "operationId": "root_create_5",
-        "description": "Обов'язкове поле `agree_terms=true` — користувач підтверджує, \n        що ознайомлений з умовами використання та політикою конфіденційності.",
+        "operationId": "user_register",
+        "description": "Обов'язкове поле `agree_terms=true` — користувач підтверджує, що ознайомлений з умовами використання та політикою конфіденційності.",
         "summary": "Реєстрація нового користувача",
         "tags": [
           "auth"
@@ -503,7 +503,7 @@
     },
     "/resend-verification": {
       "post": {
-        "operationId": "root_create_6",
+        "operationId": "user_resend_verification",
         "description": "Спробує використати сесію з куки. Якщо ні — очікує email у body. Rate-limited.",
         "summary": "Повторна відправка коду верифікації",
         "tags": [
@@ -570,7 +570,7 @@
     },
     "/schema": {
       "get": {
-        "operationId": "root_retrieve_3",
+        "operationId": "root_retrieve",
         "description": "OpenApi3 schema for this API. Format can be selected via content negotiation.\n\n- YAML: application/vnd.oai.openapi\n- JSON: application/vnd.oai.openapi+json",
         "parameters": [
           {
@@ -752,7 +752,7 @@
     },
     "/token/refresh": {
       "post": {
-        "operationId": "root_create_7",
+        "operationId": "user_token_refresh",
         "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
         "summary": "Оновлення токену",
         "tags": [
@@ -812,7 +812,7 @@
     },
     "/users": {
       "get": {
-        "operationId": "root_list",
+        "operationId": "user_list",
         "parameters": [
           {
             "in": "query",
@@ -842,6 +842,24 @@
             "name": "is_verified",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
             }
           },
           {
@@ -877,15 +895,40 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No response body"
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PaginatedUserList"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
           }
         }
       }
     },
     "/users/{id}": {
       "get": {
-        "operationId": "root_retrieve_4",
+        "operationId": "user_retrieve",
         "parameters": [
           {
             "in": "path",
@@ -937,7 +980,7 @@
         }
       },
       "put": {
-        "operationId": "root_update_2",
+        "operationId": "user_update",
         "parameters": [
           {
             "in": "path",
@@ -1009,7 +1052,7 @@
         }
       },
       "patch": {
-        "operationId": "root_partial_update_2",
+        "operationId": "user_partial_update",
         "parameters": [
           {
             "in": "path",
@@ -1080,7 +1123,7 @@
         }
       },
       "delete": {
-        "operationId": "root_destroy",
+        "operationId": "user_destroy",
         "parameters": [
           {
             "in": "path",
@@ -1109,7 +1152,7 @@
     },
     "/verify-email/{uidb64}/{token}": {
       "get": {
-        "operationId": "root_retrieve_5",
+        "operationId": "user_verify_email",
         "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "summary": "Підтвердження email",
         "parameters": [

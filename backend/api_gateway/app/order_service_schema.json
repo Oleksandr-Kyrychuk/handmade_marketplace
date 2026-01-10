@@ -8,7 +8,10 @@
   "paths": {
     "/carts": {
       "get": {
-        "operationId": "root_list",
+        "operationId": "cart_list",
+        "tags": [
+          "cart"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -34,7 +37,10 @@
         }
       },
       "post": {
-        "operationId": "root_create",
+        "operationId": "cart_create",
+        "tags": [
+          "cart"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -78,7 +84,7 @@
     },
     "/carts/{id}": {
       "get": {
-        "operationId": "root_retrieve",
+        "operationId": "cart_retrieve",
         "parameters": [
           {
             "in": "path",
@@ -89,6 +95,9 @@
             "description": "A unique integer value identifying this Cart.",
             "required": true
           }
+        ],
+        "tags": [
+          "cart"
         ],
         "security": [
           {
@@ -112,7 +121,7 @@
         }
       },
       "put": {
-        "operationId": "root_update",
+        "operationId": "cart_update",
         "parameters": [
           {
             "in": "path",
@@ -123,6 +132,9 @@
             "description": "A unique integer value identifying this Cart.",
             "required": true
           }
+        ],
+        "tags": [
+          "cart"
         ],
         "requestBody": {
           "content": {
@@ -165,7 +177,7 @@
         }
       },
       "patch": {
-        "operationId": "root_partial_update",
+        "operationId": "cart_partial_update",
         "parameters": [
           {
             "in": "path",
@@ -176,6 +188,9 @@
             "description": "A unique integer value identifying this Cart.",
             "required": true
           }
+        ],
+        "tags": [
+          "cart"
         ],
         "requestBody": {
           "content": {
@@ -218,7 +233,7 @@
         }
       },
       "delete": {
-        "operationId": "root_destroy",
+        "operationId": "cart_destroy",
         "parameters": [
           {
             "in": "path",
@@ -229,6 +244,9 @@
             "description": "A unique integer value identifying this Cart.",
             "required": true
           }
+        ],
+        "tags": [
+          "cart"
         ],
         "security": [
           {
@@ -247,7 +265,7 @@
     },
     "/orders": {
       "get": {
-        "operationId": "root_list_2",
+        "operationId": "order_list",
         "parameters": [
           {
             "in": "query",
@@ -307,6 +325,9 @@
             "description": "* `pending` - Pending\n* `reserved` - Reserved\n* `paid` - Paid\n* `processing` - Processing\n* `shipped` - Shipped\n* `delivered` - Delivered\n* `cancelled` - Cancelled\n* `refunded` - Refunded\n* `failed` - Failed"
           }
         ],
+        "tags": [
+          "orders"
+        ],
         "security": [
           {
             "cookieAuth": []
@@ -332,7 +353,10 @@
         }
       },
       "post": {
-        "operationId": "root_create_2",
+        "operationId": "order_create",
+        "tags": [
+          "orders"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -376,7 +400,7 @@
     },
     "/orders/{id}": {
       "get": {
-        "operationId": "root_retrieve_2",
+        "operationId": "order_retrieve",
         "parameters": [
           {
             "in": "path",
@@ -387,6 +411,9 @@
             "description": "A unique integer value identifying this order.",
             "required": true
           }
+        ],
+        "tags": [
+          "orders"
         ],
         "security": [
           {
@@ -410,7 +437,7 @@
         }
       },
       "put": {
-        "operationId": "root_update_2",
+        "operationId": "order_update",
         "parameters": [
           {
             "in": "path",
@@ -421,6 +448,9 @@
             "description": "A unique integer value identifying this order.",
             "required": true
           }
+        ],
+        "tags": [
+          "orders"
         ],
         "requestBody": {
           "content": {
@@ -463,7 +493,7 @@
         }
       },
       "patch": {
-        "operationId": "root_partial_update_2",
+        "operationId": "order_partial_update",
         "parameters": [
           {
             "in": "path",
@@ -474,6 +504,9 @@
             "description": "A unique integer value identifying this order.",
             "required": true
           }
+        ],
+        "tags": [
+          "orders"
         ],
         "requestBody": {
           "content": {
@@ -516,7 +549,7 @@
         }
       },
       "delete": {
-        "operationId": "root_destroy_2",
+        "operationId": "order_destroy",
         "parameters": [
           {
             "in": "path",
@@ -527,6 +560,9 @@
             "description": "A unique integer value identifying this order.",
             "required": true
           }
+        ],
+        "tags": [
+          "orders"
         ],
         "security": [
           {
@@ -545,7 +581,7 @@
     },
     "/orders/{id}/change_status": {
       "post": {
-        "operationId": "root_create_4",
+        "operationId": "order_change_status",
         "parameters": [
           {
             "in": "path",
@@ -556,6 +592,9 @@
             "description": "A unique integer value identifying this order.",
             "required": true
           }
+        ],
+        "tags": [
+          "orders"
         ],
         "requestBody": {
           "content": {
@@ -600,8 +639,11 @@
     },
     "/orders/create_from_cart": {
       "post": {
-        "operationId": "root_create_3",
+        "operationId": "order_create_from_cart",
         "description": "Create order from cart",
+        "tags": [
+          "orders"
+        ],
         "requestBody": {
           "content": {
             "application/json": {

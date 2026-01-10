@@ -33,7 +33,7 @@ echo "Applying migrations for all apps..."
 python manage.py migrate --noinput
 
 # Optional: Collect static files
-# python manage.py collectstatic --noinput
+ python manage.py collectstatic --noinput
 
 # Optional: Create superuser
 # python manage.py createsuperuser --noinput --email admin@example.com --username admin --surname Admin || true

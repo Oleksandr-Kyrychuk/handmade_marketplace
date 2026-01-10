@@ -17,6 +17,7 @@ from django.utils import timezone
 from datetime import timedelta
 import requests
 from django.conf import settings
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +187,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             OpenApiParameter(name='type', description='Type of content to moderate (product/review)', required=True, type=str),
             OpenApiParameter(name='is_approved', description='Filter by approval status', required=False, type=bool),
         ],
-        responses={200: ProductSerializer(many=True) | ReviewSerializer(many=True)},
+        responses={
+            200: Union[ProductSerializer(many=True), ReviewSerializer(many=True)]
+        },
         description="Retrieve content pending moderation (products or reviews)"
     ),
     create=extend_schema(
