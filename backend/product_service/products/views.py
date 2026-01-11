@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from .mixins import UnifiedResponseMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.timezone import now
@@ -9,17 +10,21 @@ from .filters import ProductFilter
 from rest_framework.permissions import IsAuthenticated
 from .permissions import HasRolePermission, ReviewPermission
 from django_filters.rest_framework import DjangoFilterBackend
-from .tasks import upload_image_to_cloudinary, send_moderation_notification
+from .tasks import upload_image_to_cloudinary, send_moderation_notification, moderate_content
 import logging
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from rest_framework.generics import GenericAPIView
 from django.utils import timezone
 from datetime import timedelta
+import requests
+from django.conf import settings
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
 @extend_schema_view(
     list=extend_schema(
+        operation_id='product_list',
         tags=['products'],
         parameters=[
             OpenApiParameter(name='category', type=int, description='ID категорії'),
@@ -31,21 +36,21 @@ logger = logging.getLogger(__name__)
             OpenApiParameter(name='created_before', type={'format': 'date'}, description='Створено до (YYYY-MM-DD)'),
             OpenApiParameter(name='min_rating', type=float, description='Мінімальний середній рейтинг (0.0–5.0)'),
             OpenApiParameter(name='max_rating', type=float, description='Максимальний середній рейтинг (0.0–5.0)'),
-        ]
+        ],
     ),
-    retrieve=extend_schema(tags=['products']),
-    create=extend_schema(tags=['products']),
-    update=extend_schema(tags=['products']),
-    partial_update=extend_schema(tags=['products']),
-    destroy=extend_schema(tags=['products']),
+    retrieve=extend_schema(operation_id='product_retrieve', tags=['products']),
+    create=extend_schema(operation_id='product_create', tags=['products']),
+    update=extend_schema(operation_id='product_update', tags=['products']),
+    partial_update=extend_schema(operation_id='product_partial_update', tags=['products']),
+    destroy=extend_schema(operation_id='product_destroy', tags=['products']),
 )
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [HasRolePermission]
     allowed_roles = ['user', 'admin']
-    filterset_class = ProductFilter
     filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
     throttle_scope = 'products'
 
     def get_queryset(self):
@@ -91,7 +96,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    @extend_schema(tags=['products'])
+    @extend_schema(operation_id='product_upload_image', tags=['products'])
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def upload_image(self, request, pk=None):
         product = self.get_object()
@@ -130,7 +135,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    @extend_schema(tags=['products'])
+    @extend_schema(operation_id='product_reviews', tags=['products'])
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def reviews(self, request, pk=None):
         product = self.get_object()
@@ -138,21 +143,17 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = ReviewSerializer(reviews, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @extend_schema(tags=['products'])
+    @extend_schema(operation_id='product_reserve', tags=['products'])
     @action(detail=True, methods=['patch'], url_path='reserve')
     def reserve(self, request, pk=None):
         product = self.get_object()
         quantity = int(request.data.get('quantity', 0))
         order_id = request.data.get('order_id')
-
         if quantity <= 0 or not order_id:
             return Response({"errors": "quantity and order_id required"}, status=400)
-
         if product.stock < quantity:
             return Response({"errors": "Not enough stock"}, status=400)
-
         expires_at = timezone.now() + timedelta(hours=24)
-
         with transaction.atomic():
             Reservation.objects.create(
                 product=product,
@@ -162,37 +163,38 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
             product.stock -= quantity
             product.save(update_fields=['stock'])
-
         return Response({"success": True, "reserved": quantity})
 
-    @extend_schema(tags=['products'])
+    @extend_schema(operation_id='product_release', tags=['products'])
     @action(detail=True, methods=['post'], url_path='release')
     def release(self, request, pk=None):
         product = self.get_object()
         order_id = request.data.get('order_id')
         if not order_id:
             return Response({"errors": "order_id required"}, status=400)
-
         with transaction.atomic():
             reservations = product.reservations.filter(order_id=order_id)
             total = sum(r.quantity for r in reservations)
             reservations.delete()
             product.stock += total
             product.save(update_fields=['stock'])
-
         return Response({"success": True, "released": total})
 
 @extend_schema_view(
     list=extend_schema(
+        operation_id='moderation_list',
         tags=['moderation'],
         parameters=[
             OpenApiParameter(name='type', description='Type of content to moderate (product/review)', required=True, type=str),
             OpenApiParameter(name='is_approved', description='Filter by approval status', required=False, type=bool),
         ],
-        responses={200: ProductSerializer(many=True)},
+        responses={
+            200: Union[ProductSerializer(many=True), ReviewSerializer(many=True)]
+        },
         description="Retrieve content pending moderation (products or reviews)"
     ),
     create=extend_schema(
+        operation_id='moderation_approve_reject',
         tags=['moderation'],
         request={
             'application/json': {
@@ -213,7 +215,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         description="Approve or reject content (product or review)"
     ),
 )
-class ModerationViewSet(viewsets.ViewSet):
+class ModerationViewSet(UnifiedResponseMixin, viewsets.ViewSet):
     permission_classes = [HasRolePermission]
     allowed_roles = ['admin']
     throttle_scope = 'moderation'
@@ -221,14 +223,12 @@ class ModerationViewSet(viewsets.ViewSet):
     def list(self, request):
         content_type = request.query_params.get('type')
         is_approved = request.query_params.get('is_approved', None)
-
         if content_type not in ['product', 'review']:
             logger.error(f"Invalid content type {content_type} for moderation")
             return Response(
                 {"success": False, "errors": {"type": "Тип контенту має бути 'product' або 'review'"}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         try:
             if content_type == 'product':
                 queryset = Product.objects.all()
@@ -240,7 +240,6 @@ class ModerationViewSet(viewsets.ViewSet):
                 if is_approved is not None:
                     queryset = queryset.filter(is_approved=is_approved.lower() == 'true')
                 serializer = ReviewSerializer(queryset, many=True)
-
             return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error listing moderation content for type {content_type}: {str(e)}")
@@ -253,28 +252,24 @@ class ModerationViewSet(viewsets.ViewSet):
         content_type = request.data.get('type')
         content_id = request.data.get('id')
         is_approved = request.data.get('is_approved')
-
         if content_type not in ['product', 'review']:
             logger.error(f"Invalid content type {content_type} for moderation")
             return Response(
                 {"success": False, "errors": {"type": "Тип контенту має бути 'product' або 'review'"}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         if not isinstance(content_id, int):
             logger.error(f"Invalid content ID {content_id} for moderation")
             return Response(
                 {"success": False, "errors": {"id": "ID контенту має бути цілим числом"}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         if not isinstance(is_approved, bool):
             logger.error(f"Invalid is_approved value {is_approved} for moderation")
             return Response(
                 {"success": False, "errors": {"is_approved": "is_approved має бути булевим значенням"}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         try:
             if content_type == 'product':
                 obj = Product.objects.get(id=content_id)
@@ -282,19 +277,14 @@ class ModerationViewSet(viewsets.ViewSet):
             else:
                 obj = Review.objects.get(id=content_id)
                 recipient_email = self._get_user_email(obj.user_id, request)
-
             obj.is_approved = is_approved
             obj.save()
-
             logger.info(f"{content_type.capitalize()} {content_id} {'approved' if is_approved else 'rejected'} by user {request.user.id}")
-
             send_moderation_notification.delay(content_type, content_id, is_approved, recipient_email)
-
             return Response(
                 {"success": True, "message": f"{content_type.capitalize()} {'схвалено' if is_approved else 'відхилено'}"},
                 status=status.HTTP_200_OK
             )
-
         except (Product.DoesNotExist, Review.DoesNotExist):
             logger.error(f"{content_type.capitalize()} with ID {content_id} not found")
             return Response(
@@ -341,20 +331,20 @@ class HealthCheckView(GenericAPIView):
         })
 
 @extend_schema_view(
-    list=extend_schema(tags=['reviews']),
-    retrieve=extend_schema(tags=['reviews']),
-    create=extend_schema(tags=['reviews']),
-    update=extend_schema(tags=['reviews']),
-    partial_update=extend_schema(tags=['reviews']),
-    destroy=extend_schema(tags=['reviews']),
+    list=extend_schema(operation_id='review_list', tags=['reviews']),
+    retrieve=extend_schema(operation_id='review_retrieve', tags=['reviews']),
+    create=extend_schema(operation_id='review_create', tags=['reviews']),
+    update=extend_schema(operation_id='review_update', tags=['reviews']),
+    partial_update=extend_schema(operation_id='review_partial_update', tags=['reviews']),
+    destroy=extend_schema(operation_id='review_destroy', tags=['reviews']),
 )
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [ReviewPermission]
     allowed_roles = ['user', 'admin']
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['product', 'rating', 'is_approved', 'created_at'] #фільтри по продукту, рейтингу тощо
+    filterset_fields = ['product', 'rating', 'is_approved', 'created_at']
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -366,12 +356,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user_id=self.request.user.id, is_approved=False)
-        # Асинхронна модерація (REV-08)
-        from .tasks import moderate_content
+        # Асинхронна модерація
         moderate_content.delay('review', serializer.instance.id, serializer.instance.comment)
 
     def perform_update(self, serializer):
-        # Логіка для редагування (тільки адміни або власник)
         instance = serializer.instance
         if instance.user_id != self.request.user.id and 'admin' not in self.request.user.roles:
             raise PermissionDenied("Ви не можете редагувати цей відгук")

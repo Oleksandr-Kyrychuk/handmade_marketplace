@@ -32,6 +32,10 @@ python manage.py makemigrations products --noinput
 echo "Applying migrations for products app..."
 python manage.py migrate products --noinput
 
+# Додано: автоматичний collectstatic перед запуском сервера
+echo "Collecting static files..."
+python manage.py collectstatic --noinput --clear || true
+
 PORT=${PORT:-8002}
 echo "Starting Gunicorn on port $PORT..."
 exec gunicorn --bind 0.0.0.0:$PORT product_service.wsgi:application --workers 2 --threads 2

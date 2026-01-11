@@ -42,10 +42,12 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'
-
+ADMIN_EMAIL = env('ADMIN_EMAIL')
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -53,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Логування API-запитів, підключено після AuthenticationMiddleware для правильного user_id
+    'user_service.middleware.APILoggingMiddleware'
 ]
 
 ROOT_URLCONF = 'user_service.urls'
@@ -129,12 +133,24 @@ LOGGING = {
         'verbose': {
             'format': '[%(asctime)s] %(levelname)s %(name)s %(message)s',
         },
+        'json': {  # Формат для структурованих логів API
+    '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+    'format': '%(asctime)s %(levelname)s %(name)s %(message)s %(request_id)s %(method)s %(path)s %(status)s %(duration_ms)s %(user_id)s %(client_ip)s'
+},
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'json_file': {  # Запис логів API у файл з обмеженням розміру та ротацією
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs/api_requests.json.log'),
+    'formatter': 'json',
+    'maxBytes': 10 * 1024 * 1024,  # макс. 10MB на файл
+    'backupCount': 5,
+},
+
     },
     'loggers': {
         'django': {
@@ -147,22 +163,30 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'api.request': {  # Новий логер для API-запитів
+            'handlers': ['console', 'json_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     }
 }
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Генерує унікальний operation_id для DRF Spectacular на основі класу і дії view
 def spectacular_id(view):
     name = view.__class__.__name__
     action = getattr(view, "action", "index")
     return f"{name}_{action}"
 
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'User Service API',
     'DESCRIPTION': 'User management, registration, auth, profile',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_INCLUDE_SCHEMA': True,
     'COMPONENT_SPLIT_REQUEST': True,
     'SCHEMA_PATH_PREFIX': r'^/?.*',
     'TAGS': [
@@ -172,4 +196,16 @@ SPECTACULAR_SETTINGS = {
     ],
     'OPERATION_ID_SUFFIX': 'ViewSet',
     'GENERATE_UNIQUE_ID_FUNCTION': 'settings.spectacular_id',
+'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'users.hooks.postprocess_unified_schema',
+    ],
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)

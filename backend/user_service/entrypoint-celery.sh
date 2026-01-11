@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Гарантуємо правильний settings для Celery
+export DJANGO_SETTINGS_MODULE=user_service.settings
+
 # Перевірка, що DATABASE_URL встановлено
 : "${DATABASE_URL:?DATABASE_URL is not set}"
 
@@ -23,4 +26,4 @@ echo "Database ready!"
 # python manage.py migrate --noinput || true
 
 echo "Starting Celery worker for user-service..."
-exec celery -A user_service.celery worker --loglevel=info -Q user_queue,default
+exec celery -A user_service.celery.celery_app worker --loglevel=info -Q user_queue,default

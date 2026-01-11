@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from .mixins import UnifiedResponseMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
@@ -9,7 +10,7 @@ from .serializers import CartSerializer, OrderSerializer
 from .permissions import HasRolePermission
 from .filters import OrderFilter
 from .tasks import reserve_stock, send_order_notification, cancel_pending_orders
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from rest_framework.generics import GenericAPIView
 import requests
 from django.conf import settings
@@ -19,7 +20,15 @@ from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
 
-class CartViewSet(viewsets.ModelViewSet):
+@extend_schema_view(
+    list=extend_schema(operation_id='cart_list', tags=['cart']),
+    retrieve=extend_schema(operation_id='cart_retrieve', tags=['cart']),
+    create=extend_schema(operation_id='cart_create', tags=['cart']),
+    update=extend_schema(operation_id='cart_update', tags=['cart']),
+    partial_update=extend_schema(operation_id='cart_partial_update', tags=['cart']),
+    destroy=extend_schema(operation_id='cart_destroy', tags=['cart']),
+)
+class CartViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [HasRolePermission]
@@ -29,7 +38,6 @@ class CartViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             return Cart.objects.none()
         return Cart.objects.filter(user_id=self.request.user.id)
-
 
     def list(self, request):
         carts = Cart.objects.filter(user_id=request.user.id)
@@ -47,7 +55,16 @@ class CartViewSet(viewsets.ModelViewSet):
         Cart.objects.filter(user_id=request.user.id, product_id=pk).delete()
         return Response(status=204)
 
-class OrderViewSet(viewsets.ModelViewSet):
+
+@extend_schema_view(
+    list=extend_schema(operation_id='order_list', tags=['orders']),
+    retrieve=extend_schema(operation_id='order_retrieve', tags=['orders']),
+    create=extend_schema(operation_id='order_create', tags=['orders']),
+    update=extend_schema(operation_id='order_update', tags=['orders']),
+    partial_update=extend_schema(operation_id='order_partial_update', tags=['orders']),
+    destroy=extend_schema(operation_id='order_destroy', tags=['orders']),
+)
+class OrderViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [HasRolePermission]
@@ -59,14 +76,16 @@ class OrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.request.user.is_authenticated:
             return Order.objects.none()
-
         user_roles = getattr(self.request.user, 'roles', [])
         if 'admin' in user_roles:
             return super().get_queryset()
         return self.queryset.filter(customer_id=self.request.user.id)
 
-
-    @extend_schema(description="Create order from cart")
+    @extend_schema(
+        operation_id='order_create_from_cart',
+        description="Create order from cart",
+        tags=['orders'],
+    )
     @action(detail=False, methods=['post'])
     def create_from_cart(self, request):
         if not request.user.is_authenticated:
@@ -80,6 +99,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             total = 0
             order_items_data = []
             products = {}
+
             for item in cart_items:
                 try:
                     resp = requests.get(
@@ -130,6 +150,10 @@ class OrderViewSet(viewsets.ModelViewSet):
             send_order_notification.delay(order.id, 'created')
             return Response(OrderSerializer(order).data, status=201)
 
+    @extend_schema(
+        operation_id='order_change_status',
+        tags=['orders'],
+    )
     @action(detail=True, methods=['post'])
     def change_status(self, request, pk=None):
         order = self.get_object()
@@ -141,8 +165,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         send_order_notification.delay(order.id, new_status)
         return Response({"status": "updated"})
 
+
+@extend_schema(exclude=True)
 class HealthCheckView(APIView):
-    @extend_schema(exclude=True)
     def get(self, request):
         return Response({
             'status': 'ok',

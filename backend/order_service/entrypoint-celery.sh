@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+
 : "${DATABASE_URL:?DATABASE_URL is not set}"
 
 DB_HOST=$(python -c "import dj_database_url, os; print(dj_database_url.parse(os.environ['DATABASE_URL'])['HOST'])")

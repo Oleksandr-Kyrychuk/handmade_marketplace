@@ -151,4 +151,8 @@ SPECTACULAR_SETTINGS = {
         {'name': 'cart', 'description': 'Cart operations'},
     ],
     'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
+'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'orders.hooks.postprocess_unified_schema',
+    ],
 }
