@@ -186,6 +186,10 @@ SPECTACULAR_SETTINGS = {
         {'name': 'moderation', 'description': 'Content moderation'},
     ],
     'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
+'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'products.hooks.postprocess_unified_schema',
+    ],
 }
 
 # Додай для безпеки в проді

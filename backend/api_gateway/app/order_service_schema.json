@@ -9,6 +9,7 @@
     "/carts": {
       "get": {
         "operationId": "cart_list",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "tags": [
           "cart"
         ],
@@ -25,10 +26,28 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Cart"
-                  }
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Cart"
+                      }
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -38,6 +57,7 @@
       },
       "post": {
         "operationId": "cart_create",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "tags": [
           "cart"
         ],
@@ -73,7 +93,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -85,6 +123,7 @@
     "/carts/{id}": {
       "get": {
         "operationId": "cart_retrieve",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -112,7 +151,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -122,6 +179,7 @@
       },
       "put": {
         "operationId": "cart_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -168,7 +226,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -178,6 +254,7 @@
       },
       "patch": {
         "operationId": "cart_partial_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -224,7 +301,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -234,6 +329,7 @@
       },
       "delete": {
         "operationId": "cart_destroy",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -266,6 +362,7 @@
     "/orders": {
       "get": {
         "operationId": "order_list",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "query",
@@ -341,10 +438,28 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Order"
-                  }
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -354,6 +469,7 @@
       },
       "post": {
         "operationId": "order_create",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "tags": [
           "orders"
         ],
@@ -389,7 +505,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -401,6 +535,7 @@
     "/orders/{id}": {
       "get": {
         "operationId": "order_retrieve",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -428,7 +563,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -438,6 +591,7 @@
       },
       "put": {
         "operationId": "order_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -484,7 +638,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -494,6 +666,7 @@
       },
       "patch": {
         "operationId": "order_partial_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -540,7 +713,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -550,6 +741,7 @@
       },
       "delete": {
         "operationId": "order_destroy",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -582,6 +774,7 @@
     "/orders/{id}/change_status": {
       "post": {
         "operationId": "order_change_status",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
         "parameters": [
           {
             "in": "path",
@@ -628,7 +821,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
@@ -676,7 +887,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             },
