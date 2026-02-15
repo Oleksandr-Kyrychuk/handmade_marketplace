@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from django.conf import settings
 from django.core.validators import RegexValidator
 from .models import Product, ProductImage, Category, Review
@@ -66,7 +67,11 @@ class ProductImageUploadSerializer(serializers.Serializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     vendor = serializers.SerializerMethodField()
-    images = ProductImageSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(
+        many=True,
+        read_only=True,
+        # help spectacular не лізти глибоко
+    )
     isAvailable = serializers.SerializerMethodField()
     reviews_count = serializers.IntegerField(read_only=True, source='rating_count')
     productId = serializers.IntegerField(source='id', read_only=True)
@@ -74,6 +79,8 @@ class ProductSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     discount_tag = serializers.SerializerMethodField()
     is_approved = serializers.BooleanField(read_only=True)
+
+
 
     class Meta:
         model = Product
@@ -87,7 +94,17 @@ class ProductSerializer(serializers.ModelSerializer):
             'category': {'write_only': True}
         }
 
-    def get_vendor(self, obj) -> dict:
+    @extend_schema_field({
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'integer', 'description': 'User ID'},
+            'username': {'type': 'string', 'description': 'Username or "unknown"'},
+        },
+        'required': ['id'],
+        'additionalProperties': False,
+        'description': 'Vendor details'
+    })
+    def get_vendor(self, obj):
         request = self.context.get('request')
         auth_header = request.META.get('HTTP_AUTHORIZATION', '') if request else ''
 
@@ -114,14 +131,31 @@ class ProductSerializer(serializers.ModelSerializer):
             logger.warning(f"Failed to fetch vendor {obj.vendor_id}: {e}")
             return {"id": obj.vendor_id}
 
-    def get_isAvailable(self, obj) -> bool:
+    @extend_schema_field({
+        'type': 'boolean',
+        'description': 'Product available if stock > 0'
+    })
+    def get_isAvailable(self, obj):
         return obj.is_available()
 
-    def get_rating(self, obj) -> float:
+    @extend_schema_field({
+        'type': 'number',
+        'format': 'float',
+        'minimum': 0,
+        'maximum': 5,
+        'nullable': True,
+        'description': 'Average rating or null'
+    })
+    def get_rating(self, obj):
         average = obj.reviews.filter(is_approved=True).aggregate(Avg('rating'))['rating__avg']
         return round(average, 2) if average is not None else None
 
-    def get_discount_tag(self, obj) -> str:
+    @extend_schema_field({
+        'type': 'string',
+        'nullable': True,
+        'description': 'Discount tag like "20% OFF" or null'
+    })
+    def get_discount_tag(self, obj):
         if obj.sale_type == 'fixed' and obj.discount_price is not None and obj.price is not None and obj.price > 0:
             discount_percentage = round(((obj.price - obj.discount_price) / obj.price) * 100)
             return f"{discount_percentage}%"

@@ -12,13 +12,14 @@ from .permissions import HasRolePermission, ReviewPermission
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import upload_image_to_cloudinary, send_moderation_notification, moderate_content
 import logging
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from rest_framework.generics import GenericAPIView
 from django.utils import timezone
 from datetime import timedelta
 import requests
 from django.conf import settings
 from typing import Union
+from rest_framework.exceptions import PermissionDenied
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +38,60 @@ logger = logging.getLogger(__name__)
             OpenApiParameter(name='min_rating', type=float, description='Мінімальний середній рейтинг (0.0–5.0)'),
             OpenApiParameter(name='max_rating', type=float, description='Максимальний середній рейтинг (0.0–5.0)'),
         ],
+        responses={
+            200: OpenApiResponse(
+                description='Список продуктів',
+                response=ProductSerializer(many=True)
+            )
+        },
     ),
-    retrieve=extend_schema(operation_id='product_retrieve', tags=['products']),
-    create=extend_schema(operation_id='product_create', tags=['products']),
-    update=extend_schema(operation_id='product_update', tags=['products']),
-    partial_update=extend_schema(operation_id='product_partial_update', tags=['products']),
-    destroy=extend_schema(operation_id='product_destroy', tags=['products']),
+    retrieve=extend_schema(
+        operation_id='product_retrieve',
+        tags=['products'],
+        responses={
+            200: OpenApiResponse(
+                description='Деталі продукту',
+                response=ProductSerializer(many=False)
+            )
+        },
+    ),
+    create=extend_schema(
+        operation_id='product_create',
+        tags=['products'],
+        responses={
+            201: OpenApiResponse(
+                description='Продукт створено',
+                response=ProductSerializer(many=False)
+            )
+        },
+    ),
+    update=extend_schema(
+        operation_id='product_update',
+        tags=['products'],
+        responses={
+            200: OpenApiResponse(
+                description='Продукт оновлено',
+                response=ProductSerializer(many=False)
+            )
+        },
+    ),
+    partial_update=extend_schema(
+        operation_id='product_partial_update',
+        tags=['products'],
+        responses={
+            200: OpenApiResponse(
+                description='Продукт частково оновлено',
+                response=ProductSerializer(many=False)
+            )
+        },
+    ),
+    destroy=extend_schema(
+        operation_id='product_destroy',
+        tags=['products'],
+        responses={
+            204: OpenApiResponse(description='Продукт видалено')
+        },
+    ),
 )
 class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -189,9 +238,11 @@ class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
             OpenApiParameter(name='is_approved', description='Filter by approval status', required=False, type=bool),
         ],
         responses={
-            200: Union[ProductSerializer(many=True), ReviewSerializer(many=True)]
+            200: OpenApiResponse(
+                description='Список контенту для модерації',
+                response=Union[ProductSerializer(many=True), ReviewSerializer(many=True)]
+            )
         },
-        description="Retrieve content pending moderation (products or reviews)"
     ),
     create=extend_schema(
         operation_id='moderation_approve_reject',
@@ -208,11 +259,8 @@ class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
             }
         },
         responses={
-            200: {'description': 'Content approved or rejected'},
-            400: {'description': 'Invalid request'},
-            404: {'description': 'Content not found'},
+            200: OpenApiResponse(description='Контент схвалено або відхилено')
         },
-        description="Approve or reject content (product or review)"
     ),
 )
 class ModerationViewSet(UnifiedResponseMixin, viewsets.ViewSet):
@@ -331,12 +379,63 @@ class HealthCheckView(GenericAPIView):
         })
 
 @extend_schema_view(
-    list=extend_schema(operation_id='review_list', tags=['reviews']),
-    retrieve=extend_schema(operation_id='review_retrieve', tags=['reviews']),
-    create=extend_schema(operation_id='review_create', tags=['reviews']),
-    update=extend_schema(operation_id='review_update', tags=['reviews']),
-    partial_update=extend_schema(operation_id='review_partial_update', tags=['reviews']),
-    destroy=extend_schema(operation_id='review_destroy', tags=['reviews']),
+    list=extend_schema(
+        operation_id='review_list',
+        tags=['reviews'],
+        responses={
+            200: OpenApiResponse(
+                description='Список відгуків',
+                response=ReviewSerializer(many=True)
+            )
+        },
+    ),
+    retrieve=extend_schema(
+        operation_id='review_retrieve',
+        tags=['reviews'],
+        responses={
+            200: OpenApiResponse(
+                description='Деталі відгуку',
+                response=ReviewSerializer(many=False)
+            )
+        },
+    ),
+    create=extend_schema(
+        operation_id='review_create',
+        tags=['reviews'],
+        responses={
+            201: OpenApiResponse(
+                description='Відгук створено',
+                response=ReviewSerializer(many=False)
+            )
+        },
+    ),
+    update=extend_schema(
+        operation_id='review_update',
+        tags=['reviews'],
+        responses={
+            200: OpenApiResponse(
+                description='Відгук оновлено',
+                response=ReviewSerializer(many=False)
+            )
+        },
+    ),
+    partial_update=extend_schema(
+        operation_id='review_partial_update',
+        tags=['reviews'],
+        responses={
+            200: OpenApiResponse(
+                description='Відгук частково оновлено',
+                response=ReviewSerializer(many=False)
+            )
+        },
+    ),
+    destroy=extend_schema(
+        operation_id='review_destroy',
+        tags=['reviews'],
+        responses={
+            204: OpenApiResponse(description='Відгук видалено')
+        },
+    ),
 )
 class ReviewViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
     queryset = Review.objects.all()

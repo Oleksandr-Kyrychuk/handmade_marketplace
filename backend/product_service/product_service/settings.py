@@ -176,25 +176,34 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Product Service API',
     'DESCRIPTION': 'Products, reviews, moderation, images',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,  # в проді краще False, щоб не віддавати /schema
+    'SERVE_INCLUDE_SCHEMA': True,  # OK для local
     'COMPONENT_SPLIT_REQUEST': True,
     'SCHEMA_PATH_PREFIX': r'^/?.*',
     'OPERATION_ID_SUFFIX': 'ViewSet',
-    'TAGS': [
+    'TAGS': [  # без змін
         {'name': 'products', 'description': 'Products CRUD & filtering'},
         {'name': 'reviews', 'description': 'Product reviews'},
         {'name': 'moderation', 'description': 'Content moderation'},
     ],
     'GENERATE_UNIQUE_ID_FUNCTION': lambda view: f"{view.__class__.__name__}_{view.action or 'index'}",
-'POSTPROCESSING_HOOKS': [
+    'POSTPROCESSING_HOOKS': [
         'drf_spectacular.hooks.postprocess_schema_enums',
         'products.hooks.postprocess_unified_schema',
     ],
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,  # Допомагає з read_only
+    'ENUM_NAME_OVERRIDES': {
+        'SALE_TYPE_CHOICES': 'ProductSaleType',
+    },
+    # для кращої обробки nullables/unions
+    'ONE_OF_UNION_RESOLUTION': 'auto',
+    'ALLOW_UNRESOLVED_REFERENCES': True,
+    'FAIL_ON_UNRESOLVED_REFERENCES': False,# Авто-вирішення oneOf (з 0.25+ версій)
+    'COMPONENT_GENERATION_MODE': 'reference',
 }
 
-# Додай для безпеки в проді
+
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
