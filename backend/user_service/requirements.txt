@@ -25,5 +25,6 @@ pytest-django
 pytest-mock
 coverage
 factory-boy
+djangorestframework-gis>=1.0
 
 

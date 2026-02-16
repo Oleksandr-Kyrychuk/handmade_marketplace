@@ -5,7 +5,7 @@ DOCKER_COMPOSE_BIN := $(shell command -v docker-compose 2>/dev/null || echo "doc
 # Запуск усіх сервісів
 up:
 	@echo "🚀 Будуємо образи без кешу..."
-	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml build --no-cache
+	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml build
 	@echo "🚀 Запуск усіх контейнерів (api_gateway, user_service, product_service, marketplace_database, redis)..."
 	$(DOCKER_COMPOSE_BIN) -f docker-compose.local.yml up -d
 	@echo "⏳ Очікування запуску сервісів..."

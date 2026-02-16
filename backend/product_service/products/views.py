@@ -3,16 +3,17 @@ from .mixins import UnifiedResponseMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.timezone import now
+from rest_framework import permissions
 from django.db import transaction
 from .models import Product, Category, Review
-from .serializers import ProductSerializer, ProductImageUploadSerializer, ReviewSerializer, HealthCheckSerializer
-from .filters import ProductFilter
+from .serializers import ProductSerializer, ProductImageUploadSerializer, ReviewSerializer, HealthCheckSerializer, CategorySerializer
+from .filters import ProductFilter, CategoryFilter
 from rest_framework.permissions import IsAuthenticated
 from .permissions import HasRolePermission, ReviewPermission
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import upload_image_to_cloudinary, send_moderation_notification, moderate_content
 import logging
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse, PolymorphicProxySerializer
 from rest_framework.generics import GenericAPIView
 from django.utils import timezone
 from datetime import timedelta
@@ -20,6 +21,8 @@ import requests
 from django.conf import settings
 from typing import Union
 from rest_framework.exceptions import PermissionDenied
+from rest_framework import filters as drf_filters
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +44,7 @@ logger = logging.getLogger(__name__)
         responses={
             200: OpenApiResponse(
                 description='Список продуктів',
-                response=ProductSerializer(many=True)
+                response=ProductSerializer()
             )
         },
     ),
@@ -51,7 +54,7 @@ logger = logging.getLogger(__name__)
         responses={
             200: OpenApiResponse(
                 description='Деталі продукту',
-                response=ProductSerializer(many=False)
+                response=ProductSerializer()
             )
         },
     ),
@@ -61,7 +64,7 @@ logger = logging.getLogger(__name__)
         responses={
             201: OpenApiResponse(
                 description='Продукт створено',
-                response=ProductSerializer(many=False)
+                response=ProductSerializer()
             )
         },
     ),
@@ -71,7 +74,7 @@ logger = logging.getLogger(__name__)
         responses={
             200: OpenApiResponse(
                 description='Продукт оновлено',
-                response=ProductSerializer(many=False)
+                response=ProductSerializer()
             )
         },
     ),
@@ -81,7 +84,7 @@ logger = logging.getLogger(__name__)
         responses={
             200: OpenApiResponse(
                 description='Продукт частково оновлено',
-                response=ProductSerializer(many=False)
+                response=ProductSerializer()
             )
         },
     ),
@@ -234,15 +237,18 @@ class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
         operation_id='moderation_list',
         tags=['moderation'],
         parameters=[
-            OpenApiParameter(name='type', description='Type of content to moderate (product/review)', required=True, type=str),
-            OpenApiParameter(name='is_approved', description='Filter by approval status', required=False, type=bool),
+            OpenApiParameter(name='type', type=str, enum=['product', 'review'], required=True,
+                             description='Тип контенту'),
+            OpenApiParameter(name='is_approved', type=bool, description='Фільтр за статусом схвалення'),
         ],
-        responses={
-            200: OpenApiResponse(
-                description='Список контенту для модерації',
-                response=Union[ProductSerializer(many=True), ReviewSerializer(many=True)]
-            )
-        },
+        responses=PolymorphicProxySerializer(
+            component_name='ModerationList',
+            serializers=[
+                ProductSerializer,  # infers many=True for list
+                ReviewSerializer,
+            ],
+            resource_type_field_name=None  # or 'type' if you want to discriminate
+        ),
     ),
     create=extend_schema(
         operation_id='moderation_approve_reject',
@@ -262,6 +268,7 @@ class ProductViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
             200: OpenApiResponse(description='Контент схвалено або відхилено')
         },
     ),
+
 )
 class ModerationViewSet(UnifiedResponseMixin, viewsets.ViewSet):
     permission_classes = [HasRolePermission]
@@ -385,7 +392,7 @@ class HealthCheckView(GenericAPIView):
         responses={
             200: OpenApiResponse(
                 description='Список відгуків',
-                response=ReviewSerializer(many=True)
+                response=ReviewSerializer  # ← no (many=True)
             )
         },
     ),
@@ -395,7 +402,7 @@ class HealthCheckView(GenericAPIView):
         responses={
             200: OpenApiResponse(
                 description='Деталі відгуку',
-                response=ReviewSerializer(many=False)
+                response=ReviewSerializer  # ← no (many=False)
             )
         },
     ),
@@ -405,7 +412,7 @@ class HealthCheckView(GenericAPIView):
         responses={
             201: OpenApiResponse(
                 description='Відгук створено',
-                response=ReviewSerializer(many=False)
+                response=ReviewSerializer
             )
         },
     ),
@@ -415,7 +422,7 @@ class HealthCheckView(GenericAPIView):
         responses={
             200: OpenApiResponse(
                 description='Відгук оновлено',
-                response=ReviewSerializer(many=False)
+                response=ReviewSerializer
             )
         },
     ),
@@ -425,7 +432,7 @@ class HealthCheckView(GenericAPIView):
         responses={
             200: OpenApiResponse(
                 description='Відгук частково оновлено',
-                response=ReviewSerializer(many=False)
+                response=ReviewSerializer
             )
         },
     ),
@@ -463,3 +470,66 @@ class ReviewViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
         if instance.user_id != self.request.user.id and 'admin' not in self.request.user.roles:
             raise PermissionDenied("Ви не можете редагувати цей відгук")
         serializer.save()
+
+
+@extend_schema_view(
+    list=extend_schema(
+        operation_id='category_list',
+        tags=['categories'],
+        parameters=[
+            OpenApiParameter(name='parent', type=int, description='ID батька (null для кореневих)', required=False),
+            OpenApiParameter(name='search', type=str, description='Повнотекстовий пошуку', required=False),
+        ],
+        responses={200: CategorySerializer(many=True)},
+    ),
+    retrieve=extend_schema(
+        operation_id='category_retrieve',
+        tags=['categories'],
+        responses={200: CategorySerializer},
+    ),
+    create=extend_schema(
+        operation_id='category_create',
+        tags=['categories'],
+        responses={201: CategorySerializer},
+    ),
+    update=extend_schema(
+        operation_id='category_update',
+        tags=['categories'],
+        responses={200: CategorySerializer},
+    ),
+    partial_update=extend_schema(
+        operation_id='category_partial_update',
+        tags=['categories'],
+        responses={200: CategorySerializer},
+    ),
+    destroy=extend_schema(
+        operation_id='category_destroy',
+        tags=['categories'],
+        responses={204: OpenApiResponse(description='Категорію видалено')},
+    ),
+)
+class CategoryViewSet(UnifiedResponseMixin, viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'category_href'
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter, drf_filters.OrderingFilter]
+    filterset_class = CategoryFilter
+    search_fields = ['name']
+    ordering_fields = ['name']
+    ordering = ['name']
+    allowed_roles = ['admin']
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]  # будь-хто може дивитися
+        return [permissions.IsAdminUser()]
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def list(self, request, *args, **kwargs):
+        parent_param = request.query_params.get('parent')
+        if parent_param == 'null':
+            self.queryset = self.queryset.filter(parent__isnull=True)
+        return super().list(request, *args, **kwargs)

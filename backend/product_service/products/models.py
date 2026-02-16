@@ -15,7 +15,7 @@ name_validator = RegexValidator(
 # Категорії
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, db_index=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, db_index=True, related_name='children')
     category_image = CloudinaryField('image', blank=True, null=True)
     category_href = models.SlugField(max_length=255, unique=True, blank=True)
     search_vector = SearchVectorField(null=True, blank=True)
