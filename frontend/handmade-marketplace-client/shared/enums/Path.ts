@@ -6,6 +6,7 @@ export const enum Path {
   Registration = '/registration',
   Confirm_email = '/confirm-email',
   Resend_verification = '/resend-verification',
+  Send_confirm_email = '/send-confirm-email',
 
   //Menu
   Home = '/',

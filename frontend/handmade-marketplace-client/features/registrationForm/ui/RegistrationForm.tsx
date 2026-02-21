@@ -15,7 +15,8 @@ import Link from "next/link";
 import { Path } from "@/shared/enums/Path";
 import BaseControlField from "@/shared/UI/InputControl/BaseControlField";
 import useRegistrationMutation from "../model/Quries/useRegistrationMutation";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/shared/i18n";
+
 
 function RegistrationForm() {
   const t = useTranslations();
@@ -50,7 +51,7 @@ function RegistrationForm() {
 
 		registrationMutation(data, {
 			onSuccess: () => {
-				router.push(Path.Confirm_email)
+				router.push(Path.Send_confirm_email)
 			},
 			onError: (error: Error) => {
 				setGlobalError('');

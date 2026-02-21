@@ -140,5 +140,9 @@
   "varify_email": {
     "varify_email_title_succese": "Your email has been successfully verified!",
     "varify_email_title_error": "Something went wrong. Please try again"
+  },
+  "send_confirm_email": {
+    "send_confirm_email_title": "Welcome!",
+    "send_confirm_email_description": "A confirmation email has been sent to you. Click the link inside to verify your email and complete registration"
   }
 }

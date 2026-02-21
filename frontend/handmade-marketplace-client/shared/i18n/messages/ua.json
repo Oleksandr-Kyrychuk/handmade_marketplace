@@ -142,5 +142,9 @@
   "varify_email": {
     "varify_email_title_succese": "Вашу електронну адресу успішно підтверджено!",
     "varify_email_title_error": "Виникла помилка. Будь ласка, спробуйте ще раз"
+  },
+  "send_confirm_email": {
+    "send_confirm_email_title": "Вітаємо!",
+    "send_confirm_email_description": "Ми надіслали лист на вашу електронну адресу. Щоб завершити реєстрацію, будь ласка, підтвердіть пошту, перейшовши за посиланням у листі"
   }
 }
