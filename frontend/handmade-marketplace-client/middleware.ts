@@ -10,6 +10,8 @@ export default async function middleware(request: NextRequest) {
   const url = request.nextUrl.pathname; 
   const locale = url.split('/')[1];
 
+  console.log('url', url)
+
   if (request.nextUrl.pathname === `/${locale}/confirm-email` && !hasConfirmSession) {
     return NextResponse.redirect(new URL(Path.Home, request.url));
   }

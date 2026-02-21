@@ -1,6 +1,5 @@
 'use client';
 
-import Link from "next/link";
 import AuthLayout from "@/entities/authLayout/ui/AuthLayout";
 import { Button } from "@/shared/UI";
 import { Path } from "@/shared/enums/Path";
@@ -9,16 +8,16 @@ import { Controller, useForm } from "react-hook-form";
 import { CustomError, LogInRequestDTO } from "../../../entities/auth/model/types/interfaces";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { logInSchema } from "../validation/validation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import PlatformsButtons from "@/entities/platformsButtons/PlatformsButtons";
 import { useState } from "react";
 import useLogInMutation from "../model/Queries/useLogInMutation";
-import { useRouter } from "next/navigation";
+import { Link, redirect } from "@/shared/i18n";
 
 
 function LogInForm() {
   const t = useTranslations();
-	const router = useRouter()
+	const locale = useLocale();
 
   const [globalError, setGlobalError] = useState('');
   const {mutateLogIn, mutateLoginPending} = useLogInMutation();
@@ -32,7 +31,10 @@ function LogInForm() {
 
 		mutateLogIn(data, {
 			onSuccess: () => {
-				router.push(Path.Home)
+				redirect({
+					href: Path.Home,
+					locale: locale
+				})
 			},
 			onError: (error: Error) => {
 				setGlobalError('');
@@ -71,9 +73,9 @@ function LogInForm() {
 										inputType="email"
 										isHasError={!!errors.email}
 										errorText={errors?.email?.message || ''}
-										{...register('email')}
 										placeholder="Email"
 										inputClassName="rounded-5xl font-secondary"
+										labelClassName="block mb-1 font-size-body-4 leading-130"
 										label={t('form.email')}
 									/>
 								)}
@@ -92,8 +94,8 @@ function LogInForm() {
 										{...field}
 										id="password"
 										inputType="password"
-										{...register('password')}
 										inputClassName="rounded-5xl font-secondary pr-12"
+										labelClassName="block mb-1 font-size-body-4 leading-130"
 										placeholder={t('form.enter-password')}
 										isHasError={!!errors.password}
 										errorText={errors?.password?.message || ''}

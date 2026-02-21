@@ -136,5 +136,9 @@
     "resend-verification": "Already registered but haven't confirmed your email?",
     "resend-verification-link": "Confirm email",
     "send": "Send"
+  },
+  "varify_email": {
+    "varify_email_title_succese": "Your email has been successfully verified!",
+    "varify_email_title_error": "Something went wrong. Please try again"
   }
 }

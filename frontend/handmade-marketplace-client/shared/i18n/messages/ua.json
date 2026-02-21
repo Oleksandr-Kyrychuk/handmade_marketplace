@@ -138,5 +138,9 @@
     "resend-verification": "Вже реєструвались, але не підтвердили email?",
     "resend-verification-link": "Підтвердити email",
     "send": "Відправити"
+  },
+  "varify_email": {
+    "varify_email_title_succese": "Вашу електронну адресу успішно підтверджено!",
+    "varify_email_title_error": "Виникла помилка. Будь ласка, спробуйте ще раз"
   }
 }
