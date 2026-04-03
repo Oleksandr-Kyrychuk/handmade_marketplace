@@ -107,19 +107,47 @@ class VerifyEmailView(UnifiedResponseMixin, APIView):
     )
     def get(self, request, uidb64, token):
         try:
+            # 1. Декодуємо UID
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-            if (user.verification_token_created_at and
-                default_token_generator.check_token(user, token) and
-                (now() - user.verification_token_created_at) < timedelta(hours=1)):
-                user.is_verified = True
-                user.save()
-                return Response({"detail": "Email verified successfully"}, status=status.HTTP_200_OK)
-            raise ValidationError("Invalid token or expired")
-        except User.DoesNotExist:
-            raise ValidationError("User not found")
-        except Exception as e:
-            raise ValidationError(str(e))
+        except (User.DoesNotExist, ValueError, TypeError):
+            return Response({
+                "status": False,
+                "code": "INVALID_TOKEN",
+                "message": "Verification link is invalid or has expired."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Уже верифікований — повертаємо ALREADY_VERIFIED
+        if user.is_verified:
+            return Response({
+                "status": True,
+                "code": "ALREADY_VERIFIED",
+                "message": "Your email is already verified."
+            }, status=status.HTTP_200_OK)
+
+        # 3. Перевірка токену + часу життя
+        token_valid = (
+            user.verification_token_created_at and
+            default_token_generator.check_token(user, token) and
+            (now() - user.verification_token_created_at) < timedelta(hours=1)
+        )
+
+        if not token_valid:
+            return Response({
+                "status": False,
+                "code": "INVALID_TOKEN",
+                "message": "Verification link is invalid or has expired."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 4. Перша успішна верифікація
+        user.is_verified = True
+        user.save()
+
+        return Response({
+            "status": True,
+            "code": "SUCCESSFULLY_VERIFIED",
+            "message": "Your email has been successfully verified."
+        }, status=status.HTTP_200_OK)
 
 
 class ResendVerificationCodeView(UnifiedResponseMixin, APIView):

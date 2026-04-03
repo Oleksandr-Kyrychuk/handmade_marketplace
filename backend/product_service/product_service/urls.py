@@ -2,12 +2,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from products.views import ProductViewSet, ModerationViewSet, HealthCheckView, ReviewViewSet
+from products.views import ProductViewSet, ModerationViewSet, HealthCheckView, ReviewViewSet, CategoryViewSet
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r'products', ProductViewSet)
 router.register(r'moderation', ModerationViewSet, basename='moderation')
 router.register(r'reviews', ReviewViewSet)
+router.register(r'categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('health', HealthCheckView.as_view(), name='health'),
