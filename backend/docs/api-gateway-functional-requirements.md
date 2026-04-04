@@ -30,15 +30,15 @@
 
 ### 2.2 Кешування OpenAPI схем
 
-| ID       | Вимога                                                                 | Статус | Джерело / Коментар                                      |
-|----------|------------------------------------------------------------------------|--------|---------------------------------------------------------|
-| SCHEMA-01 | Фоновий завантажувач схем при старті аплікейшена (daemon thread)       | [x]    | `background_schema_loader()` в `apps.py`                |
+| ID       | Вимога                                                                                                      | Статус | Джерело / Коментар                                      |
+|----------|-------------------------------------------------------------------------------------------------------------|--------|---------------------------------------------------------|
+| SCHEMA-01 | Фоновий завантажувач схем при старті аплікейшена (daemon thread)                                            | [x]    | `background_schema_loader()` в `apps.py`                |
 | SCHEMA-02 | Кеш схем в Redis (ключі `user_service_schema`, `product_service_schema`, `order_service_schema`, TTL 1 год) | [x] | `cache.set(..., timeout=3600)`                          |
-| SCHEMA-03 | Exponential backoff + jitter (±10%) при помилках завантаження           | [x]    | `2 ** attempt`, `max_sleep=60`, jitter                  |
-| SCHEMA-04 | Безкінечний цикл авто-оновлення схем                                   | [x]    | `while True`                                            |
-| SCHEMA-05 | Окреме логирование успіху/помилки для кожного сервісу                  | [x]    | `logger.info/warning`                                   |
-| SCHEMA-06 | Management команда `fetch_schema` для ручного оновлення                | [x]    | `app/management/commands/fetch_schema.py`               |
-| SCHEMA-07 | Авто-детект сервісів через env змінні                                  | [x]    | `USER_SERVICE_URL`, `PRODUCT_SERVICE_URL`, `ORDER_SERVICE_URL` |
+| SCHEMA-03 | Exponential backoff + jitter (±10%) при помилках завантаження                                               | [x]    | `2 ** attempt`, `max_sleep=60`, jitter                  |
+| SCHEMA-04 | Безкінечний цикл авто-оновлення схем                                                                        | [x]    | `while True`                                            |
+| SCHEMA-05 | Окреме логування успіху/помилки для кожного сервісу                                                         | [x]    | `logger.info/warning`                                   |
+| SCHEMA-06 | Management команда `fetch_schema` для ручного оновлення                                                     | [x]    | `app/management/commands/fetch_schema.py`               |
+| SCHEMA-07 | Авто-детект сервісів через env змінні                                                                       | [x]    | `USER_SERVICE_URL`, `PRODUCT_SERVICE_URL`, `ORDER_SERVICE_URL` |
 
 ### 2.3 Об’єднання OpenAPI документації
 

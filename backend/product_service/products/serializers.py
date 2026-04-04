@@ -17,10 +17,33 @@ class HealthCheckSerializer(serializers.Serializer):
         )
     )
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):  # ← updated
+    children = serializers.SerializerMethodField(read_only=True)
+    parent = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), allow_null=True, required=False)
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'parent', 'category_image', 'category_href']
+        fields = ['id', 'name', 'parent', 'category_image', 'category_href', 'search_vector', 'children']
+        read_only_fields = ['category_href', 'search_vector', 'children']
+
+    def get_children(self, obj):
+        return CategoryMinimalSerializer(obj.children.all(), many=True).data
+
+    def validate_name(self, value):
+        name_validator(value)
+        return value
+
+    def validate(self, data):
+        parent = data.get('parent')
+        if parent and self.instance and parent == self.instance:
+            raise serializers.ValidationError("Категорія не може бути власним батьком.")
+        return data
+
+class CategoryMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'category_href']
+
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -177,6 +200,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'productId', 'user', 'rating', 'comment', 'created_at', 'is_approved']
         read_only_fields = ['user', 'created_at', 'is_approved']
 
+    @extend_schema_field({
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'integer', 'description': 'User ID'},
+            'username': {'type': 'string', 'description': 'Username or "unknown"'},
+        },
+        'required': ['id'],
+        'additionalProperties': False,
+        'description': 'User details'
+    })
     def get_user(self, obj) -> dict:
         request = self.context.get('request')
         auth_header = request.META.get('HTTP_AUTHORIZATION', '') if request else ''

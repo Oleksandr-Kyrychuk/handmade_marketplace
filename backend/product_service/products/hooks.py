@@ -1,4 +1,4 @@
-# users/hooks.py
+# products/hooks.py
 from drf_spectacular.plumbing import build_object_type  # ← тільки це
 
 

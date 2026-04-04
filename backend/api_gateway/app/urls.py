@@ -1,62 +1,66 @@
 import logging
-from django.urls import path, re_path
+
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path, re_path
 from django.views.generic import RedirectView
+
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
 from drf_spectacular.utils import extend_schema
-from .serializers import HealthCheckSerializer, EmptySerializer
+from drf_spectacular.views import SpectacularSwaggerView
+
 from django.core.cache import cache
 import requests
 import time
 import redis
 
+from .serializers import HealthCheckSerializer, EmptySerializer
+
 logger = logging.getLogger(__name__)
 
-# ============================
-# Root View
-# ============================
+
+# ────────────────────────────────────────────────
+# Root endpoint
+# ────────────────────────────────────────────────
 class RootView(APIView):
     def get(self, request):
-        user_schema = cache.get('user_service_schema', {})
+        user_schema    = cache.get('user_service_schema', {})
         product_schema = cache.get('product_service_schema', {})
-        order_schema = cache.get('order_service_schema', {})
+        order_schema   = cache.get('order_service_schema', {})
 
         def extract_paths(schema):
             return list(schema.get('paths', {}).keys()) if schema else []
 
-        available_services = {
-            "user_service": extract_paths(user_schema),
-            "product_service": extract_paths(product_schema),
-            "order_service": extract_paths(order_schema),
-        }
-
         return Response({
             "gateway": "Handmade Marketplace Gateway",
             "version": "1.0.0",
-            "available_services": available_services,
+            "available_services": {
+                "user_service":    extract_paths(user_schema),
+                "product_service": extract_paths(product_schema),
+                "order_service":   extract_paths(order_schema),
+            },
             "docs": {
-                "user_service": "/swagger-ui?urls.primaryName=User",
+                "user_service":    "/swagger-ui?urls.primaryName=User",
                 "product_service": "/swagger-ui?urls.primaryName=Product",
-                "order_service": "/swagger-ui?urls.primaryName=Order"
+                "order_service":   "/swagger-ui?urls.primaryName=Order",
             },
             "endpoints": {
-                "users": "/users/",
-                "products": "/products/",
-                "orders": "/orders/",
-                "carts": "/carts/",
-                "moderation": "/moderation/"
+                "users":      "/api/users/",
+                "products":   "/api/products/",
+                "orders":     "/api/orders/",
+                "carts":      "/api/carts/",
+                "moderation": "/api/moderation/",
             }
         })
 
 
-# ============================
-# Health Check
-# ============================
+# ────────────────────────────────────────────────
+# Health check
+# ────────────────────────────────────────────────
 class HealthCheckView(APIView):
     throttle_classes = []
     serializer_class = HealthCheckSerializer
@@ -70,307 +74,270 @@ class HealthCheckView(APIView):
     def get(self, request):
         results = {}
         all_healthy = True
-        max_retries = 5
-        retry_delay = 10
+        max_retries = 3           # зменшено до розумного значення
+        retry_delay = 2
 
         # Redis
         try:
-            cache.get('health_check_test')
+            cache.get('health_check_test_key')
             results['redis'] = {'status': 'ok'}
         except redis.RedisError as e:
-            results['redis'] = {'status': 'errors', 'detail': str(e)}
+            results['redis'] = {'status': 'error', 'detail': str(e)}
             all_healthy = False
-            logger.error(f"Redis health check failed: {e}")
+            logger.error("Redis health check failed", exc_info=True)
 
-        # User Service
-        for attempt in range(max_retries):
-            try:
-                resp = requests.get(f'{settings.USER_SERVICE_URL}/health', timeout=20)
-                results['user_service'] = {'status': 'ok' if resp.status_code == 200 else 'error'}
-                break
-            except requests.RequestException as e:
-                if attempt == max_retries - 1:
-                    results['user_service'] = {'status': 'errors', 'detail': str(e)}
-                    all_healthy = False
-                    logger.error(f"User Service health check failed: {e}")
-                time.sleep(retry_delay)
+        def check_service(name, url):
+            nonlocal all_healthy
+            for attempt in range(max_retries):
+                try:
+                    r = requests.get(url + '/health', timeout=10)
+                    status = 'ok' if r.status_code == 200 else 'error'
+                    results[name] = {'status': status}
+                    if status != 'ok':
+                        all_healthy = False
+                    return
+                except requests.RequestException as exc:
+                    if attempt == max_retries - 1:
+                        results[name] = {'status': 'error', 'detail': str(exc)}
+                        all_healthy = False
+                        logger.error(f"{name} health check failed after {max_retries} attempts", exc_info=True)
+                    time.sleep(retry_delay)
 
-        # Product Service
-        for attempt in range(max_retries):
-            try:
-                resp = requests.get(f'{settings.PRODUCT_SERVICE_URL}/health', timeout=20)
-                results['product_service'] = {'status': 'ok' if resp.status_code == 200 else 'errors'}
-                break
-            except requests.RequestException as e:
-                if attempt == max_retries - 1:
-                    results['product_service'] = {'status': 'error', 'detail': str(e)}
-                    all_healthy = False
-                    logger.error(f"Product Service health check failed: {e}")
-                time.sleep(retry_delay)
-
-        # Order Service
-        for attempt in range(max_retries):
-            try:
-                resp = requests.get(f'{settings.ORDER_SERVICE_URL}/health', timeout=20)
-                results['order_service'] = {'status': 'ok' if resp.status_code == 200 else 'errors'}
-                break
-            except requests.RequestException as e:
-                if attempt == max_retries - 1:
-                    results['order_service'] = {'status': 'errors', 'detail': str(e)}
-                    all_healthy = False
-                    logger.error(f"Order Service health check failed: {e}")
-                time.sleep(retry_delay)
+        check_service('user_service',    settings.USER_SERVICE_URL)
+        check_service('product_service', settings.PRODUCT_SERVICE_URL)
+        check_service('order_service',   settings.ORDER_SERVICE_URL)
 
         results['schema_cache'] = {
-            'user_service': 'ok' if cache.get('user_service_schema') else 'missing',
+            'user_service':    'ok' if cache.get('user_service_schema')    else 'missing',
             'product_service': 'ok' if cache.get('product_service_schema') else 'missing',
-            'order_service': 'ok' if cache.get('order_service_schema') else 'missing',
+            'order_service':   'ok' if cache.get('order_service_schema')   else 'missing',
         }
 
-        overall_status = 'ok' if all_healthy else 'error'
+        status_code = 200 if all_healthy else 503
         return Response(
-            {'status': overall_status, 'services': results},
-            status=200 if all_healthy else 503
+            {'status': 'ok' if all_healthy else 'error', 'services': results},
+            status=status_code
         )
 
 
-# ============================
-# Merged OpenAPI Schema — ВИПРАВЛЕНО
-# ============================
+# ────────────────────────────────────────────────
+# Merged OpenAPI schema (без змін)
+# ────────────────────────────────────────────────
 class MergedSchemaView(GenericAPIView):
     serializer_class = EmptySerializer
 
     def get(self, request):
-        merged_schema = cache.get('merged_schema')
-        if merged_schema:
-            return Response(merged_schema)
+        if cached := cache.get('merged_schema'):
+            return Response(cached)
 
         from drf_spectacular.generators import SchemaGenerator
         generator = SchemaGenerator()
         gateway_schema = generator.get_schema(request=request)
 
-        external_schemas = [
+        external = [
             cache.get('user_service_schema', {}),
             cache.get('product_service_schema', {}),
             cache.get('order_service_schema', {}),
         ]
 
-        # === 1. Збираємо всі теги один раз (правильно) ===
+        # Збір тегів
         all_tags = set()
-        for schema in external_schemas:
+        for schema in external:
             for tag in schema.get('tags', []):
-                if isinstance(tag, dict):
-                    all_tags.add(tag.get('name'))
-                elif isinstance(tag, str):
-                    all_tags.add(tag)
+                name = tag['name'] if isinstance(tag, dict) else tag
+                if name:
+                    all_tags.add(name)
 
-        existing_gateway_tags = {t.get('name') for t in gateway_schema.get('tags', [])}
-        for tag_name in all_tags:
-            if tag_name and tag_name not in existing_gateway_tags:
-                gateway_schema.setdefault('tags', []).append({'name': tag_name})
+        existing = {t.get('name') for t in gateway_schema.get('tags', [])}
+        for name in all_tags - existing:
+            gateway_schema.setdefault('tags', []).append({'name': name})
 
-        # === 2. Злиття paths з гарантією тегів ===
-        service_to_tag = {
-            'user': 'users',
-            'product': 'products',
-            'order': 'orders',
-        }
+        # Злиття шляхів (логіка збережена)
+        service_to_tag = {'user': 'users', 'product': 'products', 'order': 'orders'}
         service_names = ['user', 'product', 'order']
 
-        for i, schema in enumerate(external_schemas):
-            service_key = service_names[i]
-            default_tag = service_to_tag[service_key]
+        for i, schema in enumerate(external):
+            svc = service_names[i]
+            default_tag = service_to_tag[svc]
 
-            for path, methods in schema.get('paths', {}).items():
-                if path not in gateway_schema['paths']:
-                    gateway_schema['paths'][path] = {}
+            for p, methods in schema.get('paths', {}).items():
+                if p not in gateway_schema['paths']:
+                    gateway_schema['paths'][p] = {}
 
-                for method, operation in methods.items():
-                    if method not in ('get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'):
+                for m, op in methods.items():
+                    if m not in {'get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'}:
                         continue
 
-                    if method in gateway_schema['paths'][path]:
-                        # Конфлікт — зливаємо теги + summary/description
-                        existing_op = gateway_schema['paths'][path][method]
-                        new_tags = operation.get('tags', [])
-                        existing_tags = existing_op.get('tags', [])
-                        combined = existing_tags + [t for t in new_tags if t not in existing_tags]
-                        existing_op['tags'] = combined
-
-                        if 'summary' not in existing_op and 'summary' in operation:
-                            existing_op['summary'] = operation.get('summary')
-                        if 'description' not in existing_op and 'description' in operation:
-                            existing_op['description'] = operation.get('description')
+                    if m in gateway_schema['paths'][p]:
+                        ex = gateway_schema['paths'][p][m]
+                        ex['tags'] = list(set(ex.get('tags', []) + op.get('tags', [])))
+                        if 'summary' not in ex and 'summary' in op:
+                            ex['summary'] = op['summary']
+                        if 'description' not in ex and 'description' in op:
+                            ex['description'] = op['description']
                     else:
-                        # Нова операція — копіюємо + гарантуємо тег
-                        new_op = operation.copy()
+                        new_op = op.copy()
                         if not new_op.get('tags'):
+                            # ваша логіка fallback тегів
                             fallback = default_tag
-                            if service_key == 'user':
-                                if path.startswith('/users'):
-                                    fallback = 'users'
-                                elif any(path.startswith(p) for p in ['/login', '/logout', '/register', '/token', '/password']):
-                                    fallback = 'auth'
-                                elif path.startswith('/profile'):
-                                    fallback = 'profile'
-                            elif service_key == 'product':
-                                if path.startswith('/products'):
-                                    fallback = 'products'
-                                elif path.startswith('/moderation'):
-                                    fallback = 'moderation'
-                                elif path.startswith('/reviews'):
-                                    fallback = 'reviews'
-                            elif service_key == 'order':
-                                if path.startswith('/orders'):
-                                    fallback = 'orders'
-                                elif path.startswith('/carts') or path.startswith('/cart'):
-                                    fallback = 'carts'
+                            if svc == 'user':
+                                if p.startswith('/users'):     fallback = 'users'
+                                elif p.startswith(('/login','/logout','/register','/token','/password')): fallback = 'auth'
+                                elif p.startswith('/profile'): fallback = 'profile'
+                            elif svc == 'product':
+                                if p.startswith('/products'):  fallback = 'products'
+                                elif p.startswith('/moderation'): fallback = 'moderation'
+                                elif p.startswith('/reviews'): fallback = 'reviews'
+                            elif svc == 'order':
+                                if p.startswith('/orders'):    fallback = 'orders'
+                                elif p.startswith(('/carts','/cart')): fallback = 'carts'
                             new_op['tags'] = [fallback]
+                        gateway_schema['paths'][p][m] = new_op
 
-                        gateway_schema['paths'][path][method] = new_op
+        # components
+        for schema in external:
+            comp = schema.get('components', {})
+            gw_comp = gateway_schema.setdefault('components', {})
+            for k in ('schemas', 'parameters', 'responses', 'requestBodies', 'headers', 'securitySchemes'):
+                if k in comp:
+                    gw_comp.setdefault(k, {}).update(comp[k])
 
-        # Злиття components (schemas, responses тощо)
-        for schema in external_schemas:
-            for comp_type in ('schemas', 'parameters', 'responses', 'requestBodies', 'headers', 'securitySchemes'):
-                if comp_type in schema.get('components', {}):
-                    gateway_schema['components'].setdefault(comp_type, {}).update(
-                        schema['components'][comp_type]
-                    )
-
-        # Кешуємо на 1 годину
-        cache.set('merged_schema', gateway_schema, timeout=3600)
-
+        cache.set('merged_schema', gateway_schema, 3600)
         return Response(gateway_schema)
 
 
-# ============================
-# Proxy View (з фіксом для заголовків)
-# ============================
+# ────────────────────────────────────────────────
+# Proxy — тільки /api/
+# ────────────────────────────────────────────────
 @extend_schema(exclude=True)
 class ProxyView(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     @extend_schema(exclude=True)
-    def handle_request(self, request, path):
-        target_url = None
+    def proxy(self, request, path: str):
+        # path вже без /api/
 
-        # === СПЕЦІАЛЬНІ ШЛЯХИ ===
-        if path in (
-            'users/health', 'users/schema/', 'products/health', 'products/schema/',
-            'orders/health', 'orders/schema/'
-        ):
-            mapping = {
-                'users/health': f"{settings.USER_SERVICE_URL}/health",
-                'users/schema/': f"{settings.USER_SERVICE_URL}/schema/",
-                'products/health': f"{settings.PRODUCT_SERVICE_URL}/health",
-                'products/schema/': f"{settings.PRODUCT_SERVICE_URL}/schema/",
-                'orders/health': f"{settings.ORDER_SERVICE_URL}/health",
-                'orders/schema/': f"{settings.ORDER_SERVICE_URL}/schema/",
-            }
-            target_url = mapping.get(path)
+        target = None
 
-        # === ЗВИЧАЙНІ ШЛЯХИ ===
-        if path.startswith('users/'):
-            inner_path = path[len('users/'):]
-            target_url = f"{settings.USER_SERVICE_URL}/{inner_path}"
+        # Спеціальні ендпоінти (health / schema)
+        special = {
+            'users/health':     f"{settings.USER_SERVICE_URL}/health",
+            'users/schema':     f"{settings.USER_SERVICE_URL}/schema",
+            'products/health':  f"{settings.PRODUCT_SERVICE_URL}/health",
+            'products/schema':  f"{settings.PRODUCT_SERVICE_URL}/schema",
+            'orders/health':    f"{settings.ORDER_SERVICE_URL}/health",
+            'orders/schema':    f"{settings.ORDER_SERVICE_URL}/schema",
+        }
+        if path in special:
+            target = special[path]
+
+        # Основні маршрути
+        elif path.startswith('users/'):
+            target = f"{settings.USER_SERVICE_URL}/{path[6:]}"
         elif path == 'users':
-            target_url = settings.USER_SERVICE_URL
+            target = f"{settings.USER_SERVICE_URL}/users"
+
         elif path.startswith('products/'):
-            inner_path = path[len('products/'):] or 'products'
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/{inner_path}"
+            target = f"{settings.PRODUCT_SERVICE_URL}/{path[9:] or 'products'}"
         elif path == 'products':
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/products"
+            target = f"{settings.PRODUCT_SERVICE_URL}/products"
+
         elif path.startswith('moderation/'):
-            inner_path = path[len('moderation/'):]
-            target_url = f"{settings.PRODUCT_SERVICE_URL}/moderation/{inner_path}"
+            target = f"{settings.PRODUCT_SERVICE_URL}/{path}"
+
         elif path.startswith('orders/'):
-            inner_path = path[len('orders/'):] or 'orders'
-            target_url = f"{settings.ORDER_SERVICE_URL}/orders/{inner_path}"
+            target = f"{settings.ORDER_SERVICE_URL}/{path}"
         elif path == 'orders':
-            target_url = f"{settings.ORDER_SERVICE_URL}/orders"
-        elif path.startswith('carts/'):
-            inner_path = path[len('carts/'):]
-            target_url = f"{settings.ORDER_SERVICE_URL}/cart/{inner_path}"
-        elif path == 'carts':
-            target_url = f"{settings.ORDER_SERVICE_URL}/cart"
+            target = f"{settings.ORDER_SERVICE_URL}/orders"
 
-        if not target_url:
-            logger.warning(f"No route for path: {path}")
-            return Response({"errors": "Not found"}, status=404)
+        elif path.startswith(('carts/', 'cart/')):
+            pfx = 6 if path.startswith('carts/') else 5
+            target = f"{settings.ORDER_SERVICE_URL}/cart/{path[pfx:]}"
+        elif path in ('carts', 'cart'):
+            target = f"{settings.ORDER_SERVICE_URL}/cart"
 
-        headers = {k: v for k, v in request.headers.items() if k.lower() not in ('host', 'content-length')}
+        if not target:
+            logger.warning(f"No mapping for /api/{path}")
+            return Response(
+                {"detail": "Not Found", "hint": "Check endpoint prefix /api/"},
+                status=404
+            )
 
+        # ─── Forward request ───────────────────────────────────────
+        headers = {
+            k: v for k, v in request.headers.items()
+            if k.lower() not in {'host', 'content-length'}
+        }
+
+        # Безпечні encoding'и
         if 'Accept-Encoding' in headers:
-            encodings = [enc.strip() for enc in headers['Accept-Encoding'].split(',')]
-            safe_encodings = [enc for enc in encodings if enc.lower() not in {'br', 'brotli'}]
-            if safe_encodings:
-                headers['Accept-Encoding'] = ', '.join(safe_encodings)
-            else:
-                headers['Accept-Encoding'] = 'gzip, deflate'
+            enc = [e.strip() for e in headers['Accept-Encoding'].split(',')]
+            safe = [e for e in enc if e.lower() not in {'br', 'brotli'}]
+            headers['Accept-Encoding'] = ', '.join(safe or ['gzip', 'deflate'])
 
         try:
-            resp = requests.request(
+            upstream = requests.request(
                 method=request.method,
-                url=target_url,
+                url=target,
                 headers=headers,
                 data=request.body,
                 params=request.GET,
                 allow_redirects=False,
-                timeout=30,
+                timeout=25,
             )
 
-            content_type = resp.headers.get('Content-Type', '')
+            ct = upstream.headers.get('Content-Type', '')
 
-            if 'application/json' in content_type:
+            if 'application/json' in ct:
                 try:
-                    data = resp.json()
+                    data = upstream.json()
                 except ValueError:
-                    logger.error(f"Invalid JSON from {target_url}: {resp.text[:200]}")
-                    return Response({'errors': 'Invalid JSON from upstream'}, status=502)
-                response = Response(data, status=resp.status_code)
+                    logger.error(f"Upstream invalid JSON → {target}")
+                    return Response({"detail": "Bad gateway"}, status=502)
+                response = Response(data, status=upstream.status_code)
             else:
-                response = Response(resp.content, status=resp.status_code)
+                response = Response(upstream.content, status=upstream.status_code)
 
-            # Content-Type
-            if content_type:
-                response['Content-Type'] = content_type
+            if ct:
+                response['Content-Type'] = ct
 
-            # Set-Cookie — головне!
-            if 'Set-Cookie' in resp.headers:
-                response['Set-Cookie'] = resp.headers['Set-Cookie']
-                logger.debug(f"Forwarding cookie: {resp.headers['Set-Cookie']}")
+            if 'Set-Cookie' in upstream.headers:
+                response['Set-Cookie'] = upstream.headers['Set-Cookie']
 
-            # Інші заголовки
-            for header in ['Location', 'Cache-Control', 'Vary', 'Allow']:
-                if header in resp.headers:
-                    response[header] = resp.headers[header]
+            for h in ('Location', 'Cache-Control', 'Vary', 'Allow'):
+                if h in upstream.headers:
+                    response[h] = upstream.headers[h]
 
             return response
 
         except requests.Timeout:
-            return Response({'errors': 'Gateway timeout'}, status=504)
+            return Response({"detail": "Gateway Timeout"}, status=504)
         except requests.ConnectionError:
-            return Response({'errors': 'Service unavailable'}, status=502)
-        except requests.RequestException:
-            return Response({'errors': 'Proxy error'}, status=502)
+            return Response({"detail": "Service Unavailable"}, status=503)
+        except Exception as exc:
+            logger.exception(f"Proxy error → {target}")
+            return Response({"detail": "Proxy Error"}, status=502)
 
-    def get(self, request, path): return self.handle_request(request, path)
-    def post(self, request, path): return self.handle_request(request, path)
-    def put(self, request, path): return self.handle_request(request, path)
-    def patch(self, request, path): return self.handle_request(request, path)
-    def delete(self, request, path): return self.handle_request(request, path)
+    # HTTP methods
+    def get(self, request, path=''):    return self.proxy(request, path)
+    def post(self, request, path=''):   return self.proxy(request, path)
+    def put(self, request, path=''):    return self.proxy(request, path)
+    def patch(self, request, path=''):  return self.proxy(request, path)
+    def delete(self, request, path=''): return self.proxy(request, path)
 
 
-# ============================
-# URL patterns
-# ============================
+# ────────────────────────────────────────────────
+# URLconf
+# ────────────────────────────────────────────────
 urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
-    path('', RootView.as_view(), name='root'),
-    path('health', HealthCheckView.as_view(), name='health'),
-    path('schema', MergedSchemaView.as_view(), name='schema'),
-    path('swagger-ui', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    re_path(r'^(?P<path>.*)/?$', ProxyView.as_view(), name='proxy'),
+    path('',                RootView.as_view(),           name='root'),
+    path('health',          HealthCheckView.as_view(),    name='health'),
+    path('schema',          MergedSchemaView.as_view(),   name='schema'),
+    path('swagger-ui',      SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+
+    # Тільки API-префікс
+    re_path(r'^api/(?P<path>.*)/?$', ProxyView.as_view(), name='api-proxy'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
