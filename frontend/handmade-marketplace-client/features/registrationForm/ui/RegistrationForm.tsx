@@ -18,6 +18,7 @@ import useRegistrationMutation from "../model/Quries/useRegistrationMutation";
 import { useRouter } from "@/shared/i18n";
 
 
+
 function RegistrationForm() {
   const t = useTranslations();
 	const router = useRouter()
@@ -48,6 +49,7 @@ function RegistrationForm() {
 
   function onSubmit(data: SignUpRequestDTO) {
     console.log('data', data)
+		console.log('router',router);
 
 		registrationMutation(data, {
 			onSuccess: () => {
@@ -58,8 +60,10 @@ function RegistrationForm() {
 				const customError = error as CustomError;
 				let hasFieldErrors = false;
 
-				if (customError.original) {
-					Object.entries(customError.original).forEach(([key, message]) => {
+				console.log('error', error)
+
+				if (customError.fieldErrors) {
+					Object.entries(customError.fieldErrors).forEach(([key, message]) => {
 						setError(key as keyof SignUpRequestDTO, {
 							type: 'server',
 							message: message.toString() as string,

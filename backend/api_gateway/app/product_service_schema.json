@@ -1,0 +1,2464 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Product Service API",
+    "version": "1.0.0",
+    "description": "Products, reviews, moderation, images"
+  },
+  "paths": {
+    "/categories": {
+      "get": {
+        "operationId": "category_list",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "required": false,
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "parent",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID батька (null для кореневих)"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Повнотекстовий пошуку"
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PaginatedCategoryList"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "category_create",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "tags": [
+          "categories"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Category"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/categories/{category_href}": {
+      "get": {
+        "operationId": "category_retrieve",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_href",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Category"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "category_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_href",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Category"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "category_partial_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_href",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedCategoryRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedCategoryRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedCategoryRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Category"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "category_destroy",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_href",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Категорію видалено"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "root_retrieve",
+        "description": "Checks Redis and database availability.",
+        "summary": "Health check for Product Service",
+        "tags": [
+          "health"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/HealthCheck"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/moderation": {
+      "get": {
+        "operationId": "moderation_list",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "is_approved",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Фільтр за статусом схвалення"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "product",
+                "review"
+              ]
+            },
+            "description": "Тип контенту",
+            "required": true
+          }
+        ],
+        "tags": [
+          "moderation"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModerationList"
+                      }
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "moderation_approve_reject",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "tags": [
+          "moderation"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "product",
+                      "review"
+                    ]
+                  },
+                  "id": {
+                    "type": "integer"
+                  },
+                  "is_approved": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id",
+                  "is_approved"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Контент схвалено або відхилено"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "operationId": "product_list",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID категорії"
+          },
+          {
+            "in": "query",
+            "name": "created_after",
+            "schema": {
+              "format": "date"
+            },
+            "description": "Створено після (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "created_before",
+            "schema": {
+              "format": "date"
+            },
+            "description": "Створено до (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "is_approved",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Статус схвалення"
+          },
+          {
+            "in": "query",
+            "name": "max_price",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Максимальна ціна"
+          },
+          {
+            "in": "query",
+            "name": "max_rating",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Максимальний середній рейтинг (0.0–5.0)"
+          },
+          {
+            "in": "query",
+            "name": "min_price",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Мінімальна ціна"
+          },
+          {
+            "in": "query",
+            "name": "min_rating",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Мінімальний середній рейтинг (0.0–5.0)"
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sale_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Тип продажу: fixed або auction"
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PaginatedProductList"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Список продуктів"
+          }
+        }
+      },
+      "post": {
+        "operationId": "product_create",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "tags": [
+          "products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Продукт створено"
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "operationId": "product_retrieve",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Деталі продукту"
+          }
+        }
+      },
+      "put": {
+        "operationId": "product_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Продукт оновлено"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "product_partial_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Продукт частково оновлено"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "product_destroy",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Продукт видалено"
+          }
+        }
+      }
+    },
+    "/products/{id}/release": {
+      "post": {
+        "operationId": "product_release",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/products/{id}/reserve": {
+      "patch": {
+        "operationId": "product_reserve",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedProductRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/products/{id}/reviews": {
+      "get": {
+        "operationId": "product_reviews",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/products/{id}/upload_image": {
+      "post": {
+        "operationId": "product_upload_image",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this product.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/reviews": {
+      "get": {
+        "operationId": "review_list",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "created_at",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_approved",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "product",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PaginatedReviewList"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Список відгуків"
+          }
+        }
+      },
+      "post": {
+        "operationId": "review_create",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "tags": [
+          "reviews"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Review"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Відгук створено"
+          }
+        }
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "operationId": "review_retrieve",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Review"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Деталі відгуку"
+          }
+        }
+      },
+      "put": {
+        "operationId": "review_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Review"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Відгук оновлено"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "review_partial_update",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedReviewRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedReviewRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedReviewRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Review"
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": "Відгук частково оновлено"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "review_destroy",
+        "description": "Міксин для уніфікації відповідей API.\nОбгортає відповіді в формат:\n{\n    \"success\": bool,\n    \"data\": any | null,\n    \"errors\": array<object> | null,\n    \"message\": string | null\n}\nДе errors: [{\"field\": str|null, \"message\": str, \"code\": str|None}]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this review.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Відгук видалено"
+          }
+        }
+      }
+    },
+    "/schema": {
+      "get": {
+        "operationId": "root_retrieve_2",
+        "description": "OpenApi3 schema for this API. Format can be selected via content negotiation.\n\n- YAML: application/vnd.oai.openapi\n- JSON: application/vnd.oai.openapi+json",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "yaml"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "af",
+                "ar",
+                "ar-dz",
+                "ast",
+                "az",
+                "be",
+                "bg",
+                "bn",
+                "br",
+                "bs",
+                "ca",
+                "ckb",
+                "cs",
+                "cy",
+                "da",
+                "de",
+                "dsb",
+                "el",
+                "en",
+                "en-au",
+                "en-gb",
+                "eo",
+                "es",
+                "es-ar",
+                "es-co",
+                "es-mx",
+                "es-ni",
+                "es-ve",
+                "et",
+                "eu",
+                "fa",
+                "fi",
+                "fr",
+                "fy",
+                "ga",
+                "gd",
+                "gl",
+                "he",
+                "hi",
+                "hr",
+                "hsb",
+                "hu",
+                "hy",
+                "ia",
+                "id",
+                "ig",
+                "io",
+                "is",
+                "it",
+                "ja",
+                "ka",
+                "kab",
+                "kk",
+                "km",
+                "kn",
+                "ko",
+                "ky",
+                "lb",
+                "lt",
+                "lv",
+                "mk",
+                "ml",
+                "mn",
+                "mr",
+                "ms",
+                "my",
+                "nb",
+                "ne",
+                "nl",
+                "nn",
+                "os",
+                "pa",
+                "pl",
+                "pt",
+                "pt-br",
+                "ro",
+                "ru",
+                "sk",
+                "sl",
+                "sq",
+                "sr",
+                "sr-latn",
+                "sv",
+                "sw",
+                "ta",
+                "te",
+                "tg",
+                "th",
+                "tk",
+                "tr",
+                "tt",
+                "udm",
+                "uk",
+                "ur",
+                "uz",
+                "vi",
+                "zh-hans",
+                "zh-hant"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.oai.openapi": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "application/yaml": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "application/vnd.oai.openapi+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "errors": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "parent": {
+            "type": "integer",
+            "nullable": true
+          },
+          "category_href": {
+            "type": "string",
+            "readOnly": true,
+            "pattern": "^[-a-zA-Z0-9_]+$"
+          },
+          "children": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CategoryRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "parent": {
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "services": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "services",
+          "status"
+        ]
+      },
+      "ModerationList": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Product"
+          },
+          {
+            "$ref": "#/components/schemas/Review"
+          }
+        ]
+      },
+      "PaginatedCategoryList": {
+        "type": "object",
+        "required": [
+          "count",
+          "results"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        }
+      },
+      "PaginatedProductList": {
+        "type": "object",
+        "required": [
+          "count",
+          "results"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "PaginatedReviewList": {
+        "type": "object",
+        "required": [
+          "count",
+          "results"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          }
+        }
+      },
+      "PatchedCategoryRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "parent": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "PatchedProductRequest": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "integer",
+            "writeOnly": true,
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z\\u0410-\\u042f\\u0430-\\u044f0-9\\s\\-\\']+$",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          },
+          "sale_type": {
+            "$ref": "#/components/schemas/SaleTypeEnum"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "discount_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "start_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "auction_end_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stock": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "product_href": {
+            "type": "string",
+            "maxLength": 255,
+            "pattern": "^[-a-zA-Z0-9_]+$"
+          }
+        }
+      },
+      "PatchedReviewRequest": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "vendor": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "User ID"
+              },
+              "username": {
+                "type": "string",
+                "description": "Username or \"unknown\""
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false,
+            "description": "Vendor details",
+            "readOnly": true
+          },
+          "categoryId": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z\\u0410-\\u042f\\u0430-\\u044f0-9\\s\\-\\']+$",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          },
+          "sale_type": {
+            "$ref": "#/components/schemas/SaleTypeEnum"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "discount_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "start_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "auction_end_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stock": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImage"
+            },
+            "readOnly": true
+          },
+          "product_href": {
+            "type": "string",
+            "maxLength": 255,
+            "pattern": "^[-a-zA-Z0-9_]+$"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "description": "Product available if stock > 0",
+            "readOnly": true
+          },
+          "reviews_count": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 5,
+            "nullable": true,
+            "description": "Average rating or null",
+            "readOnly": true
+          },
+          "discount_tag": {
+            "type": "string",
+            "nullable": true,
+            "description": "Discount tag like \"20% OFF\" or null",
+            "readOnly": true
+          },
+          "is_approved": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ProductImage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 200
+          },
+          "user_id": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648
+          }
+        },
+        "required": [
+          "user_id"
+        ]
+      },
+      "ProductImageRequest": {
+        "type": "object",
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 200
+          },
+          "user_id": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648
+          }
+        },
+        "required": [
+          "user_id"
+        ]
+      },
+      "ProductRequest": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "integer",
+            "writeOnly": true,
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z\\u0410-\\u042f\\u0430-\\u044f0-9\\s\\-\\']+$",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          },
+          "sale_type": {
+            "$ref": "#/components/schemas/SaleTypeEnum"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "discount_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "start_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "auction_end_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stock": {
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "product_href": {
+            "type": "string",
+            "maxLength": 255,
+            "pattern": "^[-a-zA-Z0-9_]+$"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "productId": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "User ID"
+              },
+              "username": {
+                "type": "string",
+                "description": "Username or \"unknown\""
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false,
+            "description": "User details",
+            "readOnly": true
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0
+          },
+          "comment": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "is_approved": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "productId",
+          "rating"
+        ]
+      },
+      "ReviewRequest": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productId",
+          "rating"
+        ]
+      },
+      "SaleTypeEnum": {
+        "enum": [
+          "fixed",
+          "auction"
+        ],
+        "type": "string",
+        "description": "* `fixed` - Fixed Price\n* `auction` - Auction"
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "products",
+      "description": "Products CRUD & filtering"
+    },
+    {
+      "name": "reviews",
+      "description": "Product reviews"
+    },
+    {
+      "name": "moderation",
+      "description": "Content moderation"
+    }
+  ]
+}

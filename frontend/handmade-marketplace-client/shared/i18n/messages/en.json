@@ -75,7 +75,8 @@
     "registration": "Registration",
     "auction": "Auction",
     "about": "About the platform",
-    "help": "Help"
+    "help": "Help",
+    "back_to_home": "Back to home page"
   },
   "user-menu": {
     "navigation": {
@@ -138,7 +139,8 @@
     "send": "Send"
   },
   "varify_email": {
-    "varify_email_title_succese": "Your email has been successfully verified!",
+    "varify_email_title_succese": "Thank you! Your email address has been successfully verified",
+    "varify_email_subtitle_succese": "Your account is now fully activated, and you can start using all features of our platform.",
     "varify_email_title_error": "Something went wrong. Please try again"
   },
   "send_confirm_email": {

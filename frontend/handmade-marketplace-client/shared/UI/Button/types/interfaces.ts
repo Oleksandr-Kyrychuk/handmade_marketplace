@@ -9,4 +9,5 @@ export interface IButtonBaseProps extends ButtonHTMLAttributes<HTMLButtonElement
   variant?: IButtonVariant;
   size?: IButtonSize;
   disabled?: boolean;
+  href?: string;
 }

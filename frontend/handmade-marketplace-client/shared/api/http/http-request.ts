@@ -33,7 +33,7 @@ export async function  Request<T>(options:RequestOptions): Promise<T> {
     const requestConfig = buildRequestConfig(options);
     const response: AxiosResponse<T> = await axiosInstance(requestConfig);
 
-    // console.log('response', response)
+    console.log('response', response)
 
     return response.data
   } catch (error: unknown) {
